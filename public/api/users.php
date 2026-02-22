@@ -31,7 +31,14 @@ if ($method === 'GET') {
     }
     
     // List all students
-    $stmt = $pdo->query("SELECT id, name, email, student_code, email_verified, account_enabled, profile_completed, created_at FROM users WHERE role = 'student' ORDER BY created_at DESC");
+    $search = trim($_GET['search'] ?? '');
+    if ($search !== '') {
+        $like = "%$search%";
+        $stmt = $pdo->prepare("SELECT id, name, email, student_code, email_verified, account_enabled, profile_completed, created_at FROM users WHERE role = 'student' AND (name LIKE ? OR email LIKE ? OR student_code LIKE ?) ORDER BY name ASC LIMIT 20");
+        $stmt->execute([$like, $like, $like]);
+    } else {
+        $stmt = $pdo->query("SELECT id, name, email, student_code, email_verified, account_enabled, profile_completed, created_at FROM users WHERE role = 'student' ORDER BY created_at DESC");
+    }
     $students = $stmt->fetchAll();
     jsonResponse(['students' => $students]);
 }

@@ -297,6 +297,27 @@ $translations = [
     'email_verification_title' => ['ar' => 'تأكيد البريد الإلكتروني', 'en' => 'Email Verification'],
     'verification_request_new_link' => ['ar' => 'يرجى تسجيل الدخول وطلب إعادة إرسال رابط التأكيد.', 'en' => 'Please login and request a new verification link.'],
 
+    // Professor — Create & Assign
+    'create_project_professor' => ['ar' => 'إنشاء مشروع جديد', 'en' => 'Create New Project'],
+    'assign_students' => ['ar' => 'تعيين طلاب', 'en' => 'Assign Students'],
+    'assign_student' => ['ar' => 'تعيين طالب', 'en' => 'Assign Student'],
+    'search_students' => ['ar' => 'بحث عن طالب (بالاسم أو البريد أو الكود)', 'en' => 'Search student (by name, email or code)'],
+    'search_add_students' => ['ar' => 'بحث وإضافة طلاب', 'en' => 'Search & Add Students'],
+    'no_results' => ['ar' => 'لا توجد نتائج', 'en' => 'No results found'],
+    'student_already_in_project' => ['ar' => 'الطالب عضو بالفعل في هذا المشروع', 'en' => 'Student is already a member of this project'],
+    'student_added' => ['ar' => 'تم إضافة الطالب بنجاح', 'en' => 'Student added successfully'],
+    'student_removed' => ['ar' => 'تم إزالة الطالب بنجاح', 'en' => 'Student removed successfully'],
+    'set_as_leader' => ['ar' => 'تعيين كقائد', 'en' => 'Set as Leader'],
+    'leader_changed' => ['ar' => 'تم تغيير قائد الفريق', 'en' => 'Team leader changed'],
+    'remove_from_project' => ['ar' => 'إزالة من المشروع', 'en' => 'Remove from Project'],
+    'confirm_remove_from_project' => ['ar' => 'هل تريد إزالة هذا الطالب من المشروع؟', 'en' => 'Remove this student from the project?'],
+    'student_has_project' => ['ar' => 'هذا الطالب لديه مشروع بالفعل', 'en' => 'This student already has a project'],
+    'select_leader_first' => ['ar' => 'يجب اختيار قائد للفريق أولاً', 'en' => 'A team leader must be selected first'],
+    'project_created_by_professor' => ['ar' => 'تم إنشاء المشروع بنجاح', 'en' => 'Project created successfully'],
+    'add' => ['ar' => 'إضافة', 'en' => 'Add'],
+    'no_leader_assigned' => ['ar' => 'لم يتم تعيين قائد بعد', 'en' => 'No leader assigned yet'],
+    'current_members' => ['ar' => 'الأعضاء الحاليون', 'en' => 'Current Members'],
+
     // Navbar
     'viewing_as' => ['ar' => 'أنت تتصفح كـ', 'en' => 'Viewing as'],
     'back_to_professor' => ['ar' => 'العودة للدكتور', 'en' => 'Back to Professor'],

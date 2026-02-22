@@ -78,7 +78,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                 </div>
                 <div class="col-md-4 mb-2">
                     <strong><?= __('team_leader') ?>:</strong>
-                    <span><?= sanitize($project['leader_name']) ?> (<?= sanitize($project['leader_email']) ?>)</span>
+                    <span><?= $project['leader_name'] ? sanitize($project['leader_name']) . ' (' . sanitize($project['leader_email']) . ')' : '<em class="text-muted">' . __('no_leader_assigned') . '</em>' ?></span>
                 </div>
                 <div class="col-md-4 mb-2">
                     <strong><?= __('submission_date') ?>:</strong>
@@ -124,7 +124,17 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                         <span class="badge bg-primary ms-2"><?= __('leader') ?></span>
                     <?php endif; ?>
                 </h6>
-                <span class="badge bg-secondary"><?= sanitize($member['student_code'] ?? '-') ?></span>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-secondary"><?= sanitize($member['student_code'] ?? '-') ?></span>
+                    <?php if ($member['member_role'] !== 'leader'): ?>
+                        <button class="btn btn-sm btn-outline-primary" onclick="setLeader(<?= $member['id'] ?>)" title="<?= __('set_as_leader') ?>">
+                            <i class="bi bi-star"></i>
+                        </button>
+                    <?php endif; ?>
+                    <button class="btn btn-sm btn-outline-danger" onclick="removeMember(<?= $member['id'] ?>, '<?= sanitize($member['name']) ?>')" title="<?= __('remove_from_project') ?>">
+                        <i class="bi bi-person-x"></i>
+                    </button>
+                </div>
             </div>
             <div class="card-body">
                 <div class="row">
@@ -240,6 +250,24 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
         </div>
     <?php endif; ?>
 
+    <!-- Assign Students (doctor can always add/remove) -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-info bg-opacity-25">
+            <h5 class="mb-0"><i class="bi bi-person-plus me-2"></i><?= __('assign_students') ?></h5>
+        </div>
+        <div class="card-body">
+            <div class="input-group mb-2">
+                <input type="text" class="form-control" id="assignStudentSearch" 
+                       placeholder="<?= __('search_students') ?>">
+                <button type="button" class="btn btn-outline-primary" onclick="searchAndAssign()">
+                    <i class="bi bi-search me-1"></i><?= __('search') ?>
+                </button>
+            </div>
+            <div id="assignSearchResults" class="list-group mb-2"></div>
+            <div id="assignAlert" class="alert d-none"></div>
+        </div>
+    </div>
+
     <!-- Review Actions (only if under_review) -->
     <?php if ($project['status'] === 'under_review'): ?>
         <div class="card shadow mt-4">
@@ -305,6 +333,98 @@ async function resendInvitation(invitationId) {
             alert(data.error);
         }
     } catch (err) { alert(err.message); }
+}
+
+const PROJECT_ID = <?= $projectId ?>;
+
+// Search & assign students
+document.getElementById('assignStudentSearch')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); searchAndAssign(); }
+});
+
+async function searchAndAssign() {
+    const query = document.getElementById('assignStudentSearch').value.trim();
+    if (!query) return;
+    
+    try {
+        const res = await fetch('/api/project.php', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'search_students', project_id: PROJECT_ID, query })
+        });
+        const data = await res.json();
+        const container = document.getElementById('assignSearchResults');
+        container.innerHTML = '';
+        
+        if (!data.students || data.students.length === 0) {
+            container.innerHTML = '<div class="list-group-item text-muted"><?= __('no_results') ?></div>';
+            return;
+        }
+        
+        data.students.forEach(s => {
+            const item = document.createElement('button');
+            item.type = 'button';
+            item.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+            const esc = str => { const d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML; };
+            item.innerHTML = `
+                <span><strong>${esc(s.name)}</strong> <small class="text-muted">${esc(s.email)}</small> <code>${esc(s.student_code || '')}</code></span>
+                <span class="badge bg-primary"><i class="bi bi-plus me-1"></i><?= __('add') ?></span>`;
+            item.onclick = () => assignStudent(s.id);
+            container.appendChild(item);
+        });
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+async function assignStudent(studentId) {
+    try {
+        const res = await fetch('/api/project.php', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'add_student', project_id: PROJECT_ID, student_id: studentId })
+        });
+        const data = await res.json();
+        if (data.success) location.reload();
+        else showAssignAlert(data.error, 'danger');
+    } catch (err) { showAssignAlert(err.message, 'danger'); }
+}
+
+async function removeMember(studentId, name) {
+    if (!confirm(<?= json_encode(__('confirm_remove_from_project')) ?>)) return;
+    try {
+        const res = await fetch('/api/project.php', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'remove_student', project_id: PROJECT_ID, student_id: studentId })
+        });
+        const data = await res.json();
+        if (data.success) location.reload();
+        else alert(data.error);
+    } catch (err) { alert(err.message); }
+}
+
+async function setLeader(studentId) {
+    if (!confirm(<?= json_encode(__('set_as_leader')) ?> + '?')) return;
+    try {
+        const res = await fetch('/api/project.php', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'set_leader', project_id: PROJECT_ID, student_id: studentId })
+        });
+        const data = await res.json();
+        if (data.success) location.reload();
+        else alert(data.error);
+    } catch (err) { alert(err.message); }
+}
+
+function showAssignAlert(msg, type) {
+    const el = document.getElementById('assignAlert');
+    el.className = 'alert alert-' + type;
+    el.textContent = msg;
+    el.classList.remove('d-none');
+    setTimeout(() => el.classList.add('d-none'), 3000);
+}
 }
 
 <?php if ($project['status'] === 'under_review'): ?>

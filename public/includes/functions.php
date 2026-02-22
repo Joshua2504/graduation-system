@@ -94,8 +94,8 @@ function getProject(int $id): ?array {
     $stmt = $pdo->prepare("
         SELECT p.*, u.name AS leader_name, u.email AS leader_email, u.student_code AS leader_code, u.id AS leader_id
         FROM projects p
-        JOIN project_members pm ON pm.project_id = p.id AND pm.role = 'leader'
-        JOIN users u ON u.id = pm.user_id
+        LEFT JOIN project_members pm ON pm.project_id = p.id AND pm.role = 'leader'
+        LEFT JOIN users u ON u.id = pm.user_id
         WHERE p.id = ?
     ");
     $stmt->execute([$id]);

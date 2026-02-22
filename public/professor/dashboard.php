@@ -25,8 +25,8 @@ foreach (['draft', 'under_review', 'accepted', 'rejected'] as $s) {
 $stmt = $pdo->prepare("SELECT p.*, u.name AS leader_name, u.email AS leader_email,
                               (SELECT COUNT(*) FROM project_members WHERE project_id = p.id) AS member_count
                        FROM projects p 
-                       JOIN project_members pm ON pm.project_id = p.id AND pm.role = 'leader'
-                       JOIN users u ON u.id = pm.user_id 
+                       LEFT JOIN project_members pm ON pm.project_id = p.id AND pm.role = 'leader'
+                       LEFT JOIN users u ON u.id = pm.user_id 
                        WHERE p.status = ? 
                        ORDER BY p.created_at $sort");
 $stmt->execute([$activeTab]);
@@ -47,6 +47,14 @@ $isAr = getLang() === 'ar';
 ?>
 
 <div class="container">
+    <!-- Create Project Button -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0"><i class="bi bi-house-door me-2"></i><?= __('dashboard') ?></h3>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createProjectModal">
+            <i class="bi bi-plus-circle me-1"></i><?= __('create_project_professor') ?>
+        </button>
+    </div>
+
     <!-- Stats Cards -->
     <div class="row mb-4">
         <div class="col-md-3 mb-3">
@@ -174,7 +182,7 @@ $isAr = getLang() === 'ar';
                                             <?php endif; ?>
                                         <?php endif; ?>
                                     </td>
-                                    <td><?= sanitize($p['leader_name']) ?></td>
+                                    <td><?= $p['leader_name'] ? sanitize($p['leader_name']) : '<span class="text-muted fst-italic">' . __('no_leader_assigned') . '</span>' ?></td>
                                     <td><span class="badge bg-info"><?= $p['member_count'] ?></span></td>
                                     <td><?= $p['submission_date'] ? date('Y-m-d H:i', strtotime($p['submission_date'])) : '-' ?></td>
                                     <?php if ($activeTab === 'accepted'): ?>
@@ -194,5 +202,204 @@ $isAr = getLang() === 'ar';
         </div>
     </div>
 </div>
+
+<!-- Create Project Modal -->
+<div class="modal fade" id="createProjectModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i><?= __('create_project_professor') ?></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="profCreateForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><?= __('project_name') ?> <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="profNewTitle" required maxlength="500">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><?= __('project_type') ?></label>
+                        <input type="text" class="form-control" id="profNewType" maxlength="255"
+                               placeholder="<?= __('project_type_placeholder') ?>">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><?= __('project_description') ?></label>
+                        <div class="simple-editor-toolbar">
+                            <button type="button" class="btn" onclick="editorCmd('bold')" title="<?= __('bold') ?>"><i class="bi bi-type-bold"></i></button>
+                            <button type="button" class="btn" onclick="editorCmd('italic')" title="<?= __('italic') ?>"><i class="bi bi-type-italic"></i></button>
+                            <button type="button" class="btn" onclick="editorCmd('underline')" title="<?= __('underline_text') ?>"><i class="bi bi-type-underline"></i></button>
+                            <div class="vr mx-1 opacity-25"></div>
+                            <button type="button" class="btn" onclick="editorCmd('insertUnorderedList')" title="<?= __('bullet_list') ?>"><i class="bi bi-list-ul"></i></button>
+                            <button type="button" class="btn" onclick="editorCmd('insertOrderedList')" title="<?= __('numbered_list') ?>"><i class="bi bi-list-ol"></i></button>
+                            <div class="vr mx-1 opacity-25"></div>
+                            <button type="button" class="btn" onclick="editorInsertLink()" title="<?= __('insert_link') ?>"><i class="bi bi-link-45deg"></i></button>
+                        </div>
+                        <div id="profNewDescription" class="simple-editor-content" contenteditable="true" data-placeholder="<?= __('description_placeholder') ?>" style="min-height:100px;"></div>
+                    </div>
+
+                    <hr>
+                    <h6 class="fw-bold"><i class="bi bi-people me-1"></i><?= __('assign_students') ?></h6>
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="profStudentSearch" 
+                                   placeholder="<?= __('search_students') ?>">
+                            <button type="button" class="btn btn-outline-primary" onclick="searchStudents()">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                        <div id="profSearchResults" class="list-group mt-2"></div>
+                    </div>
+                    <div id="profSelectedStudents" class="mb-3"></div>
+                    <div id="profCreateAlert" class="alert d-none"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= __('cancel') ?></button>
+                <button type="button" class="btn btn-primary" onclick="profCreateProject()">
+                    <i class="bi bi-plus-circle me-1"></i><?= __('create_project') ?>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function editorCmd(command) {
+    document.execCommand(command, false, null);
+}
+function editorInsertLink() {
+    const url = prompt('URL:', 'https://');
+    if (url) document.execCommand('createLink', false, url);
+}
+
+let selectedStudents = [];
+let selectedLeaderId = null;
+
+function searchStudents() {
+    const query = document.getElementById('profStudentSearch').value.trim();
+    if (!query) return;
+    
+    // We use the project PATCH endpoint with a temporary project_id=0 for searching
+    // But actually, let's search for all students not yet in this (new) project
+    fetch('/api/users.php?search=' + encodeURIComponent(query))
+        .then(r => r.json())
+        .then(data => {
+            const container = document.getElementById('profSearchResults');
+            container.innerHTML = '';
+            const students = data.students || [];
+            
+            if (students.length === 0) {
+                container.innerHTML = '<div class="list-group-item text-muted"><?= __('no_results') ?></div>';
+                return;
+            }
+            
+            students.forEach(s => {
+                if (selectedStudents.find(x => x.id == s.id)) return; // skip already selected
+                const item = document.createElement('button');
+                item.type = 'button';
+                item.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+                item.innerHTML = `
+                    <span><strong>${escHtml(s.name)}</strong> <small class="text-muted">${escHtml(s.email)}</small> <code>${escHtml(s.student_code || '')}</code></span>
+                    <span class="badge bg-primary"><i class="bi bi-plus"></i> <?= __('add') ?></span>`;
+                item.onclick = () => addStudent(s);
+                container.appendChild(item);
+            });
+        })
+        .catch(err => console.error(err));
+}
+
+// Allow searching on Enter key
+document.getElementById('profStudentSearch')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); searchStudents(); }
+});
+
+function addStudent(s) {
+    if (selectedStudents.find(x => x.id == s.id)) return;
+    selectedStudents.push(s);
+    if (selectedStudents.length === 1) selectedLeaderId = s.id; // first student = default leader
+    renderSelectedStudents();
+    document.getElementById('profSearchResults').innerHTML = '';
+    document.getElementById('profStudentSearch').value = '';
+}
+
+function removeStudent(id) {
+    selectedStudents = selectedStudents.filter(s => s.id != id);
+    if (selectedLeaderId == id) {
+        selectedLeaderId = selectedStudents.length > 0 ? selectedStudents[0].id : null;
+    }
+    renderSelectedStudents();
+}
+
+function setLeader(id) {
+    selectedLeaderId = id;
+    renderSelectedStudents();
+}
+
+function renderSelectedStudents() {
+    const container = document.getElementById('profSelectedStudents');
+    if (selectedStudents.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    let html = '<label class="form-label small fw-bold"><?= __('current_members') ?>:</label><div class="list-group">';
+    selectedStudents.forEach(s => {
+        const isLeader = s.id == selectedLeaderId;
+        html += `<div class="list-group-item d-flex justify-content-between align-items-center">
+            <span>
+                <strong>${escHtml(s.name)}</strong>
+                <small class="text-muted ms-2">${escHtml(s.email)}</small>
+                ${isLeader ? '<span class="badge bg-primary ms-2"><?= __('leader') ?></span>' : ''}
+            </span>
+            <span>
+                ${!isLeader ? `<button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="setLeader(${s.id})" title="<?= __('set_as_leader') ?>"><i class="bi bi-star"></i></button>` : ''}
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeStudent(${s.id})" title="<?= __('remove_member') ?>"><i class="bi bi-x-lg"></i></button>
+            </span>
+        </div>`;
+    });
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+async function profCreateProject() {
+    const title = document.getElementById('profNewTitle').value.trim();
+    const type = document.getElementById('profNewType').value.trim();
+    const descEl = document.getElementById('profNewDescription');
+    const description = descEl ? descEl.innerHTML.trim() : '';
+    const alertEl = document.getElementById('profCreateAlert');
+    alertEl.classList.add('d-none');
+    
+    if (!title) return;
+    
+    try {
+        const body = {
+            title, type, description,
+            students: selectedStudents.map(s => s.id),
+            leader_id: selectedLeaderId
+        };
+        const res = await fetch('/api/project.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (data.success) {
+            window.location.href = '/professor/project.php?id=' + data.project_id;
+        } else {
+            throw new Error(data.error);
+        }
+    } catch (err) {
+        alertEl.className = 'alert alert-danger';
+        alertEl.textContent = err.message;
+        alertEl.classList.remove('d-none');
+    }
+}
+
+function escHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+}
+</script>
 
 <?php require_once dirname(__DIR__) . '/includes/footer.php'; ?>
