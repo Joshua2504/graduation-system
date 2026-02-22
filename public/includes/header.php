@@ -17,8 +17,14 @@ $bootstrapCss = $lang === 'ar'
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= sanitize($pageTitle) ?></title>
+    <script>
+        (function() {
+            const t = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-bs-theme', t);
+        })();
+    </script>
     <link rel="stylesheet" href="<?= $bootstrapCss ?>">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="/assets/css/app.css">
 </head>
-<body class="bg-light">
+<body>

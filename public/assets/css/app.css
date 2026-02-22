@@ -120,3 +120,55 @@ body {
 .card:hover {
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
 }
+
+/* ─── Theme Toggle Button ─── */
+#themeToggle {
+    text-decoration: none;
+    padding: 0.5rem;
+}
+
+#themeToggle:focus {
+    box-shadow: none;
+}
+
+/* ─── Dark Mode Overrides ─── */
+[data-bs-theme="dark"] .upload-zone {
+    border-color: #495057;
+}
+
+[data-bs-theme="dark"] .upload-zone:hover {
+    border-color: #6ea8fe;
+    background: rgba(110, 168, 254, 0.05);
+}
+
+[data-bs-theme="dark"] .card.border-success .upload-zone {
+    border-color: #75b798;
+    background: rgba(117, 183, 152, 0.05);
+}
+
+[data-bs-theme="dark"] .card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-bs-theme="dark"] .form-control:focus,
+[data-bs-theme="dark"] .form-select:focus {
+    border-color: #6ea8fe;
+    box-shadow: 0 0 0 0.2rem rgba(110, 168, 254, 0.2);
+}
+
+[data-bs-theme="dark"] .table-dark {
+    --bs-table-bg: #1a1d20;
+}
+
+[data-bs-theme="dark"] .navbar {
+    --bs-navbar-bg: #1a3a5c;
+}
+
+[data-bs-theme="dark"] .card.shadow,
+[data-bs-theme="dark"] .card.shadow-sm {
+    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-bs-theme="dark"] .bg-light {
+    background-color: var(--bs-body-bg) !important;
+}

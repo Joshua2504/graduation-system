@@ -56,6 +56,11 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
             </ul>
             <ul class="navbar-nav">
                 <li class="nav-item">
+                    <button class="nav-link btn btn-link" id="themeToggle" onclick="toggleTheme()" title="Toggle dark mode">
+                        <i class="bi bi-moon-fill" id="themeIcon"></i>
+                    </button>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="?lang=<?= $otherLang ?>">
                         <i class="bi bi-translate me-1"></i><?= $otherLangLabel ?>
                     </a>
