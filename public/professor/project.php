@@ -20,6 +20,7 @@ if (!$project) {
 }
 
 $members = getProjectMembers($projectId);
+$pendingInvites = getProjectPendingInvitations($projectId);
 $duplicates = findDuplicateProjects($projectId, $project['title']);
 $isAr = getLang() === 'ar';
 
@@ -100,7 +101,11 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
     </div>
 
     <!-- Team Members -->
-    <h5 class="mb-3"><i class="bi bi-people-fill me-2"></i><?= $isAr ? 'أعضاء الفريق' : 'Team Members' ?> (<?= count($members) ?>)</h5>
+    <h5 class="mb-3"><i class="bi bi-people-fill me-2"></i><?= $isAr ? 'أعضاء الفريق' : 'Team Members' ?> (<?= count($members) ?>)
+        <?php if (!empty($pendingInvites)): ?>
+            <span class="badge bg-warning text-dark ms-2"><?= count($pendingInvites) ?> <?= $isAr ? 'دعوات معلقة' : 'pending' ?></span>
+        <?php endif; ?>
+    </h5>
 
     <?php foreach ($members as $i => $member): ?>
         <div class="card shadow-sm mb-3">
@@ -179,6 +184,54 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
         </div>
     <?php endforeach; ?>
 
+    <?php if (!empty($pendingInvites)): ?>
+        <div class="card shadow-sm mb-3 border-warning">
+            <div class="card-header bg-warning bg-opacity-25">
+                <h6 class="mb-0"><i class="bi bi-hourglass-split me-2"></i><?= $isAr ? 'الدعوات المعلقة' : 'Pending Invitations' ?></h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th><?= $isAr ? 'الطالب المدعو' : 'Invited Student' ?></th>
+                                <th><?= $isAr ? 'البريد' : 'Email' ?></th>
+                                <th><?= $isAr ? 'الكود' : 'Code' ?></th>
+                                <th><?= $isAr ? 'بواسطة' : 'Invited By' ?></th>
+                                <th><?= $isAr ? 'تاريخ الدعوة' : 'Invited At' ?></th>
+                                <th><?= $isAr ? 'تنتهي في' : 'Expires' ?></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($pendingInvites as $inv): ?>
+                                <tr>
+                                    <td>
+                                        <?php if ($inv['invited_name']): ?>
+                                            <?= sanitize($inv['invited_name']) ?>
+                                        <?php else: ?>
+                                            <span class="text-muted fst-italic"><?= $isAr ? 'رابط دعوة عام' : 'General invite link' ?></span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td><?= $inv['invited_email'] ? sanitize($inv['invited_email']) : '-' ?></td>
+                                    <td><code><?= $inv['invited_student_code'] ? sanitize($inv['invited_student_code']) : '-' ?></code></td>
+                                    <td><?= sanitize($inv['invited_by_name']) ?></td>
+                                    <td><small><?= date('Y-m-d H:i', strtotime($inv['created_at'])) ?></small></td>
+                                    <td><small><?= date('Y-m-d H:i', strtotime($inv['expires_at'])) ?></small></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="resendInvitation(<?= $inv['id'] ?>)" title="<?= $isAr ? 'إعادة إرسال' : 'Resend' ?>">
+                                            <i class="bi bi-arrow-repeat"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
     <!-- Review Actions (only if under_review) -->
     <?php if ($project['status'] === 'under_review'): ?>
         <div class="card shadow mt-4">
@@ -227,6 +280,23 @@ function showImageModal(src, title) {
     document.getElementById('imageModalImg').src = src;
     const modal = new bootstrap.Modal(document.getElementById('imageModal'));
     modal.show();
+}
+
+async function resendInvitation(invitationId) {
+    try {
+        const res = await fetch('/api/invitations.php', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ invitation_id: invitationId })
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert(data.error);
+        }
+    } catch (err) { alert(err.message); }
 }
 
 <?php if ($project['status'] === 'under_review'): ?>

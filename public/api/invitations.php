@@ -10,6 +10,7 @@
 require_once dirname(__DIR__) . '/includes/db.php';
 require_once dirname(__DIR__) . '/includes/auth.php';
 require_once dirname(__DIR__) . '/includes/functions.php';
+require_once dirname(__DIR__) . '/includes/mailer.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -119,7 +120,19 @@ if ($method === 'POST') {
         
         $stmt = $pdo->prepare("INSERT INTO invitations (project_id, invited_by, invited_user_id, token, expires_at) VALUES (?, ?, ?, ?, ?)");
         $stmt->execute([$projectId, $userId, $invitee['id'], $token, $expiresAt]);
-        
+
+        // Send invitation email
+        $inviterProfile = getUserProfile($userId);
+        $lang = $_GET['lang'] ?? ($_COOKIE['lang'] ?? 'ar');
+        sendInvitationEmail(
+            $invitee['email'],
+            $invitee['name'],
+            $inviterProfile['name'] ?? '',
+            $project['title'],
+            $token,
+            $lang
+        );
+
         jsonResponse([
             'success' => true,
             'invitation_id' => (int)$pdo->lastInsertId(),
@@ -259,6 +272,76 @@ if ($method === 'PUT') {
         'project_title' => $project['title'] ?? '',
         'message' => 'تم الانضمام للمشروع بنجاح'
     ]);
+}
+
+// ─── PATCH: Resend invitation (refresh token & expiry) ───
+if ($method === 'PATCH') {
+    require_login(true);
+
+    $input = json_decode(file_get_contents('php://input'), true);
+    $invitationId = (int)($input['invitation_id'] ?? 0);
+    $userId = current_user_id();
+    $role = current_role();
+
+    if ($invitationId === 0) {
+        jsonResponse(['error' => 'معرف الدعوة مطلوب'], 400);
+    }
+
+    // Doctors can resend any invitation, students can only resend their own
+    if ($role === 'doctor') {
+        $stmt = $pdo->prepare("SELECT i.*, p.status AS project_status FROM invitations i JOIN projects p ON p.id = i.project_id WHERE i.id = ? AND i.status = 'pending'");
+        $stmt->execute([$invitationId]);
+    } else {
+        $stmt = $pdo->prepare("SELECT i.*, p.status AS project_status FROM invitations i JOIN projects p ON p.id = i.project_id WHERE i.id = ? AND i.invited_by = ? AND i.status = 'pending'");
+        $stmt->execute([$invitationId, $userId]);
+    }
+    $invitation = $stmt->fetch();
+
+    if (!$invitation) {
+        jsonResponse(['error' => 'الدعوة غير موجودة أو لا يمكن إعادة إرسالها'], 404);
+    }
+    if ($invitation['project_status'] !== 'draft') {
+        jsonResponse(['error' => 'المشروع لم يعد يقبل أعضاء جدد'], 400);
+    }
+
+    // Refresh token and extend expiry by 7 days
+    $newToken = bin2hex(random_bytes(32));
+    $newExpiry = date('Y-m-d H:i:s', strtotime('+7 days'));
+
+    $stmt = $pdo->prepare("UPDATE invitations SET token = ?, expires_at = ? WHERE id = ?");
+    $stmt->execute([$newToken, $newExpiry, $invitationId]);
+
+    // Resend email if it's a direct invite
+    if (!empty($invitation['invited_user_id'])) {
+        $invitee = getUserProfile((int)$invitation['invited_user_id']);
+        $inviter = getUserProfile((int)$invitation['invited_by']);
+        $project = getProject((int)$invitation['project_id']);
+        $lang = $_GET['lang'] ?? ($_COOKIE['lang'] ?? 'ar');
+        if ($invitee && $inviter && $project) {
+            sendInvitationEmail(
+                $invitee['email'],
+                $invitee['name'],
+                $inviter['name'],
+                $project['title'],
+                $newToken,
+                $lang
+            );
+        }
+    }
+
+    $response = [
+        'success' => true,
+        'expires_at' => $newExpiry,
+        'message' => 'تم إعادة إرسال الدعوة بنجاح'
+    ];
+
+    // If it's a link invitation (no invited_user_id), return the new join URL
+    if (empty($invitation['invited_user_id'])) {
+        $response['token'] = $newToken;
+        $response['join_url'] = '/join.php?token=' . $newToken;
+    }
+
+    jsonResponse($response);
 }
 
 // ─── DELETE: Cancel invitation ───

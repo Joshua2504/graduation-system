@@ -8,6 +8,7 @@ services:
       - ./public:/var/www/html/public
       - ./db:/var/www/html/db
       - ./data/uploads_data:/var/www/html/public/uploads
+      - ./data/sessions:/var/lib/php/sessions
     env_file:
       - .env
     depends_on:

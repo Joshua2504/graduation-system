@@ -216,3 +216,66 @@ HTML;
 
     return sendMail($email, $subject, $body);
 }
+
+/**
+ * Send project invitation email to a student
+ *
+ * @param string $email       Invitee email
+ * @param string $inviteeName Invitee name
+ * @param string $inviterName Name of the person who sent the invite
+ * @param string $projectTitle Project title
+ * @param string $token       Invitation token
+ * @param string $lang        Language code (ar/en)
+ * @return bool
+ */
+function sendInvitationEmail(string $email, string $inviteeName, string $inviterName, string $projectTitle, string $token, string $lang = 'ar'): bool {
+    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost:8642';
+    $joinUrl = "$protocol://$host/join.php?token=$token";
+
+    if ($lang === 'ar') {
+        $subject = 'دعوة للانضمام لمشروع تخرج - ' . $projectTitle;
+        $heading = 'دعوة للانضمام لمشروع تخرج';
+        $greeting = "مرحباً $inviteeName،";
+        $message = "قام <strong>$inviterName</strong> بدعوتك للانضمام لمشروع التخرج <strong>$projectTitle</strong>. اضغط على الزر أدناه لقبول الدعوة.";
+        $btnText = 'قبول الدعوة';
+        $expiry = 'هذه الدعوة صالحة لمدة 7 أيام.';
+        $ignore = 'إذا لم تكن تعرف هذا الشخص، يمكنك تجاهل هذا البريد.';
+        $dir = 'rtl';
+    } else {
+        $subject = 'Project Invitation - ' . $projectTitle;
+        $heading = 'Project Team Invitation';
+        $greeting = "Hello $inviteeName,";
+        $message = "<strong>$inviterName</strong> has invited you to join the graduation project <strong>$projectTitle</strong>. Click the button below to accept the invitation.";
+        $btnText = 'Accept Invitation';
+        $expiry = 'This invitation is valid for 7 days.';
+        $ignore = 'If you don\'t know this person, you can ignore this email.';
+        $dir = 'ltr';
+    }
+
+    $body = <<<HTML
+<!DOCTYPE html>
+<html dir="$dir" lang="$lang">
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background:#f4f6f9;">
+    <div style="max-width:520px;margin:40px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);">
+        <div style="background:#198754;padding:24px;text-align:center;">
+            <h1 style="margin:0;color:#fff;font-size:22px;">🎓 $heading</h1>
+        </div>
+        <div style="padding:28px 32px;">
+            <p style="font-size:16px;color:#333;">$greeting</p>
+            <p style="font-size:15px;color:#555;line-height:1.6;">$message</p>
+            <div style="text-align:center;margin:32px 0;">
+                <a href="$joinUrl" style="display:inline-block;background:#198754;color:#fff;padding:14px 36px;border-radius:8px;text-decoration:none;font-size:16px;font-weight:bold;">$btnText</a>
+            </div>
+            <p style="font-size:13px;color:#888;text-align:center;">$expiry</p>
+            <hr style="border:none;border-top:1px solid #eee;margin:20px 0;">
+            <p style="font-size:12px;color:#999;text-align:center;">$ignore</p>
+        </div>
+    </div>
+</body>
+</html>
+HTML;
+
+    return sendMail($email, $subject, $body);
+}

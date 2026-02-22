@@ -22,6 +22,7 @@ $project = getProject($projectId);
 if (!$project) redirect('/student/dashboard.php');
 
 $members = getProjectMembers($projectId);
+$pendingInvites = getProjectPendingInvitations($projectId);
 $isLeader = isProjectLeader($projectId, $userId);
 $isAr = getLang() === 'ar';
 $settings = getSettings();
@@ -196,6 +197,36 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                                         <i class="bi bi-x-lg"></i>
                                                     </button>
                                                 <?php endif; ?>
+                                            </td>
+                                        <?php endif; ?>
+                                    </tr>
+                                <?php endforeach; ?>
+                                <?php foreach ($pendingInvites as $inv): ?>
+                                    <tr class="table-warning">
+                                        <td><i class="bi bi-hourglass-split text-warning"></i></td>
+                                        <td>
+                                            <?php if ($inv['invited_name']): ?>
+                                                <?= sanitize($inv['invited_name']) ?>
+                                            <?php else: ?>
+                                                <span class="text-muted fst-italic"><?= $isAr ? 'رابط دعوة' : 'Invite link' ?></span>
+                                            <?php endif; ?>
+                                            <span class="badge bg-warning text-dark ms-1"><?= $isAr ? 'في الانتظار' : 'Pending' ?></span>
+                                        </td>
+                                        <td><code><?= $inv['invited_student_code'] ? sanitize($inv['invited_student_code']) : '-' ?></code></td>
+                                        <td>
+                                            <span class="badge bg-warning text-dark"><?= $isAr ? 'مدعو' : 'Invited' ?></span>
+                                        </td>
+                                        <td>—</td>
+                                        <?php if ($isLeader && $project['status'] === 'draft'): ?>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <button class="btn btn-outline-primary" onclick="resendInvitation(<?= $inv['id'] ?>)" title="<?= $isAr ? 'إعادة إرسال الدعوة' : 'Resend Invitation' ?>">
+                                                        <i class="bi bi-arrow-repeat"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-danger" onclick="cancelInvitation(<?= $inv['id'] ?>)" title="<?= $isAr ? 'إلغاء الدعوة' : 'Cancel Invitation' ?>">
+                                                        <i class="bi bi-x-lg"></i>
+                                                    </button>
+                                                </div>
                                             </td>
                                         <?php endif; ?>
                                     </tr>
@@ -458,6 +489,40 @@ async function submitProject() {
         const data = await res.json();
         if (data.success) location.reload();
         else alert(data.error || JSON.stringify(data));
+    } catch (err) { alert(err.message); }
+}
+
+// Cancel invitation
+async function cancelInvitation(invitationId) {
+    const msg = <?= json_encode($isAr ? 'هل تريد إلغاء هذه الدعوة؟' : 'Cancel this invitation?') ?>;
+    if (!confirm(msg)) return;
+    try {
+        const res = await fetch('/api/invitations.php', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ invitation_id: invitationId })
+        });
+        const data = await res.json();
+        if (data.success) location.reload();
+        else alert(data.error);
+    } catch (err) { alert(err.message); }
+}
+
+// Resend invitation (refresh token & expiry)
+async function resendInvitation(invitationId) {
+    try {
+        const res = await fetch('/api/invitations.php', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ invitation_id: invitationId })
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert(data.error);
+        }
     } catch (err) { alert(err.message); }
 }
 </script>

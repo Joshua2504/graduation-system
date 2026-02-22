@@ -25,6 +25,10 @@ RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/Allo
 # Set upload limits
 RUN echo "upload_max_filesize = 50M\npost_max_size = 55M\nmax_file_uploads = 25" > /usr/local/etc/php/conf.d/uploads.ini
 
+# Persist sessions across restarts
+RUN mkdir -p /var/lib/php/sessions && chown www-data:www-data /var/lib/php/sessions
+RUN echo "session.save_path = /var/lib/php/sessions" > /usr/local/etc/php/conf.d/sessions.ini
+
 # Copy project files
 COPY . /var/www/html/
 

@@ -179,6 +179,25 @@ function isProfileComplete(array $user): bool {
 }
 
 /**
+ * Get pending invitations for a project (not yet accepted)
+ */
+function getProjectPendingInvitations(int $projectId): array {
+    $pdo = getDB();
+    $stmt = $pdo->prepare("
+        SELECT i.*, 
+               u_invited.name AS invited_name, u_invited.email AS invited_email, u_invited.student_code AS invited_student_code,
+               u_by.name AS invited_by_name
+        FROM invitations i
+        LEFT JOIN users u_invited ON u_invited.id = i.invited_user_id
+        JOIN users u_by ON u_by.id = i.invited_by
+        WHERE i.project_id = ? AND i.status = 'pending' AND i.expires_at > NOW()
+        ORDER BY i.created_at DESC
+    ");
+    $stmt->execute([$projectId]);
+    return $stmt->fetchAll();
+}
+
+/**
  * Get pending invitations received by a user (direct invites)
  */
 function getPendingInvitations(int $userId): array {
