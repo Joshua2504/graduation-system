@@ -34,6 +34,10 @@ $translations = [
     'success' => ['ar' => 'نجاح', 'en' => 'Success'],
     'required_field' => ['ar' => 'هذا الحقل مطلوب', 'en' => 'This field is required'],
     'settings' => ['ar' => 'الإعدادات', 'en' => 'Settings'],
+    'actions' => ['ar' => 'الإجراءات', 'en' => 'Actions'],
+    'confirm' => ['ar' => 'تأكيد', 'en' => 'Confirm'],
+    'delete' => ['ar' => 'حذف', 'en' => 'Delete'],
+    'search' => ['ar' => 'بحث', 'en' => 'Search'],
 
     // Auth
     'email' => ['ar' => 'البريد الإلكتروني', 'en' => 'Email Address'],
@@ -57,14 +61,22 @@ $translations = [
     'verification_invalid' => ['ar' => 'رابط التأكيد غير صالح أو منتهي الصلاحية.', 'en' => 'Verification link is invalid or has expired.'],
     'verification_already' => ['ar' => 'تم تأكيد بريدك الإلكتروني مسبقاً.', 'en' => 'Your email has already been verified.'],
 
+    // Profile
+    'my_profile' => ['ar' => 'ملفي الشخصي', 'en' => 'My Profile'],
+    'profile_incomplete' => ['ar' => 'الملف الشخصي غير مكتمل', 'en' => 'Profile Incomplete'],
+    'profile_complete' => ['ar' => 'الملف الشخصي مكتمل', 'en' => 'Profile Complete'],
+    'complete_profile' => ['ar' => 'أكمل ملفك الشخصي', 'en' => 'Complete Your Profile'],
+    'profile_info' => ['ar' => 'بيانات الملف الشخصي تُستخدم في جميع المشاريع التي تنضم إليها', 'en' => 'Profile data is used across all projects you join'],
+    'personal_info' => ['ar' => 'البيانات الشخصية', 'en' => 'Personal Information'],
+    'documents' => ['ar' => 'المستندات', 'en' => 'Documents'],
+
     // Project
     'project_name' => ['ar' => 'اسم المشروع', 'en' => 'Project Name'],
     'project_type' => ['ar' => 'نوع المشروع', 'en' => 'Project Type'],
     'project_details' => ['ar' => 'تفاصيل المشروع', 'en' => 'Project Details'],
-    'student_names' => ['ar' => 'أسماء الطلاب المشاركين', 'en' => 'Participating Student Names'],
-    'student_data' => ['ar' => 'بيانات الطالب', 'en' => 'Student Data'],
-    'confirmation' => ['ar' => 'التأكيد', 'en' => 'Confirmation'],
-    'step' => ['ar' => 'الخطوة', 'en' => 'Step'],
+    'create_project' => ['ar' => 'إنشاء مشروع', 'en' => 'Create Project'],
+    'my_projects' => ['ar' => 'مشاريعي', 'en' => 'My Projects'],
+    'no_projects_yet' => ['ar' => 'لا توجد مشاريع بعد', 'en' => 'No projects yet'],
 
     // Student fields
     'gender' => ['ar' => 'الجنس', 'en' => 'Gender'],
@@ -93,21 +105,46 @@ $translations = [
     'status_accepted' => ['ar' => 'مقبول', 'en' => 'Accepted'],
     'status_rejected' => ['ar' => 'مرفوض', 'en' => 'Rejected'],
 
+    // Team & Invitations
+    'team_members' => ['ar' => 'أعضاء الفريق', 'en' => 'Team Members'],
+    'member_count' => ['ar' => 'عدد الأعضاء', 'en' => 'Member Count'],
+    'invite_members' => ['ar' => 'دعوة أعضاء', 'en' => 'Invite Members'],
+    'join_project' => ['ar' => 'الانضمام لمشروع', 'en' => 'Join Project'],
+    'join_code' => ['ar' => 'كود الانضمام', 'en' => 'Join Code'],
+    'invite_link' => ['ar' => 'رابط الدعوة', 'en' => 'Invite Link'],
+    'qr_code' => ['ar' => 'رمز QR', 'en' => 'QR Code'],
+    'invite_by_search' => ['ar' => 'دعوة بالبريد أو الكود', 'en' => 'Invite by Email or Code'],
+    'send_invite' => ['ar' => 'إرسال دعوة', 'en' => 'Send Invite'],
+    'pending_invitations' => ['ar' => 'الدعوات المعلقة', 'en' => 'Pending Invitations'],
+    'accept_invite' => ['ar' => 'قبول', 'en' => 'Accept'],
+    'decline_invite' => ['ar' => 'رفض', 'en' => 'Decline'],
+    'leave_project' => ['ar' => 'مغادرة المشروع', 'en' => 'Leave Project'],
+    'remove_member' => ['ar' => 'إزالة العضو', 'en' => 'Remove Member'],
+    'generate_link' => ['ar' => 'إنشاء رابط', 'en' => 'Generate Link'],
+    'copy_link' => ['ar' => 'نسخ الرابط', 'en' => 'Copy Link'],
+    'link_copied' => ['ar' => 'تم نسخ الرابط', 'en' => 'Link Copied!'],
+    'enter_join_code' => ['ar' => 'أدخل كود الانضمام', 'en' => 'Enter Join Code'],
+    'project_full' => ['ar' => 'الفريق مكتمل العدد', 'en' => 'Team is full'],
+    'already_member' => ['ar' => 'أنت عضو بالفعل', 'en' => 'Already a member'],
+    'invitation_expired' => ['ar' => 'الدعوة منتهية الصلاحية', 'en' => 'Invitation expired'],
+    'invitation_sent' => ['ar' => 'تم إرسال الدعوة', 'en' => 'Invitation sent'],
+    'min_members' => ['ar' => 'الحد الأدنى للأعضاء', 'en' => 'Minimum Members'],
+    'max_members' => ['ar' => 'الحد الأقصى للأعضاء', 'en' => 'Maximum Members'],
+    'team_size' => ['ar' => 'حجم الفريق', 'en' => 'Team Size'],
+    'all_profiles_complete' => ['ar' => 'جميع الملفات مكتملة', 'en' => 'All profiles complete'],
+    'profiles_incomplete' => ['ar' => 'بعض الملفات غير مكتملة', 'en' => 'Some profiles incomplete'],
+    'leader' => ['ar' => 'قائد', 'en' => 'Leader'],
+    'member' => ['ar' => 'عضو', 'en' => 'Member'],
+
     // Student dashboard
     'project_submitted' => ['ar' => 'تم تقديم مشروعك بنجاح وهو الآن قيد المراجعة. يرجى التحقق خلال 24 ساعة.', 'en' => 'Your project has been successfully submitted and is under review. Please check back within 24 hours.'],
     'project_accepted_msg' => ['ar' => 'تم قبول مشروعك. يرجى المتابعة مع مدرس المادة في الجامعة.', 'en' => 'Your project has been accepted. Please continue with the course instructor at the university.'],
     'project_rejected_msg' => ['ar' => 'تم رفض مشروعك. يمكنك تعديل البيانات وإعادة التقديم.', 'en' => 'Your project has been rejected. You can edit your data and resubmit.'],
     'group_number' => ['ar' => 'رقم المجموعة', 'en' => 'Group Number'],
     'doctor_note' => ['ar' => 'ملاحظة الدكتور', 'en' => "Professor's Note"],
-    'resume_project' => ['ar' => 'متابعة المشروع', 'en' => 'Resume Project'],
-    'new_project' => ['ar' => 'مشروع جديد', 'en' => 'New Project'],
-    'edit_resubmit' => ['ar' => 'تعديل وإعادة التقديم', 'en' => 'Edit & Resubmit'],
-    'auto_saved' => ['ar' => 'تم الحفظ تلقائياً', 'en' => 'Auto-saved'],
-
-    // Step 9
-    'confirm_warning' => ['ar' => 'تنبيه: في حالة قبول المشروع، لن يمكن تعديله بشكل دائم. في حالة الرفض، يمكن التعديل وإعادة التقديم.', 'en' => 'Warning: If the project is accepted, it cannot be edited permanently. If rejected, it can be edited and resubmitted.'],
-    'confirm_checkbox' => ['ar' => 'أؤكد أن جميع البيانات المُدخلة صحيحة', 'en' => 'I confirm that all entered data is correct'],
     'submit_project' => ['ar' => 'تقديم المشروع', 'en' => 'Submit Project'],
+    'confirm_submit' => ['ar' => 'تأكيد: سيتم تقديم المشروع للمراجعة. هل أنت متأكد؟', 'en' => 'Confirm: The project will be submitted for review. Are you sure?'],
+    'edit_resubmit' => ['ar' => 'إعادة التقديم', 'en' => 'Resubmit'],
 
     // Professor
     'projects_under_review' => ['ar' => 'مشاريع قيد المراجعة', 'en' => 'Projects Under Review'],

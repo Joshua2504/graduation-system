@@ -19,7 +19,7 @@ if (!$project) {
     redirect('/professor/dashboard.php');
 }
 
-$students = getProjectStudents($projectId);
+$members = getProjectMembers($projectId);
 $duplicates = findDuplicateProjects($projectId, $project['title']);
 $isAr = getLang() === 'ar';
 
@@ -99,49 +99,53 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
         </div>
     </div>
 
-    <!-- Students -->
-    <h5 class="mb-3"><i class="bi bi-people-fill me-2"></i><?= $isAr ? 'بيانات الطلاب' : 'Student Data' ?> (<?= count($students) ?>/7)</h5>
+    <!-- Team Members -->
+    <h5 class="mb-3"><i class="bi bi-people-fill me-2"></i><?= $isAr ? 'أعضاء الفريق' : 'Team Members' ?> (<?= count($members) ?>)</h5>
 
-    <?php foreach ($students as $i => $student): ?>
+    <?php foreach ($members as $i => $member): ?>
         <div class="card shadow-sm mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h6 class="mb-0">
-                    <?= $isAr ? 'الطالب' : 'Student' ?> <?= $i + 1 ?>: <?= sanitize($student['name']) ?>
-                    <?php if ($i === 0): ?>
-                        <span class="badge bg-primary ms-2"><?= __('team_leader') ?></span>
+                    <?= $isAr ? 'الطالب' : 'Student' ?> <?= $i + 1 ?>: <?= sanitize($member['name']) ?>
+                    <?php if ($member['member_role'] === 'leader'): ?>
+                        <span class="badge bg-primary ms-2"><?= __('leader') ?></span>
                     <?php endif; ?>
                 </h6>
-                <span class="badge bg-secondary"><?= sanitize($student['student_code']) ?></span>
+                <span class="badge bg-secondary"><?= sanitize($member['student_code'] ?? '-') ?></span>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-3 mb-2">
                         <small class="text-muted"><?= $isAr ? 'الجنس' : 'Gender' ?></small><br>
-                        <?= $student['gender'] === 'male' ? ($isAr ? 'ذكر' : 'Male') : ($isAr ? 'أنثى' : 'Female') ?>
+                        <?php if ($member['gender']): ?>
+                            <?= $member['gender'] === 'male' ? ($isAr ? 'ذكر' : 'Male') : ($isAr ? 'أنثى' : 'Female') ?>
+                        <?php else: ?>
+                            <span class="text-muted">-</span>
+                        <?php endif; ?>
                     </div>
                     <div class="col-md-3 mb-2">
                         <small class="text-muted"><?= $isAr ? 'الرقم القومي' : 'National ID' ?></small><br>
-                        <?= sanitize($student['national_id']) ?>
+                        <?= sanitize($member['national_id'] ?? '-') ?>
                     </div>
                     <div class="col-md-3 mb-2">
                         <small class="text-muted"><?= $isAr ? 'تاريخ الميلاد' : 'Birth Date' ?></small><br>
-                        <?= $student['birth_date'] ?>
+                        <?= $member['birth_date'] ?? '-' ?>
                     </div>
                     <div class="col-md-3 mb-2">
                         <small class="text-muted"><?= $isAr ? 'المحافظة' : 'Governorate' ?></small><br>
-                        <?= sanitize($student['governorate']) ?>
+                        <?= sanitize($member['governorate'] ?? '-') ?>
                     </div>
                     <div class="col-md-4 mb-2">
                         <small class="text-muted"><?= $isAr ? 'العنوان' : 'Address' ?></small><br>
-                        <?= sanitize($student['address']) ?>
+                        <?= sanitize($member['address'] ?? '-') ?>
                     </div>
                     <div class="col-md-4 mb-2">
                         <small class="text-muted"><?= $isAr ? 'رقم الهاتف' : 'Phone' ?></small><br>
-                        <?= sanitize($student['phone']) ?>
+                        <?= sanitize($member['phone'] ?? '-') ?>
                     </div>
                     <div class="col-md-4 mb-2">
                         <small class="text-muted"><?= $isAr ? 'القسم' : 'Department' ?></small><br>
-                        <?= sanitize($student['section']) ?>
+                        <?= sanitize($member['section'] ?? '-') ?>
                     </div>
                 </div>
 
@@ -154,9 +158,10 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                         'national_id_image' => $isAr ? 'البطاقة الشخصية' : 'National ID',
                         'receipt_image' => $isAr ? 'إيصال الدفع' : 'Payment Receipt',
                     ];
+                    $memberId = $member['id'];
                     foreach ($imageTypes as $field => $label):
-                        $imgFile = $student[$field] ?? '';
-                        $imgPath = "/uploads/project_{$projectId}/{$imgFile}";
+                        $imgFile = $member[$field] ?? '';
+                        $imgPath = "/uploads/user_{$memberId}/{$imgFile}";
                     ?>
                         <div class="col-md-4 text-center mb-2">
                             <small class="text-muted d-block mb-1"><?= $label ?></small>

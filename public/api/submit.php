@@ -22,72 +22,69 @@ if ($projectId === 0) {
     jsonResponse(['error' => 'معرف المشروع مطلوب'], 400);
 }
 
+$userId = current_user_id();
+
+// Must be leader
+if (!isProjectLeader($projectId, $userId)) {
+    jsonResponse(['error' => 'فقط قائد الفريق يمكنه تقديم المشروع'], 403);
+}
+
 $pdo = getDB();
 $project = getProject($projectId);
 
-if (!$project || (int)$project['user_id'] !== current_user_id()) {
-    jsonResponse(['error' => 'غير مصرح'], 403);
-}
-
-if (!in_array($project['status'], ['draft', 'rejected'])) {
+if (!$project || !in_array($project['status'], ['draft', 'rejected'])) {
     jsonResponse(['error' => 'لا يمكن تقديم المشروع في الحالة الحالية'], 400);
 }
 
-// Verify all 7 students exist with complete data
-$studentCount = countProjectStudents($projectId);
-if ($studentCount < 7) {
-    jsonResponse(['error' => "تم إدخال بيانات $studentCount طلاب فقط من أصل 7"], 400);
+// Check member count against settings
+$settings = getSettings();
+$members = getProjectMembers($projectId);
+$memberCount = count($members);
+$minSize = (int)$settings['min_team_size'];
+$maxSize = (int)$settings['max_team_size'];
+
+if ($memberCount < $minSize) {
+    jsonResponse(['error' => "عدد أعضاء الفريق ($memberCount) أقل من الحد الأدنى ($minSize)"], 400);
 }
 
-// Verify all 21 images exist on disk AND all required fields are filled
-$students = getProjectStudents($projectId);
-$uploadDir = dirname(__DIR__) . '/uploads/project_' . $projectId;
-$missingImages = [];
-$incompleteStudents = [];
+if ($memberCount > $maxSize) {
+    jsonResponse(['error' => "عدد أعضاء الفريق ($memberCount) أكثر من الحد الأقصى ($maxSize)"], 400);
+}
 
-foreach ($students as $student) {
-    // Check required fields are filled (not null/empty from autosave)
-    $requiredFields = ['name', 'student_code', 'gender', 'national_id', 'birth_date', 'governorate', 'address', 'phone', 'section'];
-    foreach ($requiredFields as $field) {
-        if (empty($student[$field])) {
-            $incompleteStudents[] = ($student['name'] ?: 'طالب ' . ($student['student_index'] + 1)) . ' - ' . $field;
-        }
+// Verify all members have completed profiles
+$incompleteMembers = [];
+foreach ($members as $member) {
+    if (!isProfileComplete($member)) {
+        $incompleteMembers[] = $member['name'];
     }
-
+    
+    // Also check images exist on disk
+    $userUploadDir = dirname(__DIR__) . '/uploads/user_' . $member['id'];
     foreach (['card_image', 'national_id_image', 'receipt_image'] as $imgField) {
-        $imgFile = $student[$imgField] ?? '';
-        if (empty($imgFile) || !file_exists($uploadDir . '/' . $imgFile)) {
-            $missingImages[] = ($student['name'] ?: 'طالب ' . ($student['student_index'] + 1)) . ' - ' . $imgField;
+        $imgFile = $member[$imgField] ?? '';
+        if (empty($imgFile) || !file_exists($userUploadDir . '/' . $imgFile)) {
+            if (!in_array($member['name'], $incompleteMembers)) {
+                $incompleteMembers[] = $member['name'];
+            }
         }
     }
 }
 
-if (!empty($incompleteStudents)) {
+if (!empty($incompleteMembers)) {
     jsonResponse([
-        'error' => 'بعض بيانات الطلاب غير مكتملة. يرجى إكمال جميع الحقول.',
-        'missing' => $incompleteStudents
+        'error' => 'بعض أعضاء الفريق لم يكملوا ملفاتهم الشخصية',
+        'incomplete_members' => $incompleteMembers
     ], 400);
 }
 
-foreach ($students as $student) {
-    foreach (['card_image', 'national_id_image', 'receipt_image'] as $imgField) {
-        $imgFile = $student[$imgField] ?? '';
-        if (empty($imgFile) || !file_exists($uploadDir . '/' . $imgFile)) {
-            $missingImages[] = $student['name'] . ' - ' . $imgField;
-        }
-    }
+// If rejected, reset
+if ($project['status'] === 'rejected') {
+    $stmt = $pdo->prepare("UPDATE projects SET status = 'under_review', submission_date = NOW(), doctor_note = NULL WHERE id = ?");
+    $stmt->execute([$projectId]);
+} else {
+    $stmt = $pdo->prepare("UPDATE projects SET status = 'under_review', submission_date = NOW() WHERE id = ?");
+    $stmt->execute([$projectId]);
 }
-
-if (!empty($missingImages)) {
-    jsonResponse([
-        'error' => 'بعض الصور مفقودة. يرجى إعادة رفعها.',
-        'missing' => $missingImages
-    ], 400);
-}
-
-// Update status
-$stmt = $pdo->prepare("UPDATE projects SET status = 'under_review', submission_date = NOW() WHERE id = ?");
-$stmt->execute([$projectId]);
 
 jsonResponse([
     'success' => true,

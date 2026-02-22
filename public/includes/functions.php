@@ -36,7 +36,20 @@ function redirect(string $url): void {
 function getSettings(): array {
     $pdo = getDB();
     $stmt = $pdo->query("SELECT * FROM settings WHERE id = 1");
-    return $stmt->fetch() ?: ['registration_open' => 1];
+    return $stmt->fetch() ?: ['registration_open' => 1, 'min_team_size' => 2, 'max_team_size' => 7];
+}
+
+/**
+ * Generate a unique join code for a project (6-char alphanumeric uppercase)
+ */
+function generateJoinCode(): string {
+    $pdo = getDB();
+    do {
+        $code = strtoupper(substr(bin2hex(random_bytes(4)), 0, 6));
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM projects WHERE join_code = ?");
+        $stmt->execute([$code]);
+    } while ((int)$stmt->fetchColumn() > 0);
+    return $code;
 }
 
 /**
@@ -46,7 +59,6 @@ function assignGroupNumber(int $projectId): int {
     $pdo = getDB();
     $pdo->beginTransaction();
     try {
-        // Lock the projects table to prevent race conditions
         $stmt = $pdo->query("SELECT COALESCE(MAX(group_number), 0) + 1 AS next_num FROM projects FOR UPDATE");
         $nextNum = (int)$stmt->fetch()['next_num'];
 
@@ -62,46 +74,126 @@ function assignGroupNumber(int $projectId): int {
 }
 
 /**
- * Get a project by ID
+ * Get a project by ID (with leader info from project_members + users)
  */
 function getProject(int $id): ?array {
     $pdo = getDB();
-    $stmt = $pdo->prepare("SELECT p.*, u.name AS leader_name, u.email AS leader_email, u.student_code AS leader_code 
-                           FROM projects p 
-                           JOIN users u ON p.user_id = u.id 
-                           WHERE p.id = ?");
+    $stmt = $pdo->prepare("
+        SELECT p.*, u.name AS leader_name, u.email AS leader_email, u.student_code AS leader_code, u.id AS leader_id
+        FROM projects p
+        JOIN project_members pm ON pm.project_id = p.id AND pm.role = 'leader'
+        JOIN users u ON u.id = pm.user_id
+        WHERE p.id = ?
+    ");
     $stmt->execute([$id]);
     return $stmt->fetch() ?: null;
 }
 
 /**
- * Get all students for a project
+ * Get all members for a project (with user profile data)
  */
-function getProjectStudents(int $projectId): array {
+function getProjectMembers(int $projectId): array {
     $pdo = getDB();
-    $stmt = $pdo->prepare("SELECT * FROM students WHERE project_id = ? ORDER BY student_index ASC");
+    $stmt = $pdo->prepare("
+        SELECT u.*, pm.role AS member_role, pm.joined_at
+        FROM project_members pm
+        JOIN users u ON u.id = pm.user_id
+        WHERE pm.project_id = ?
+        ORDER BY pm.role = 'leader' DESC, pm.joined_at ASC
+    ");
     $stmt->execute([$projectId]);
     return $stmt->fetchAll();
 }
 
 /**
- * Get the team leader's project
+ * Count members for a project
  */
-function getUserProject(int $userId): ?array {
+function countProjectMembers(int $projectId): int {
     $pdo = getDB();
-    $stmt = $pdo->prepare("SELECT * FROM projects WHERE user_id = ? ORDER BY id DESC LIMIT 1");
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM project_members WHERE project_id = ?");
+    $stmt->execute([$projectId]);
+    return (int)$stmt->fetchColumn();
+}
+
+/**
+ * Get all projects a user belongs to
+ */
+function getUserProjects(int $userId): array {
+    $pdo = getDB();
+    $stmt = $pdo->prepare("
+        SELECT p.*, pm.role AS my_role,
+            (SELECT COUNT(*) FROM project_members WHERE project_id = p.id) AS member_count,
+            (SELECT u.name FROM project_members pm2 JOIN users u ON u.id = pm2.user_id 
+             WHERE pm2.project_id = p.id AND pm2.role = 'leader' LIMIT 1) AS leader_name
+        FROM projects p
+        JOIN project_members pm ON pm.project_id = p.id AND pm.user_id = ?
+        ORDER BY p.updated_at DESC
+    ");
+    $stmt->execute([$userId]);
+    return $stmt->fetchAll();
+}
+
+/**
+ * Check if user is leader of a project
+ */
+function isProjectLeader(int $projectId, int $userId): bool {
+    $pdo = getDB();
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM project_members WHERE project_id = ? AND user_id = ? AND role = 'leader'");
+    $stmt->execute([$projectId, $userId]);
+    return (int)$stmt->fetchColumn() > 0;
+}
+
+/**
+ * Check if user is a member of a project
+ */
+function isProjectMember(int $projectId, int $userId): bool {
+    $pdo = getDB();
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM project_members WHERE project_id = ? AND user_id = ?");
+    $stmt->execute([$projectId, $userId]);
+    return (int)$stmt->fetchColumn() > 0;
+}
+
+/**
+ * Get user profile by ID
+ */
+function getUserProfile(int $userId): ?array {
+    $pdo = getDB();
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
     $stmt->execute([$userId]);
     return $stmt->fetch() ?: null;
 }
 
 /**
- * Count students saved for a project
+ * Check if user profile is complete (all required fields + 3 images)
  */
-function countProjectStudents(int $projectId): int {
+function isProfileComplete(array $user): bool {
+    $required = ['name', 'student_code', 'gender', 'national_id', 'birth_date', 'governorate', 'address', 'phone', 'section'];
+    foreach ($required as $field) {
+        if (empty($user[$field])) return false;
+    }
+    $images = ['card_image', 'national_id_image', 'receipt_image'];
+    foreach ($images as $img) {
+        if (empty($user[$img])) return false;
+    }
+    return true;
+}
+
+/**
+ * Get pending invitations received by a user (direct invites)
+ */
+function getPendingInvitations(int $userId): array {
     $pdo = getDB();
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM students WHERE project_id = ?");
-    $stmt->execute([$projectId]);
-    return (int)$stmt->fetchColumn();
+    $stmt = $pdo->prepare("
+        SELECT i.*, p.title AS project_title, p.type AS project_type,
+               u.name AS invited_by_name
+        FROM invitations i
+        JOIN projects p ON p.id = i.project_id
+        JOIN users u ON u.id = i.invited_by
+        WHERE i.invited_user_id = ? AND i.status = 'pending' AND i.expires_at > NOW()
+        ORDER BY i.created_at DESC
+    ");
+    $stmt->execute([$userId]);
+    return $stmt->fetchAll();
 }
 
 /**
@@ -119,24 +211,18 @@ function findDuplicateProjects(int $excludeProjectId, string $title): array {
  * Returns error string or null if valid
  */
 function validateUploadedFile(array $file): ?string {
-    // Check for upload errors
     if ($file['error'] !== UPLOAD_ERR_OK) {
         return 'فشل رفع الملف';
     }
-
-    // Max 5MB
     if ($file['size'] > 5 * 1024 * 1024) {
         return 'حجم الملف يتجاوز 5 ميجابايت';
     }
-
-    // Check MIME type via finfo (magic bytes)
     $finfo = new finfo(FILEINFO_MIME_TYPE);
     $mime = $finfo->file($file['tmp_name']);
     $allowed = ['image/jpeg', 'image/png'];
     if (!in_array($mime, $allowed)) {
         return 'نوع الملف غير مسموح - يجب أن يكون JPG أو PNG';
     }
-
     return null;
 }
 

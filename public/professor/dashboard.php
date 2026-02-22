@@ -22,9 +22,11 @@ foreach (['draft', 'under_review', 'accepted', 'rejected'] as $s) {
 }
 
 // Projects for active tab
-$stmt = $pdo->prepare("SELECT p.*, u.name AS leader_name, u.email AS leader_email 
+$stmt = $pdo->prepare("SELECT p.*, u.name AS leader_name, u.email AS leader_email,
+                              (SELECT COUNT(*) FROM project_members WHERE project_id = p.id) AS member_count
                        FROM projects p 
-                       JOIN users u ON p.user_id = u.id 
+                       JOIN project_members pm ON pm.project_id = p.id AND pm.role = 'leader'
+                       JOIN users u ON u.id = pm.user_id 
                        WHERE p.status = ? 
                        ORDER BY p.created_at $sort");
 $stmt->execute([$activeTab]);
@@ -136,6 +138,7 @@ $isAr = getLang() === 'ar';
                                 <th>#</th>
                                 <th><?= $isAr ? 'اسم المشروع' : 'Project Name' ?></th>
                                 <th><?= __('team_leader') ?></th>
+                                <th><?= __('member_count') ?></th>
                                 <th><?= __('submission_date') ?></th>
                                 <?php if ($activeTab === 'accepted'): ?>
                                     <th><?= __('group_number') ?></th>
@@ -172,6 +175,7 @@ $isAr = getLang() === 'ar';
                                         <?php endif; ?>
                                     </td>
                                     <td><?= sanitize($p['leader_name']) ?></td>
+                                    <td><span class="badge bg-info"><?= $p['member_count'] ?></span></td>
                                     <td><?= $p['submission_date'] ? date('Y-m-d H:i', strtotime($p['submission_date'])) : '-' ?></td>
                                     <?php if ($activeTab === 'accepted'): ?>
                                         <td><span class="badge bg-success fs-6"><?= $p['group_number'] ?></span></td>

@@ -31,6 +31,11 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
                             <i class="bi bi-house-door me-1"></i><?= __('dashboard') ?>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= $currentPage === 'profile' ? 'active' : '' ?>" href="/student/profile.php">
+                            <i class="bi bi-person me-1"></i><?= __('my_profile') ?>
+                        </a>
+                    </li>
                 <?php elseif ($isLoggedIn && $role === 'doctor'): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= $currentPage === 'dashboard' ? 'active' : '' ?>" href="/professor/dashboard.php">

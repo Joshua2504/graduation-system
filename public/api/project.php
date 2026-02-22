@@ -2,9 +2,11 @@
 /**
  * API: Project management
  * 
- * POST   /api/project.php          — Create new project (draft)
- * GET    /api/project.php?id=X     — Get project + students
- * PUT    /api/project.php          — Update project (autosave)
+ * POST   /api/project.php          — Create new project
+ * GET    /api/project.php?id=X     — Get project details + members
+ * GET    /api/project.php          — Get current user's projects
+ * PUT    /api/project.php          — Update project (title/type, leader only)
+ * DELETE /api/project.php          — Leave project / remove member
  */
 require_once dirname(__DIR__) . '/includes/db.php';
 require_once dirname(__DIR__) . '/includes/auth.php';
@@ -13,40 +15,46 @@ require_once dirname(__DIR__) . '/includes/functions.php';
 header('Content-Type: application/json; charset=utf-8');
 
 $method = $_SERVER['REQUEST_METHOD'];
+$pdo = getDB();
 
-// ─── GET: Fetch project with students ───
+// ─── GET: Fetch project(s) ───
 if ($method === 'GET') {
     require_login(true);
     
     $projectId = (int)($_GET['id'] ?? 0);
     
-    // If no id provided, get current user's project
-    if ($projectId === 0) {
-        $project = getUserProject(current_user_id());
-        if (!$project) {
-            jsonResponse(['project' => null]);
-        }
-        $projectId = $project['id'];
-    } else {
+    if ($projectId > 0) {
+        // Fetch single project
         $project = getProject($projectId);
+        if (!$project) {
+            jsonResponse(['error' => 'المشروع غير موجود'], 404);
+        }
+        
+        // Students can only see projects they belong to; doctors can see all
+        if (current_role() === 'student' && !isProjectMember($projectId, current_user_id())) {
+            jsonResponse(['error' => 'غير مصرح'], 403);
+        }
+        
+        $members = getProjectMembers($projectId);
+        // Strip sensitive data from members
+        foreach ($members as &$m) {
+            unset($m['password'], $m['verification_token'], $m['token_expires_at']);
+        }
+        
+        $settings = getSettings();
+        
+        jsonResponse([
+            'project' => $project,
+            'members' => $members,
+            'member_count' => count($members),
+            'max_members' => (int)$settings['max_team_size'],
+            'min_members' => (int)$settings['min_team_size']
+        ]);
+    } else {
+        // Fetch all user's projects
+        $projects = getUserProjects(current_user_id());
+        jsonResponse(['projects' => $projects]);
     }
-    
-    if (!$project) {
-        jsonResponse(['error' => 'المشروع غير موجود'], 404);
-    }
-    
-    // Students can only see their own project; doctors can see all
-    if (current_role() === 'student' && (int)$project['user_id'] !== current_user_id()) {
-        jsonResponse(['error' => 'غير مصرح'], 403);
-    }
-    
-    $students = getProjectStudents($projectId);
-    
-    jsonResponse([
-        'project' => $project,
-        'students' => $students,
-        'student_count' => count($students)
-    ]);
 }
 
 // ─── POST: Create new project ───
@@ -56,68 +64,32 @@ if ($method === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
     $title = trim($input['title'] ?? '');
     $type = trim($input['type'] ?? '');
-    $studentNames = $input['student_names'] ?? [];
     
     if (empty($title)) {
         jsonResponse(['error' => 'اسم المشروع مطلوب'], 400);
     }
     
-    if (!is_array($studentNames) || count($studentNames) !== 7) {
-        jsonResponse(['error' => 'يجب إدخال أسماء 7 طلاب'], 400);
-    }
-    
-    foreach ($studentNames as $name) {
-        if (empty(trim($name))) {
-            jsonResponse(['error' => 'جميع أسماء الطلاب مطلوبة'], 400);
-        }
-    }
-    
-    $pdo = getDB();
     $userId = current_user_id();
+    $joinCode = generateJoinCode();
     
-    // Check if user already has a project
-    $existing = getUserProject($userId);
-    if ($existing && $existing['status'] !== 'rejected') {
-        jsonResponse(['error' => 'لديك مشروع بالفعل', 'project_id' => $existing['id']], 400);
-    }
-    
-    // If rejected, update existing project
-    if ($existing && $existing['status'] === 'rejected') {
-        $stmt = $pdo->prepare("UPDATE projects SET title = ?, type = ?, status = 'draft', doctor_note = NULL, submission_date = NULL WHERE id = ?");
-        $stmt->execute([$title, $type, $existing['id']]);
-        
-        // Delete existing students (will be re-entered)
-        $stmt = $pdo->prepare("DELETE FROM students WHERE project_id = ?");
-        $stmt->execute([$existing['id']]);
-        
-        // Delete existing uploaded files
-        $uploadDir = dirname(__DIR__) . '/uploads/project_' . $existing['id'];
-        if (is_dir($uploadDir)) {
-            array_map('unlink', glob("$uploadDir/*"));
-        }
-        
-        jsonResponse([
-            'success' => true,
-            'project_id' => $existing['id'],
-            'student_names' => $studentNames,
-            'message' => 'تم تحديث المشروع'
-        ]);
-    }
-    
-    // Create new project
-    $stmt = $pdo->prepare("INSERT INTO projects (user_id, title, type, status) VALUES (?, ?, ?, 'draft')");
-    $stmt->execute([$userId, $title, $type]);
+    // Create project
+    $stmt = $pdo->prepare("INSERT INTO projects (title, type, join_code, status) VALUES (?, ?, ?, 'draft')");
+    $stmt->execute([$title, $type, $joinCode]);
     $projectId = (int)$pdo->lastInsertId();
+    
+    // Add creator as leader
+    $stmt = $pdo->prepare("INSERT INTO project_members (project_id, user_id, role) VALUES (?, ?, 'leader')");
+    $stmt->execute([$projectId, $userId]);
     
     jsonResponse([
         'success' => true,
         'project_id' => $projectId,
-        'student_names' => $studentNames,
+        'join_code' => $joinCode,
         'message' => 'تم إنشاء المشروع'
     ]);
 }
 
-// ─── PUT: Update project (autosave) ───
+// ─── PUT: Update project ───
 if ($method === 'PUT') {
     require_role('student', true);
     
@@ -128,14 +100,14 @@ if ($method === 'PUT') {
         jsonResponse(['error' => 'معرف المشروع مطلوب'], 400);
     }
     
-    $pdo = getDB();
-    $project = getProject($projectId);
+    $userId = current_user_id();
     
-    if (!$project || (int)$project['user_id'] !== current_user_id()) {
-        jsonResponse(['error' => 'غير مصرح'], 403);
+    if (!isProjectLeader($projectId, $userId)) {
+        jsonResponse(['error' => 'فقط قائد الفريق يمكنه تعديل المشروع'], 403);
     }
     
-    if ($project['status'] !== 'draft') {
+    $project = getProject($projectId);
+    if (!$project || $project['status'] !== 'draft') {
         jsonResponse(['error' => 'لا يمكن تعديل المشروع في الحالة الحالية'], 400);
     }
     
@@ -145,7 +117,63 @@ if ($method === 'PUT') {
     $stmt = $pdo->prepare("UPDATE projects SET title = ?, type = ? WHERE id = ?");
     $stmt->execute([$title, $type, $projectId]);
     
-    jsonResponse(['success' => true, 'message' => 'تم الحفظ']);
+    jsonResponse(['success' => true, 'message' => 'تم تحديث المشروع']);
+}
+
+// ─── DELETE: Leave project or remove member ───
+if ($method === 'DELETE') {
+    require_role('student', true);
+    
+    $input = json_decode(file_get_contents('php://input'), true);
+    $projectId = (int)($input['project_id'] ?? 0);
+    $removeUserId = (int)($input['remove_user_id'] ?? 0);
+    $userId = current_user_id();
+    
+    if ($projectId === 0) {
+        jsonResponse(['error' => 'معرف المشروع مطلوب'], 400);
+    }
+    
+    $project = getProject($projectId);
+    if (!$project || $project['status'] !== 'draft') {
+        jsonResponse(['error' => 'لا يمكن تعديل الفريق في حالة المشروع الحالية'], 400);
+    }
+    
+    if ($removeUserId > 0 && $removeUserId !== $userId) {
+        // Leader removing a member
+        if (!isProjectLeader($projectId, $userId)) {
+            jsonResponse(['error' => 'فقط قائد الفريق يمكنه إزالة الأعضاء'], 403);
+        }
+        
+        // Can't remove yourself as leader this way
+        $stmt = $pdo->prepare("SELECT role FROM project_members WHERE project_id = ? AND user_id = ?");
+        $stmt->execute([$projectId, $removeUserId]);
+        $member = $stmt->fetch();
+        
+        if (!$member) {
+            jsonResponse(['error' => 'العضو غير موجود في المشروع'], 404);
+        }
+        if ($member['role'] === 'leader') {
+            jsonResponse(['error' => 'لا يمكن إزالة قائد الفريق'], 400);
+        }
+        
+        $stmt = $pdo->prepare("DELETE FROM project_members WHERE project_id = ? AND user_id = ?");
+        $stmt->execute([$projectId, $removeUserId]);
+        
+        jsonResponse(['success' => true, 'message' => 'تم إزالة العضو']);
+    } else {
+        // Self leave
+        if (isProjectLeader($projectId, $userId)) {
+            // Leader leaving = delete project entirely
+            $stmt = $pdo->prepare("DELETE FROM projects WHERE id = ?");
+            $stmt->execute([$projectId]);
+            jsonResponse(['success' => true, 'message' => 'تم حذف المشروع', 'project_deleted' => true]);
+        }
+        
+        $stmt = $pdo->prepare("DELETE FROM project_members WHERE project_id = ? AND user_id = ?");
+        $stmt->execute([$projectId, $userId]);
+        
+        jsonResponse(['success' => true, 'message' => 'تم مغادرة المشروع']);
+    }
 }
 
 jsonResponse(['error' => 'Method not allowed'], 405);

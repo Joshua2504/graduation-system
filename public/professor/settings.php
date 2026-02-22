@@ -17,10 +17,15 @@ $message = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $regOpen = isset($_POST['registration_open']) ? 1 : 0;
     $emailVerReq = isset($_POST['email_verification_required']) ? 1 : 0;
-    $stmt = $pdo->prepare("UPDATE settings SET registration_open = ?, email_verification_required = ? WHERE id = 1");
-    $stmt->execute([$regOpen, $emailVerReq]);
+    $minTeam = max(1, min(10, (int)($_POST['min_team_size'] ?? 2)));
+    $maxTeam = max(1, min(10, (int)($_POST['max_team_size'] ?? 7)));
+    if ($maxTeam < $minTeam) $maxTeam = $minTeam;
+    $stmt = $pdo->prepare("UPDATE settings SET registration_open = ?, email_verification_required = ?, min_team_size = ?, max_team_size = ? WHERE id = 1");
+    $stmt->execute([$regOpen, $emailVerReq, $minTeam, $maxTeam]);
     $settings['registration_open'] = $regOpen;
     $settings['email_verification_required'] = $emailVerReq;
+    $settings['min_team_size'] = $minTeam;
+    $settings['max_team_size'] = $maxTeam;
     $message = $isAr ? 'تم حفظ الإعدادات بنجاح' : 'Settings saved successfully';
 }
 
@@ -73,6 +78,28 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                        id="email_verification_required" name="email_verification_required" 
                                        <?= !empty($settings['email_verification_required']) ? 'checked' : '' ?>
                                        style="width: 3em; height: 1.5em;">
+                            </div>
+                        </div>
+
+                        <!-- Team Size Settings -->
+                        <div class="p-3 bg-light rounded mb-3">
+                            <h6 class="mb-2"><i class="bi bi-people me-1"></i><?= __('team_size') ?></h6>
+                            <small class="text-muted d-block mb-3">
+                                <?= $isAr 
+                                    ? 'تحديد الحد الأدنى والأقصى لعدد أعضاء الفريق'
+                                    : 'Set the minimum and maximum number of team members' ?>
+                            </small>
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold"><?= __('min_members') ?></label>
+                                    <input type="number" class="form-control" name="min_team_size" 
+                                           value="<?= (int)($settings['min_team_size'] ?? 2) ?>" min="1" max="10">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold"><?= __('max_members') ?></label>
+                                    <input type="number" class="form-control" name="max_team_size" 
+                                           value="<?= (int)($settings['max_team_size'] ?? 7) ?>" min="1" max="10">
+                                </div>
                             </div>
                         </div>
 

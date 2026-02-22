@@ -62,14 +62,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['resend_verification'
                     $_SESSION['name'] = $user['name'];
                     $_SESSION['email'] = $user['email'];
                     $_SESSION['role'] = $user['role'];
-                    redirect('/');
+                    $redir = $_SESSION['redirect_after_login'] ?? '/';
+                    unset($_SESSION['redirect_after_login']);
+                    redirect($redir);
                 }
             } else {
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['name'] = $user['name'];
                 $_SESSION['email'] = $user['email'];
                 $_SESSION['role'] = $user['role'];
-                redirect('/');
+                $redir = $_SESSION['redirect_after_login'] ?? '/';
+                unset($_SESSION['redirect_after_login']);
+                redirect($redir);
             }
         } else {
             $error = __('invalid_credentials');
