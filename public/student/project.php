@@ -104,6 +104,17 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                 <?php endif; ?>
             </div>
 
+            <?php if (!empty($project['description']) && !($isLeader && $project['status'] === 'draft')): ?>
+                <hr>
+                <div>
+                    <strong><i class="bi bi-card-text me-1"></i><?= __('project_description') ?>:</strong>
+                    <div class="mt-2 p-3 bg-light rounded project-description"><?= sanitizeHtml($project['description']) ?></div>
+                </div>
+            <?php elseif (empty($project['description']) && !($isLeader && $project['status'] === 'draft')): ?>
+                <hr>
+                <div class="text-muted"><i class="bi bi-card-text me-1"></i><?= __('no_description') ?></div>
+            <?php endif; ?>
+
             <?php if ($project['status'] === 'rejected' && !empty($project['doctor_note'])): ?>
                 <div class="alert alert-warning mt-3 mb-0">
                     <strong><i class="bi bi-chat-left-text me-2"></i><?= __('doctor_note') ?>:</strong>
@@ -121,22 +132,38 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                 </div>
             <?php endif; ?>
 
-            <!-- Edit title/type (leader, draft only) -->
+            <!-- Edit title/type/description (leader, draft only) -->
             <?php if ($isLeader && $project['status'] === 'draft'): ?>
                 <hr>
-                <form id="editProjectForm" class="row g-2 align-items-end">
-                    <div class="col-md-5">
-                        <label class="form-label small fw-bold"><?= __('project_name') ?></label>
-                        <input type="text" class="form-control" id="editTitle" value="<?= sanitize($project['title']) ?>" required>
+                <form id="editProjectForm">
+                    <div class="row g-2 align-items-end mb-3">
+                        <div class="col-md-5">
+                            <label class="form-label small fw-bold"><?= __('project_name') ?></label>
+                            <input type="text" class="form-control" id="editTitle" value="<?= sanitize($project['title']) ?>" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold"><?= __('project_type') ?></label>
+                            <input type="text" class="form-control" id="editType" value="<?= sanitize($project['type']) ?>">
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-check-lg me-1"></i><?= __('save') ?>
+                            </button>
+                        </div>
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label small fw-bold"><?= __('project_type') ?></label>
-                        <input type="text" class="form-control" id="editType" value="<?= sanitize($project['type']) ?>">
-                    </div>
-                    <div class="col-md-3">
-                        <button type="submit" class="btn btn-outline-primary w-100">
-                            <i class="bi bi-check-lg me-1"></i><?= __('save') ?>
-                        </button>
+                    <div class="mb-0">
+                        <label class="form-label small fw-bold"><i class="bi bi-card-text me-1"></i><?= __('project_description') ?></label>
+                        <div class="simple-editor-toolbar">
+                            <button type="button" class="btn" onclick="editorCmd('bold')" title="<?= __('bold') ?>"><i class="bi bi-type-bold"></i></button>
+                            <button type="button" class="btn" onclick="editorCmd('italic')" title="<?= __('italic') ?>"><i class="bi bi-type-italic"></i></button>
+                            <button type="button" class="btn" onclick="editorCmd('underline')" title="<?= __('underline_text') ?>"><i class="bi bi-type-underline"></i></button>
+                            <div class="vr mx-1 opacity-25"></div>
+                            <button type="button" class="btn" onclick="editorCmd('insertUnorderedList')" title="<?= __('bullet_list') ?>"><i class="bi bi-list-ul"></i></button>
+                            <button type="button" class="btn" onclick="editorCmd('insertOrderedList')" title="<?= __('numbered_list') ?>"><i class="bi bi-list-ol"></i></button>
+                            <div class="vr mx-1 opacity-25"></div>
+                            <button type="button" class="btn" onclick="editorInsertLink()" title="<?= __('insert_link') ?>"><i class="bi bi-link-45deg"></i></button>
+                        </div>
+                        <div id="editDescription" class="simple-editor-content" contenteditable="true" data-placeholder="<?= __('description_placeholder') ?>"><?= sanitizeHtml($project['description'] ?? '') ?></div>
                     </div>
                 </form>
             <?php endif; ?>
@@ -350,16 +377,28 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
 <script>
 const PROJECT_ID = <?= $projectId ?>;
 
+// Simple editor commands
+function editorCmd(command) {
+    document.execCommand(command, false, null);
+    document.getElementById('editDescription')?.focus();
+}
+function editorInsertLink() {
+    const url = prompt('URL:', 'https://');
+    if (url) document.execCommand('createLink', false, url);
+}
+
 // Edit project
 document.getElementById('editProjectForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const title = document.getElementById('editTitle').value.trim();
     const type = document.getElementById('editType').value.trim();
+    const descEl = document.getElementById('editDescription');
+    const description = descEl ? descEl.innerHTML.trim() : '';
     try {
         const res = await fetch('/api/project.php', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ project_id: PROJECT_ID, title, type })
+            body: JSON.stringify({ project_id: PROJECT_ID, title, type, description })
         });
         const data = await res.json();
         if (data.success) location.reload();

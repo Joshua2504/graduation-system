@@ -169,7 +169,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
 
 <!-- Create Project Modal -->
 <div class="modal fade" id="createProjectModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title"><i class="bi bi-plus-circle me-2"></i><?= __('create_project') ?></h5>
@@ -186,6 +186,20 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                         <input type="text" class="form-control" id="newType" maxlength="255"
                                placeholder="<?= __('project_type_placeholder') ?>">
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"><?= __('project_description') ?></label>
+                        <div class="simple-editor-toolbar">
+                            <button type="button" class="btn" onclick="editorCmd('bold', 'newDescription')" title="<?= __('bold') ?>"><i class="bi bi-type-bold"></i></button>
+                            <button type="button" class="btn" onclick="editorCmd('italic', 'newDescription')" title="<?= __('italic') ?>"><i class="bi bi-type-italic"></i></button>
+                            <button type="button" class="btn" onclick="editorCmd('underline', 'newDescription')" title="<?= __('underline_text') ?>"><i class="bi bi-type-underline"></i></button>
+                            <div class="vr mx-1 opacity-25"></div>
+                            <button type="button" class="btn" onclick="editorCmd('insertUnorderedList', 'newDescription')" title="<?= __('bullet_list') ?>"><i class="bi bi-list-ul"></i></button>
+                            <button type="button" class="btn" onclick="editorCmd('insertOrderedList', 'newDescription')" title="<?= __('numbered_list') ?>"><i class="bi bi-list-ol"></i></button>
+                            <div class="vr mx-1 opacity-25"></div>
+                            <button type="button" class="btn" onclick="editorInsertLink('newDescription')" title="<?= __('insert_link') ?>"><i class="bi bi-link-45deg"></i></button>
+                        </div>
+                        <div id="newDescription" class="simple-editor-content" contenteditable="true" data-placeholder="<?= __('description_placeholder') ?>"></div>
+                    </div>
                     <div id="createAlert" class="alert d-none"></div>
                 </form>
             </div>
@@ -200,9 +214,20 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
 </div>
 
 <script>
+function editorCmd(command, targetId) {
+    document.execCommand(command, false, null);
+    document.getElementById(targetId)?.focus();
+}
+function editorInsertLink(targetId) {
+    const url = prompt('URL:', 'https://');
+    if (url) document.execCommand('createLink', false, url);
+}
+
 async function createProject() {
     const title = document.getElementById('newTitle').value.trim();
     const type = document.getElementById('newType').value.trim();
+    const descEl = document.getElementById('newDescription');
+    const description = descEl ? descEl.innerHTML.trim() : '';
     const alertEl = document.getElementById('createAlert');
     alertEl.classList.add('d-none');
 
@@ -212,7 +237,7 @@ async function createProject() {
         const res = await fetch('/api/project.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title, type })
+            body: JSON.stringify({ title, type, description })
         });
         const data = await res.json();
         if (data.success) {

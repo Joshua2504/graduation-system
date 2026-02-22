@@ -97,6 +97,14 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                     </div>
                 <?php endif; ?>
             </div>
+
+            <?php if (!empty($project['description'])): ?>
+                <hr>
+                <div>
+                    <strong><i class="bi bi-card-text me-1"></i><?= __('project_description') ?>:</strong>
+                    <div class="mt-2 p-3 bg-light rounded project-description"><?= sanitizeHtml($project['description']) ?></div>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 

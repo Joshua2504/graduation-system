@@ -64,6 +64,7 @@ if ($method === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
     $title = trim($input['title'] ?? '');
     $type = trim($input['type'] ?? '');
+    $description = sanitizeHtml($input['description'] ?? '');
     
     if (empty($title)) {
         jsonResponse(['error' => 'اسم المشروع مطلوب'], 400);
@@ -73,8 +74,8 @@ if ($method === 'POST') {
     $joinCode = generateJoinCode();
     
     // Create project
-    $stmt = $pdo->prepare("INSERT INTO projects (title, type, join_code, status) VALUES (?, ?, ?, 'draft')");
-    $stmt->execute([$title, $type, $joinCode]);
+    $stmt = $pdo->prepare("INSERT INTO projects (title, type, description, join_code, status) VALUES (?, ?, ?, ?, 'draft')");
+    $stmt->execute([$title, $type, $description ?: null, $joinCode]);
     $projectId = (int)$pdo->lastInsertId();
     
     // Add creator as leader
@@ -113,9 +114,10 @@ if ($method === 'PUT') {
     
     $title = trim($input['title'] ?? $project['title']);
     $type = trim($input['type'] ?? $project['type']);
+    $description = array_key_exists('description', $input) ? sanitizeHtml($input['description'] ?? '') : $project['description'];
     
-    $stmt = $pdo->prepare("UPDATE projects SET title = ?, type = ? WHERE id = ?");
-    $stmt->execute([$title, $type, $projectId]);
+    $stmt = $pdo->prepare("UPDATE projects SET title = ?, type = ?, description = ? WHERE id = ?");
+    $stmt->execute([$title, $type, $description ?: null, $projectId]);
     
     jsonResponse(['success' => true, 'message' => 'تم تحديث المشروع']);
 }

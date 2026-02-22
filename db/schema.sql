@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS `projects` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `title` VARCHAR(500) NOT NULL,
   `type` VARCHAR(255) NOT NULL DEFAULT '',
+  `description` TEXT DEFAULT NULL,
   `join_code` VARCHAR(8) NOT NULL,
   `submission_date` DATETIME DEFAULT NULL,
   `status` ENUM('draft','under_review','accepted','rejected') NOT NULL DEFAULT 'draft',
@@ -97,3 +98,12 @@ ON DUPLICATE KEY UPDATE `id` = `id`;
 INSERT INTO `users` (`name`, `email`, `password`, `student_code`, `role`, `email_verified`) VALUES
 ('طالب تجريبي', 'student@university.edu', '$2y$10$yqqDmhPnvBeLXswbIx3dfepMRnibuYMv/UuUb8hp8T3NAWn0yNepO', '001', 'student', 1)
 ON DUPLICATE KEY UPDATE `id` = `id`;
+
+-- ─── Migrations ───
+
+-- Add description column to projects (safe for existing databases)
+SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'projects' AND COLUMN_NAME = 'description');
+SET @sql = IF(@col_exists = 0, 'ALTER TABLE `projects` ADD COLUMN `description` TEXT DEFAULT NULL AFTER `type`', 'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;

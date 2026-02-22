@@ -13,6 +13,19 @@ function sanitize(?string $str): string {
 }
 
 /**
+ * Sanitize HTML content — allow only safe tags for rich text descriptions
+ */
+function sanitizeHtml(?string $html): string {
+    if (empty($html)) return '';
+    $allowed = '<b><i><u><strong><em><ul><ol><li><a><br><p><div><span>';
+    $clean = strip_tags(trim($html), $allowed);
+    // Remove event handlers and javascript: URLs
+    $clean = preg_replace('/\bon\w+\s*=\s*["\'][^"\']*["\']/i', '', $clean);
+    $clean = preg_replace('/href\s*=\s*["\']javascript:[^"\']*["\']/i', 'href="#"', $clean);
+    return $clean;
+}
+
+/**
  * Send JSON response and exit
  */
 function jsonResponse(array $data, int $code = 200): void {
