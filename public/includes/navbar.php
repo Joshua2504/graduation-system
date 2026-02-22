@@ -42,6 +42,11 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
                             <i class="bi bi-gear me-1"></i><?= __('settings') ?>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= $currentPage === 'students' ? 'active' : '' ?>" href="/professor/students.php">
+                            <i class="bi bi-people me-1"></i><?= __('student_accounts') ?>
+                        </a>
+                    </li>
                 <?php endif; ?>
             </ul>
             <ul class="navbar-nav">

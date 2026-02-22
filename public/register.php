@@ -6,6 +6,7 @@ require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/functions.php';
 require_once __DIR__ . '/includes/lang.php';
+require_once __DIR__ . '/includes/mailer.php';
 
 // If already logged in, redirect
 if (is_logged_in()) {
@@ -32,6 +33,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $regOpen) {
         $error = getLang() === 'ar' ? 'البريد الإلكتروني غير صالح' : 'Invalid email address';
     } elseif (strlen($password) < 6) {
         $error = getLang() === 'ar' ? 'كلمة المرور يجب أن تكون 6 أحرف على الأقل' : 'Password must be at least 6 characters';
+    } elseif (!preg_match('/^[A-Za-z0-9]{1,30}$/', $studentCode)) {
+        $error = getLang() === 'ar' ? 'كود الطالب يجب أن يكون أحرف وأرقام بحد أقصى 30 حرف' : 'Student code must be alphanumeric, max 30 characters';
     } else {
         $pdo = getDB();
 
@@ -47,19 +50,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $regOpen) {
             if ($stmt->fetch()) {
                 $error = __('code_exists');
             } else {
-                // Create user
+                // Create user (unverified)
                 $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-                $stmt = $pdo->prepare("INSERT INTO users (name, email, password, student_code, role) VALUES (?, ?, ?, ?, 'student')");
+                $stmt = $pdo->prepare("INSERT INTO users (name, email, password, student_code, role, email_verified) VALUES (?, ?, ?, ?, 'student', 0)");
                 $stmt->execute([$name, $email, $hashedPassword, $studentCode]);
 
-                // Auto login
-                $userId = $pdo->lastInsertId();
-                $_SESSION['user_id'] = (int)$userId;
-                $_SESSION['name'] = $name;
-                $_SESSION['email'] = $email;
-                $_SESSION['role'] = 'student';
+                $userId = (int)$pdo->lastInsertId();
 
-                redirect('/student/dashboard.php');
+                // Check if email verification is required
+                $settings = getSettings();
+                if (!empty($settings['email_verification_required'])) {
+                    // Generate token and send verification email
+                    $token = generateVerificationToken($userId);
+                    $sent = sendVerificationEmail($email, $name, $token, getLang());
+
+                    if ($sent) {
+                        $success = __('verification_sent');
+                    } else {
+                        // Email failed but account created — let them resend later
+                        $success = __('verification_sent_fallback');
+                    }
+                } else {
+                    // Email verification disabled — auto-verify and login
+                    $pdo->prepare("UPDATE users SET email_verified = 1 WHERE id = ?")->execute([$userId]);
+                    $_SESSION['user_id'] = $userId;
+                    $_SESSION['name'] = $name;
+                    $_SESSION['email'] = $email;
+                    $_SESSION['role'] = 'student';
+                    redirect('/student/dashboard.php');
+                }
             }
         }
     }
@@ -89,6 +108,16 @@ require_once __DIR__ . '/includes/header.php';
                         <?php if ($error): ?>
                             <div class="alert alert-danger"><?= sanitize($error) ?></div>
                         <?php endif; ?>
+                        <?php if ($success): ?>
+                            <div class="alert alert-success">
+                                <i class="bi bi-envelope-check me-2"></i><?= sanitize($success) ?>
+                            </div>
+                            <div class="text-center mt-3">
+                                <a href="/login.php" class="btn btn-primary">
+                                    <i class="bi bi-box-arrow-in-right me-1"></i><?= __('login') ?>
+                                </a>
+                            </div>
+                        <?php else: ?>
 
                         <form method="POST" novalidate>
                             <div class="mb-3">
@@ -111,17 +140,34 @@ require_once __DIR__ . '/includes/header.php';
                             <div class="mb-3">
                                 <label for="student_code" class="form-label"><?= __('student_code') ?> <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="student_code" name="student_code" 
-                                       value="<?= sanitize($studentCode ?? '') ?>" required>
+                                       value="<?= sanitize($studentCode ?? '') ?>" required
+                                       maxlength="30" pattern="[A-Za-z0-9]{1,30}"
+                                       oninput="this.value=this.value.replace(/[^A-Za-z0-9]/g,'').slice(0,30)">
+                                <div class="form-text">
+                                    <?= getLang() === 'ar' ? 'أحرف وأرقام، بحد أقصى 30 حرف' : 'Alphanumeric, max 30 characters' ?>
+                                </div>
                             </div>
                             <button type="submit" class="btn btn-primary w-100">
                                 <i class="bi bi-person-plus me-1"></i><?= __('register') ?>
                             </button>
                         </form>
                     <?php endif; ?>
+                    <?php endif; ?>
 
                     <div class="text-center mt-3">
                         <span class="text-muted"><?= __('has_account') ?></span>
                         <a href="/login.php"><?= __('login') ?></a>
+                    </div>
+
+                    <hr>
+                    <div class="text-center">
+                        <?php
+                        $otherLang = getLang() === 'ar' ? 'en' : 'ar';
+                        $otherLangLabel = getLang() === 'ar' ? 'English' : 'العربية';
+                        ?>
+                        <a href="?lang=<?= $otherLang ?>" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-translate me-1"></i><?= $otherLangLabel ?>
+                        </a>
                     </div>
                 </div>
             </div>

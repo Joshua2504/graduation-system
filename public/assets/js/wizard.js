@@ -93,6 +93,9 @@
     }
 
     function renderCurrentStep() {
+        // Expose current step for autosave
+        state.currentStep = currentStep;
+
         // Build step indicator
         const indicator = buildStepIndicator(currentStep);
 
@@ -119,17 +122,29 @@
 
         for (let i = 1; i <= 9; i++) {
             let label = '';
-            if (i === 1) label = isAr ? 'المشروع' : 'Project';
-            else if (i >= 2 && i <= 8) label = `${isAr ? 'طالب' : 'S'}${i - 1}`;
-            else if (i === 9) label = isAr ? 'تأكيد' : 'Confirm';
+            let icon = '';
+            if (i === 1) {
+                label = isAr ? 'المشروع' : 'Project';
+                icon = '<i class="bi bi-folder"></i>';
+            } else if (i >= 2 && i <= 8) {
+                label = `${isAr ? 'طالب' : 'S'}${i - 1}`;
+                icon = '<i class="bi bi-person-fill"></i>';
+            } else if (i === 9) {
+                label = isAr ? 'تأكيد' : 'Confirm';
+                icon = '<i class="bi bi-check2-square"></i>';
+            }
 
             let className = 'step-item';
+            const isClickable = i <= active; // completed or current step
             if (i < active) className += ' completed';
             else if (i === active) className += ' active';
+            if (isClickable) className += ' clickable';
+
+            const circleContent = i < active ? '<i class="bi bi-check"></i>' : icon;
 
             steps += `
-                <div class="${className}">
-                    <div class="step-circle">${i < active ? '<i class="bi bi-check"></i>' : i}</div>
+                <div class="${className}" ${isClickable ? 'data-step="' + i + '"' : ''}>
+                    <div class="step-circle">${circleContent}</div>
                     <div class="step-label">${label}</div>
                 </div>
             `;
@@ -139,6 +154,18 @@
     }
 
     function bindStepEvents() {
+        // Bind clickable step indicators
+        document.querySelectorAll('.step-item.clickable').forEach(el => {
+            el.addEventListener('click', () => {
+                const targetStep = parseInt(el.dataset.step);
+                if (targetStep && targetStep !== currentStep) {
+                    currentStep = targetStep;
+                    renderCurrentStep();
+                    window.scrollTo(0, 0);
+                }
+            });
+        });
+
         if (currentStep === 1) {
             const nextBtn = document.getElementById('step1-next');
             if (nextBtn) {

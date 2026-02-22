@@ -1,0 +1,218 @@
+<?php
+/**
+ * Lightweight SMTP mailer — sends emails via SMTP using raw sockets.
+ * Reads config from .env: MAIL_HOST, MAIL_PORT, MAIL_USER, MAIL_PASS
+ * 
+ * Supports STARTTLS (port 587) and implicit TLS (port 465).
+ */
+
+require_once __DIR__ . '/db.php'; // ensures .env is loaded
+
+/**
+ * Send an email via SMTP
+ *
+ * @param string $to      Recipient email
+ * @param string $subject Email subject
+ * @param string $body    HTML email body
+ * @return bool           True if sent successfully
+ */
+function sendMail(string $to, string $subject, string $body): bool {
+    $host = $_ENV['MAIL_HOST'] ?? getenv('MAIL_HOST') ?: '';
+    $port = (int)($_ENV['MAIL_PORT'] ?? getenv('MAIL_PORT') ?: 587);
+    $user = $_ENV['MAIL_USER'] ?? getenv('MAIL_USER') ?: '';
+    $pass = $_ENV['MAIL_PASS'] ?? getenv('MAIL_PASS') ?: '';
+
+    if (empty($host) || empty($user) || empty($pass)) {
+        error_log('[Mailer] SMTP configuration missing in .env');
+        return false;
+    }
+
+    $from = $user; // Send from the configured mail user
+    $fromName = 'Graduation Project System';
+
+    try {
+        // Connect
+        $socket = @fsockopen($host, $port, $errno, $errstr, 10);
+        if (!$socket) {
+            error_log("[Mailer] Cannot connect to $host:$port — $errstr ($errno)");
+            return false;
+        }
+
+        stream_set_timeout($socket, 10);
+        $response = smtpRead($socket);
+        if (substr($response, 0, 3) !== '220') {
+            error_log("[Mailer] Unexpected greeting: $response");
+            fclose($socket);
+            return false;
+        }
+
+        // EHLO
+        smtpCmd($socket, "EHLO localhost", '250');
+
+        // STARTTLS for port 587
+        if ($port === 587) {
+            smtpCmd($socket, "STARTTLS", '220');
+            $crypto = stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT | STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT);
+            if (!$crypto) {
+                error_log("[Mailer] STARTTLS failed");
+                fclose($socket);
+                return false;
+            }
+            // Re-EHLO after STARTTLS
+            smtpCmd($socket, "EHLO localhost", '250');
+        }
+
+        // AUTH LOGIN
+        smtpCmd($socket, "AUTH LOGIN", '334');
+        smtpCmd($socket, base64_encode($user), '334');
+        smtpCmd($socket, base64_encode($pass), '235');
+
+        // MAIL FROM
+        smtpCmd($socket, "MAIL FROM:<$from>", '250');
+
+        // RCPT TO
+        smtpCmd($socket, "RCPT TO:<$to>", '250');
+
+        // DATA
+        smtpCmd($socket, "DATA", '354');
+
+        // Build RFC 2822 message
+        $boundary = md5(uniqid(time()));
+        $headers  = "From: $fromName <$from>\r\n";
+        $headers .= "To: <$to>\r\n";
+        $headers .= "Subject: =?UTF-8?B?" . base64_encode($subject) . "?=\r\n";
+        $headers .= "MIME-Version: 1.0\r\n";
+        $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+        $headers .= "Content-Transfer-Encoding: base64\r\n";
+        $headers .= "Date: " . date('r') . "\r\n";
+        $headers .= "Message-ID: <" . uniqid('grad_') . "@" . gethostname() . ">\r\n";
+
+        $message = $headers . "\r\n" . chunk_split(base64_encode($body));
+
+        // Escape leading dots (RFC 5321)
+        $message = str_replace("\r\n.", "\r\n..", $message);
+
+        fwrite($socket, $message . "\r\n.\r\n");
+        $response = smtpRead($socket);
+        if (substr($response, 0, 3) !== '250') {
+            error_log("[Mailer] DATA rejected: $response");
+            fclose($socket);
+            return false;
+        }
+
+        // QUIT
+        smtpCmd($socket, "QUIT", '221');
+        fclose($socket);
+
+        return true;
+
+    } catch (\Exception $e) {
+        error_log("[Mailer] Exception: " . $e->getMessage());
+        if (isset($socket) && is_resource($socket)) fclose($socket);
+        return false;
+    }
+}
+
+/**
+ * Read SMTP response (multi-line aware)
+ */
+function smtpRead($socket): string {
+    $response = '';
+    while ($line = fgets($socket, 515)) {
+        $response .= $line;
+        // Last line has a space after the code (e.g. "250 OK")
+        if (isset($line[3]) && $line[3] === ' ') break;
+    }
+    return trim($response);
+}
+
+/**
+ * Send an SMTP command and verify the expected response code
+ */
+function smtpCmd($socket, string $cmd, string $expectedCode): string {
+    fwrite($socket, $cmd . "\r\n");
+    $response = smtpRead($socket);
+    if (substr($response, 0, strlen($expectedCode)) !== $expectedCode) {
+        throw new \RuntimeException("SMTP error for '$cmd': $response");
+    }
+    return $response;
+}
+
+/**
+ * Generate a secure verification token and store it in the DB
+ *
+ * @param int $userId User ID
+ * @return string The generated token
+ */
+function generateVerificationToken(int $userId): string {
+    $token = bin2hex(random_bytes(32)); // 64 hex chars
+    $expires = date('Y-m-d H:i:s', strtotime('+24 hours'));
+
+    $pdo = getDB();
+    $stmt = $pdo->prepare("UPDATE users SET verification_token = ?, token_expires_at = ? WHERE id = ?");
+    $stmt->execute([$token, $expires, $userId]);
+
+    return $token;
+}
+
+/**
+ * Send verification email to a user
+ *
+ * @param string $email     User email
+ * @param string $name      User name
+ * @param string $token     Verification token
+ * @param string $lang      Language code (ar/en)
+ * @return bool
+ */
+function sendVerificationEmail(string $email, string $name, string $token, string $lang = 'ar'): bool {
+    // Build verification URL
+    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost:8642';
+    $verifyUrl = "$protocol://$host/verify.php?token=$token";
+
+    if ($lang === 'ar') {
+        $subject = 'تأكيد البريد الإلكتروني - نظام مشاريع التخرج';
+        $heading = 'تأكيد البريد الإلكتروني';
+        $greeting = "مرحباً $name،";
+        $message = 'شكراً لتسجيلك في نظام إدارة مشاريع التخرج. يرجى الضغط على الزر أدناه لتأكيد بريدك الإلكتروني.';
+        $btnText = 'تأكيد البريد الإلكتروني';
+        $expiry = 'هذا الرابط صالح لمدة 24 ساعة.';
+        $ignore = 'إذا لم تقم بإنشاء هذا الحساب، يرجى تجاهل هذا البريد.';
+        $dir = 'rtl';
+    } else {
+        $subject = 'Email Verification - Graduation Project System';
+        $heading = 'Verify Your Email';
+        $greeting = "Hello $name,";
+        $message = 'Thank you for registering with the Graduation Project Management System. Please click the button below to verify your email address.';
+        $btnText = 'Verify Email';
+        $expiry = 'This link is valid for 24 hours.';
+        $ignore = 'If you did not create this account, please ignore this email.';
+        $dir = 'ltr';
+    }
+
+    $body = <<<HTML
+<!DOCTYPE html>
+<html dir="$dir" lang="$lang">
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background:#f4f6f9;">
+    <div style="max-width:520px;margin:40px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);">
+        <div style="background:#0d6efd;padding:24px;text-align:center;">
+            <h1 style="margin:0;color:#fff;font-size:22px;">🎓 $heading</h1>
+        </div>
+        <div style="padding:28px 32px;">
+            <p style="font-size:16px;color:#333;">$greeting</p>
+            <p style="font-size:15px;color:#555;line-height:1.6;">$message</p>
+            <div style="text-align:center;margin:32px 0;">
+                <a href="$verifyUrl" style="display:inline-block;background:#0d6efd;color:#fff;padding:14px 36px;border-radius:8px;text-decoration:none;font-size:16px;font-weight:bold;">$btnText</a>
+            </div>
+            <p style="font-size:13px;color:#888;text-align:center;">$expiry</p>
+            <hr style="border:none;border-top:1px solid #eee;margin:20px 0;">
+            <p style="font-size:12px;color:#999;text-align:center;">$ignore</p>
+        </div>
+    </div>
+</body>
+</html>
+HTML;
+
+    return sendMail($email, $subject, $body);
+}

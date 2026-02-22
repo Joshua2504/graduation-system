@@ -8,8 +8,8 @@ require_once __DIR__ . '/db.php';
 /**
  * Sanitize input string
  */
-function sanitize(string $str): string {
-    return htmlspecialchars(trim($str), ENT_QUOTES, 'UTF-8');
+function sanitize(?string $str): string {
+    return htmlspecialchars(trim($str ?? ''), ENT_QUOTES, 'UTF-8');
 }
 
 /**

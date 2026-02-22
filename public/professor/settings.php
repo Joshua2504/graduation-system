@@ -16,12 +16,12 @@ $message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $regOpen = isset($_POST['registration_open']) ? 1 : 0;
-    $stmt = $pdo->prepare("UPDATE settings SET registration_open = ? WHERE id = 1");
-    $stmt->execute([$regOpen]);
+    $emailVerReq = isset($_POST['email_verification_required']) ? 1 : 0;
+    $stmt = $pdo->prepare("UPDATE settings SET registration_open = ?, email_verification_required = ? WHERE id = 1");
+    $stmt->execute([$regOpen, $emailVerReq]);
     $settings['registration_open'] = $regOpen;
-    $message = $regOpen 
-        ? ($isAr ? 'تم فتح التسجيل بنجاح' : 'Registration opened successfully')
-        : ($isAr ? 'تم إغلاق التسجيل بنجاح' : 'Registration closed successfully');
+    $settings['email_verification_required'] = $emailVerReq;
+    $message = $isAr ? 'تم حفظ الإعدادات بنجاح' : 'Settings saved successfully';
 }
 
 $pageTitle = __('settings');
@@ -59,10 +59,33 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             </div>
                         </div>
 
-                        <div class="text-center">
+                        <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded mb-3">
+                            <div>
+                                <h6 class="mb-1"><?= __('toggle_email_verification') ?></h6>
+                                <small class="text-muted">
+                                    <?= $isAr 
+                                        ? 'عند التفعيل، يجب على الطلاب تأكيد بريدهم الإلكتروني قبل تسجيل الدخول'
+                                        : 'When enabled, students must verify their email before logging in' ?>
+                                </small>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" 
+                                       id="email_verification_required" name="email_verification_required" 
+                                       <?= !empty($settings['email_verification_required']) ? 'checked' : '' ?>
+                                       style="width: 3em; height: 1.5em;">
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 justify-content-center mb-3">
                             <span class="badge fs-6 <?= $settings['registration_open'] ? 'bg-success' : 'bg-danger' ?>">
                                 <i class="bi bi-<?= $settings['registration_open'] ? 'unlock' : 'lock' ?> me-1"></i>
                                 <?= $settings['registration_open'] ? __('registration_open') : __('registration_locked') ?>
+                            </span>
+                            <span class="badge fs-6 <?= !empty($settings['email_verification_required']) ? 'bg-info' : 'bg-secondary' ?>">
+                                <i class="bi bi-<?= !empty($settings['email_verification_required']) ? 'envelope-check' : 'envelope-x' ?> me-1"></i>
+                                <?= !empty($settings['email_verification_required']) 
+                                    ? ($isAr ? 'تأكيد البريد مطلوب' : 'Email Verification On')
+                                    : ($isAr ? 'تأكيد البريد معطل' : 'Email Verification Off') ?>
                             </span>
                         </div>
 

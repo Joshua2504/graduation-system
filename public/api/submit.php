@@ -33,16 +33,41 @@ if (!in_array($project['status'], ['draft', 'rejected'])) {
     jsonResponse(['error' => 'لا يمكن تقديم المشروع في الحالة الحالية'], 400);
 }
 
-// Verify all 7 students exist
+// Verify all 7 students exist with complete data
 $studentCount = countProjectStudents($projectId);
 if ($studentCount < 7) {
     jsonResponse(['error' => "تم إدخال بيانات $studentCount طلاب فقط من أصل 7"], 400);
 }
 
-// Verify all 21 images exist on disk
+// Verify all 21 images exist on disk AND all required fields are filled
 $students = getProjectStudents($projectId);
 $uploadDir = dirname(__DIR__) . '/uploads/project_' . $projectId;
 $missingImages = [];
+$incompleteStudents = [];
+
+foreach ($students as $student) {
+    // Check required fields are filled (not null/empty from autosave)
+    $requiredFields = ['name', 'student_code', 'gender', 'national_id', 'birth_date', 'governorate', 'address', 'phone', 'section'];
+    foreach ($requiredFields as $field) {
+        if (empty($student[$field])) {
+            $incompleteStudents[] = ($student['name'] ?: 'طالب ' . ($student['student_index'] + 1)) . ' - ' . $field;
+        }
+    }
+
+    foreach (['card_image', 'national_id_image', 'receipt_image'] as $imgField) {
+        $imgFile = $student[$imgField] ?? '';
+        if (empty($imgFile) || !file_exists($uploadDir . '/' . $imgFile)) {
+            $missingImages[] = ($student['name'] ?: 'طالب ' . ($student['student_index'] + 1)) . ' - ' . $imgField;
+        }
+    }
+}
+
+if (!empty($incompleteStudents)) {
+    jsonResponse([
+        'error' => 'بعض بيانات الطلاب غير مكتملة. يرجى إكمال جميع الحقول.',
+        'missing' => $incompleteStudents
+    ], 400);
+}
 
 foreach ($students as $student) {
     foreach (['card_image', 'national_id_image', 'receipt_image'] as $imgField) {

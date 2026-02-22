@@ -28,11 +28,7 @@ const Step1 = {
             stepTitle: isAr ? 'الخطوة 1: تفاصيل المشروع' : 'Step 1: Project Details',
         };
 
-        let typesOptions = types.map((t, i) => {
-            const val = t[state.lang] || t.ar;
-            const selected = project.type === val ? 'selected' : '';
-            return `<option value="${val}" ${selected}>${val}</option>`;
-        }).join('');
+        // Project type is now a free text field
 
         let studentInputs = '';
         for (let i = 0; i < 7; i++) {
@@ -60,10 +56,9 @@ const Step1 = {
                     </div>
                     <div class="mb-4">
                         <label for="project_type" class="form-label fw-bold">${labels.type} <span class="text-danger">*</span></label>
-                        <select class="form-select form-select-lg" id="project_type" required>
-                            <option value="">${labels.selectType}</option>
-                            ${typesOptions}
-                        </select>
+                        <input type="text" class="form-control form-control-lg" id="project_type"
+                               value="${this._escape(project.type || '')}" required
+                               placeholder="${isAr ? 'أدخل نوع المشروع' : 'Enter project type'}">
                     </div>
                     <hr>
                     <h6 class="fw-bold mb-3">${labels.studentNames}</h6>

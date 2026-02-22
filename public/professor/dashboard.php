@@ -15,7 +15,7 @@ $activeTab = $_GET['tab'] ?? 'under_review';
 
 // Stats
 $stats = [];
-foreach (['under_review', 'accepted', 'rejected'] as $s) {
+foreach (['draft', 'under_review', 'accepted', 'rejected'] as $s) {
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM projects WHERE status = ?");
     $stmt->execute([$s]);
     $stats[$s] = (int)$stmt->fetchColumn();
@@ -47,7 +47,16 @@ $isAr = getLang() === 'ar';
 <div class="container">
     <!-- Stats Cards -->
     <div class="row mb-4">
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-secondary">
+                <div class="card-body text-center">
+                    <i class="bi bi-pencil-square text-secondary fs-1"></i>
+                    <h2 class="mt-2 mb-0"><?= $stats['draft'] ?></h2>
+                    <p class="text-muted"><?= __('draft_projects') ?></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
             <div class="card shadow-sm border-warning">
                 <div class="card-body text-center">
                     <i class="bi bi-hourglass-split text-warning fs-1"></i>
@@ -56,7 +65,7 @@ $isAr = getLang() === 'ar';
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
             <div class="card shadow-sm border-success">
                 <div class="card-body text-center">
                     <i class="bi bi-check-circle-fill text-success fs-1"></i>
@@ -65,7 +74,7 @@ $isAr = getLang() === 'ar';
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
             <div class="card shadow-sm border-danger">
                 <div class="card-body text-center">
                     <i class="bi bi-x-circle-fill text-danger fs-1"></i>
@@ -83,6 +92,7 @@ $isAr = getLang() === 'ar';
                 <ul class="nav nav-tabs card-header-tabs">
                     <?php 
                     $tabs = [
+                        'draft' => ['label' => __('draft_projects'), 'icon' => 'pencil-square', 'color' => 'secondary'],
                         'under_review' => ['label' => __('projects_under_review'), 'icon' => 'hourglass-split', 'color' => 'warning'],
                         'accepted' => ['label' => __('accepted_projects'), 'icon' => 'check-circle-fill', 'color' => 'success'],
                         'rejected' => ['label' => __('rejected_projects'), 'icon' => 'x-circle-fill', 'color' => 'danger'],

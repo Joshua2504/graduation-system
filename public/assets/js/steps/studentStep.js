@@ -47,18 +47,6 @@ const StudentStep = {
             return `<option value="${g}" ${selected}>${g}</option>`;
         }).join('');
 
-        const sections = [
-            { ar: 'علوم الحاسب', en: 'Computer Science' },
-            { ar: 'نظم المعلومات', en: 'Information Systems' },
-            { ar: 'الذكاء الاصطناعي', en: 'Artificial Intelligence' },
-            { ar: 'تكنولوجيا المعلومات', en: 'Information Technology' },
-        ];
-        let sectionOptions = sections.map(s => {
-            const val = s[state.lang] || s.ar;
-            const selected = student.section === val ? 'selected' : '';
-            return `<option value="${val}" ${selected}>${val}</option>`;
-        }).join('');
-
         // Image upload sections
         const imageTypes = [
             { key: 'card', label: labels.cardImage, field: 'card_image' },
@@ -76,7 +64,7 @@ const StudentStep = {
                             <label class="form-label fw-bold">${img.label} <span class="text-danger">*</span></label>
                             <div class="upload-zone p-3 border rounded mb-2" id="zone_${img.key}">
                                 ${hasFile 
-                                    ? `<i class="bi bi-check-circle-fill text-success fs-3"></i><br><small class="text-success">${existing}</small>`
+                                    ? `<img src="/uploads/project_${state.projectId}/${existing}" class="img-fluid rounded mb-1" style="max-height:120px;" alt="${img.label}"><br><small class="text-success"><i class="bi bi-check-circle-fill me-1"></i>${existing}</small>`
                                     : `<i class="bi bi-cloud-arrow-up fs-3 text-muted"></i><br><small class="text-muted">${labels.imgReq}</small>`
                                 }
                             </div>
@@ -108,7 +96,11 @@ const StudentStep = {
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">${labels.studentCode} <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="s_code" value="${this._escape(student.student_code || '')}" required>
+                            <input type="text" class="form-control" id="s_code" value="${this._escape(student.student_code || '')}" required
+                                   maxlength="30" pattern="[A-Za-z0-9]{1,30}"
+                                   placeholder="${isAr ? 'أحرف وأرقام' : 'Alphanumeric'}"
+                                   oninput="this.value=this.value.replace(/[^A-Za-z0-9]/g,'').slice(0,30)">
+                            <div class="form-text">${isAr ? 'أحرف وأرقام، بحد أقصى 30 حرف' : 'Alphanumeric, max 30 characters'}</div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">${labels.gender} <span class="text-danger">*</span></label>
@@ -120,7 +112,11 @@ const StudentStep = {
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">${labels.nationalId} <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="s_national_id" value="${this._escape(student.national_id || '')}" required>
+                            <input type="text" class="form-control" id="s_national_id" value="${this._escape(student.national_id || '')}" required
+                                   maxlength="14" minlength="14" pattern="[0-9]{14}"
+                                   placeholder="${isAr ? '14 رقم' : '14 digits'}"
+                                   oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,14)">
+                            <div class="form-text">${isAr ? 'يجب أن يكون 14 رقم' : 'Must be 14 digits'}</div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">${labels.birthDate} <span class="text-danger">*</span></label>
@@ -139,7 +135,11 @@ const StudentStep = {
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">${labels.phone} <span class="text-danger">*</span></label>
-                            <input type="tel" class="form-control" id="s_phone" value="${this._escape(student.phone || '')}" required>
+                            <input type="tel" class="form-control" id="s_phone" value="${this._escape(student.phone || '')}" required
+                                   maxlength="11" minlength="11" pattern="[0-9]{11}"
+                                   placeholder="${isAr ? '11 رقم' : '11 digits'}"
+                                   oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,11)">
+                            <div class="form-text">${isAr ? 'يجب أن يكون 11 رقم' : 'Must be 11 digits'}</div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">${labels.year}</label>
@@ -147,10 +147,8 @@ const StudentStep = {
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">${labels.section} <span class="text-danger">*</span></label>
-                            <select class="form-select" id="s_section" required>
-                                <option value="">${labels.selectGender}</option>
-                                ${sectionOptions}
-                            </select>
+                            <input type="text" class="form-control" id="s_section" value="${this._escape(student.section || '')}" required
+                                   placeholder="${isAr ? 'أدخل اسم القسم' : 'Enter department name'}">
                         </div>
                     </div>
 
@@ -224,10 +222,11 @@ const StudentStep = {
                         }
                     );
 
-                    // Success
+                    // Success — show image preview
                     document.getElementById(`filename_${type}`).value = result.filename;
                     const zone = document.getElementById(`zone_${type}`);
-                    zone.innerHTML = `<i class="bi bi-check-circle-fill text-success fs-3"></i><br><small class="text-success">${result.filename}</small>`;
+                    const previewUrl = result.path || `/uploads/project_${state.projectId}/${result.filename}`;
+                    zone.innerHTML = `<img src="${previewUrl}" class="img-fluid rounded mb-1" style="max-height:120px;" alt="${type}"><br><small class="text-success"><i class="bi bi-check-circle-fill me-1"></i>${result.filename}</small>`;
                     zone.closest('.card').classList.add('border-success');
                     
                     setTimeout(() => progressEl.classList.add('d-none'), 1000);
@@ -280,6 +279,17 @@ const StudentStep = {
                     error: isAr ? `${label} مطلوب` : `${label} is required`
                 };
             }
+        }
+
+        // Format validations
+        if (!/^[A-Za-z0-9]{1,30}$/.test(fields.student_code)) {
+            return { valid: false, error: isAr ? 'كود الطالب يجب أن يكون أحرف وأرقام بحد أقصى 30 حرف' : 'Student code must be alphanumeric, max 30 characters' };
+        }
+        if (!/^[0-9]{14}$/.test(fields.national_id)) {
+            return { valid: false, error: isAr ? 'الرقم القومي يجب أن يكون 14 رقم' : 'National ID must be 14 digits' };
+        }
+        if (!/^[0-9]{11}$/.test(fields.phone)) {
+            return { valid: false, error: isAr ? 'رقم الهاتف يجب أن يكون 11 رقم' : 'Phone number must be 11 digits' };
         }
 
         return { valid: true, data: { ...fields, student_index: studentIndex } };

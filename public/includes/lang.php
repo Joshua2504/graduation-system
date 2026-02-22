@@ -48,6 +48,14 @@ $translations = [
     'invalid_credentials' => ['ar' => 'البريد الإلكتروني أو كلمة المرور غير صحيحة', 'en' => 'Invalid email or password'],
     'email_exists' => ['ar' => 'البريد الإلكتروني مسجل بالفعل', 'en' => 'Email already registered'],
     'code_exists' => ['ar' => 'كود الطالب مسجل بالفعل', 'en' => 'Student code already registered'],
+    'verification_sent' => ['ar' => 'تم إرسال رابط التأكيد إلى بريدك الإلكتروني. يرجى التحقق من صندوق الوارد لتفعيل حسابك.', 'en' => 'A verification link has been sent to your email. Please check your inbox to activate your account.'],
+    'verification_sent_fallback' => ['ar' => 'تم إنشاء حسابك. يرجى تسجيل الدخول وطلب إعادة إرسال رابط التأكيد.', 'en' => 'Your account has been created. Please login and request a new verification link.'],
+    'email_not_verified' => ['ar' => 'لم يتم تأكيد بريدك الإلكتروني بعد. يرجى التحقق من بريدك الإلكتروني.', 'en' => 'Your email has not been verified yet. Please check your email.'],
+    'resend_verification' => ['ar' => 'إعادة إرسال رابط التأكيد', 'en' => 'Resend Verification Link'],
+    'verification_resent' => ['ar' => 'تم إعادة إرسال رابط التأكيد إلى بريدك الإلكتروني.', 'en' => 'Verification link has been resent to your email.'],
+    'email_verified_success' => ['ar' => 'تم تأكيد بريدك الإلكتروني بنجاح! يمكنك الآن تسجيل الدخول.', 'en' => 'Your email has been verified successfully! You can now login.'],
+    'verification_invalid' => ['ar' => 'رابط التأكيد غير صالح أو منتهي الصلاحية.', 'en' => 'Verification link is invalid or has expired.'],
+    'verification_already' => ['ar' => 'تم تأكيد بريدك الإلكتروني مسبقاً.', 'en' => 'Your email has already been verified.'],
 
     // Project
     'project_name' => ['ar' => 'اسم المشروع', 'en' => 'Project Name'],
@@ -103,6 +111,7 @@ $translations = [
 
     // Professor
     'projects_under_review' => ['ar' => 'مشاريع قيد المراجعة', 'en' => 'Projects Under Review'],
+    'draft_projects' => ['ar' => 'مشاريع مسودة', 'en' => 'Draft Projects'],
     'accepted_projects' => ['ar' => 'المشاريع المقبولة', 'en' => 'Accepted Projects'],
     'rejected_projects' => ['ar' => 'المشاريع المرفوضة', 'en' => 'Rejected Projects'],
     'sort_recent' => ['ar' => 'الأحدث', 'en' => 'Most Recent'],
@@ -116,6 +125,9 @@ $translations = [
     'registration_open' => ['ar' => 'التسجيل مفتوح', 'en' => 'Registration Open'],
     'registration_locked' => ['ar' => 'التسجيل مغلق', 'en' => 'Registration Locked'],
     'toggle_registration' => ['ar' => 'تبديل حالة التسجيل', 'en' => 'Toggle Registration'],
+    'toggle_email_verification' => ['ar' => 'تأكيد البريد الإلكتروني', 'en' => 'Email Verification'],
+    'student_accounts' => ['ar' => 'حسابات الطلاب', 'en' => 'Student Accounts'],
+    'account_disabled' => ['ar' => 'تم تعطيل حسابك. يرجى التواصل مع المسؤول.', 'en' => 'Your account has been disabled. Please contact the administrator.'],
     'no_projects' => ['ar' => 'لا توجد مشاريع', 'en' => 'No projects found'],
     'team_leader' => ['ar' => 'قائد الفريق', 'en' => 'Team Leader'],
     'submission_date' => ['ar' => 'تاريخ التقديم', 'en' => 'Submission Date'],
