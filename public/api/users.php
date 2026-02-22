@@ -3,7 +3,9 @@
  * API: User account management (doctor only)
  * 
  * GET    /api/users.php            — List all student accounts
+ * GET    /api/users.php?id=X       — Get single student profile
  * POST   /api/users.php            — Toggle verify / enable / disable a student
+ * PUT    /api/users.php            — Update student profile fields (doctor editing)
  */
 require_once dirname(__DIR__) . '/includes/db.php';
 require_once dirname(__DIR__) . '/includes/auth.php';
@@ -16,13 +18,110 @@ $method = $_SERVER['REQUEST_METHOD'];
 $pdo = getDB();
 
 if ($method === 'GET') {
-    $stmt = $pdo->query("SELECT id, name, email, student_code, email_verified, account_enabled, created_at FROM users WHERE role = 'student' ORDER BY created_at DESC");
+    $id = (int)($_GET['id'] ?? 0);
+    
+    // Single student profile
+    if ($id > 0) {
+        $stmt = $pdo->prepare("SELECT id, name, email, student_code, gender, national_id, birth_date, governorate, address, phone, year, section, card_image, national_id_image, receipt_image, profile_completed, email_verified, account_enabled, created_at FROM users WHERE id = ? AND role = 'student'");
+        $stmt->execute([$id]);
+        $user = $stmt->fetch();
+        if (!$user) jsonResponse(['error' => 'المستخدم غير موجود'], 404);
+        jsonResponse(['user' => $user]);
+    }
+    
+    // List all students
+    $stmt = $pdo->query("SELECT id, name, email, student_code, email_verified, account_enabled, profile_completed, created_at FROM users WHERE role = 'student' ORDER BY created_at DESC");
     $students = $stmt->fetchAll();
     jsonResponse(['students' => $students]);
 }
 
-if ($method === 'POST') {
+if ($method === 'PUT') {
     $input = json_decode(file_get_contents('php://input'), true);
+    $userId = (int)($input['user_id'] ?? 0);
+
+    if ($userId === 0) {
+        jsonResponse(['error' => 'معرف المستخدم مطلوب'], 400);
+    }
+
+    // Verify it's a student account
+    $stmt = $pdo->prepare("SELECT id, role FROM users WHERE id = ? AND role = 'student'");
+    $stmt->execute([$userId]);
+    if (!$stmt->fetch()) {
+        jsonResponse(['error' => 'المستخدم غير موجود'], 404);
+    }
+
+    $allowedFields = ['name', 'email', 'student_code', 'gender', 'national_id', 'birth_date', 'governorate', 'address', 'phone', 'section'];
+    $updates = [];
+    $params = [];
+
+    foreach ($allowedFields as $field) {
+        if (isset($input[$field])) {
+            $updates[] = "`$field` = ?";
+            $params[] = trim($input[$field]);
+        }
+    }
+
+    if (empty($updates)) {
+        jsonResponse(['error' => 'لا توجد بيانات للتحديث'], 400);
+    }
+
+    // Validation
+    if (isset($input['national_id']) && !empty($input['national_id'])) {
+        if (!preg_match('/^\d{14}$/', $input['national_id'])) {
+            jsonResponse(['error' => 'الرقم القومي يجب أن يكون 14 رقم'], 400);
+        }
+    }
+    if (isset($input['phone']) && !empty($input['phone'])) {
+        if (!preg_match('/^\d{11}$/', $input['phone'])) {
+            jsonResponse(['error' => 'رقم الهاتف يجب أن يكون 11 رقم'], 400);
+        }
+    }
+    if (isset($input['gender']) && !empty($input['gender']) && !in_array($input['gender'], ['male', 'female'])) {
+        jsonResponse(['error' => 'الجنس غير صالح'], 400);
+    }
+    if (isset($input['email']) && !empty($input['email'])) {
+        // Check uniqueness
+        $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
+        $stmt->execute([trim($input['email']), $userId]);
+        if ($stmt->fetch()) {
+            jsonResponse(['error' => 'البريد الإلكتروني مستخدم بالفعل'], 400);
+        }
+    }
+    if (isset($input['student_code']) && !empty($input['student_code'])) {
+        $stmt = $pdo->prepare("SELECT id FROM users WHERE student_code = ? AND id != ?");
+        $stmt->execute([trim($input['student_code']), $userId]);
+        if ($stmt->fetch()) {
+            jsonResponse(['error' => 'كود الطالب مستخدم بالفعل'], 400);
+        }
+    }
+
+    // Update profile_completed
+    $user = getUserProfile($userId);
+    $tempUser = array_merge($user, array_intersect_key($input, array_flip($allowedFields)));
+    $profileComplete = isProfileComplete($tempUser) ? 1 : 0;
+    $updates[] = "`profile_completed` = ?";
+    $params[] = $profileComplete;
+
+    $params[] = $userId;
+    $sql = "UPDATE users SET " . implode(', ', $updates) . " WHERE id = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    jsonResponse([
+        'success' => true,
+        'profile_completed' => $profileComplete,
+        'message' => 'تم تحديث بيانات الطالب بنجاح'
+    ]);
+}
+
+if ($method === 'POST') {
+    // Support both JSON and form data (for file uploads)
+    $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+    if (strpos($contentType, 'multipart/form-data') !== false) {
+        $input = $_POST;
+    } else {
+        $input = json_decode(file_get_contents('php://input'), true);
+    }
     $userId = (int)($input['user_id'] ?? 0);
     $action = trim($input['action'] ?? '');
 
@@ -69,6 +168,49 @@ if ($method === 'POST') {
             $stmt = $pdo->prepare("DELETE FROM users WHERE id = ? AND role = 'student'");
             $stmt->execute([$userId]);
             jsonResponse(['success' => true, 'message' => 'تم حذف الحساب']);
+            break;
+
+        case 'upload_image':
+            $imgType = trim($input['image_type'] ?? '');
+            if (!in_array($imgType, ['card', 'national_id', 'receipt'])) {
+                jsonResponse(['error' => 'نوع الصورة غير صالح'], 400);
+            }
+            if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
+                jsonResponse(['error' => 'فشل رفع الملف'], 400);
+            }
+            $file = $_FILES['file'];
+            $validationError = validateUploadedFile($file);
+            if ($validationError) {
+                jsonResponse(['error' => $validationError], 400);
+            }
+            $uploadDir = dirname(__DIR__) . '/uploads/user_' . $userId;
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0775, true);
+            }
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
+            $mime = $finfo->file($file['tmp_name']);
+            $ext = $mime === 'image/png' ? 'png' : 'jpg';
+            $dbField = $imgType . '_image';
+            $filename = $userId . '_' . $imgType . '.' . $ext;
+            $destPath = $uploadDir . '/' . $filename;
+            if (!move_uploaded_file($file['tmp_name'], $destPath)) {
+                jsonResponse(['error' => 'فشل في حفظ الملف'], 500);
+            }
+            chmod($destPath, 0644);
+            $stmt = $pdo->prepare("UPDATE users SET `$dbField` = ? WHERE id = ?");
+            $stmt->execute([$filename, $userId]);
+            // Update profile completed
+            $updUser = getUserProfile($userId);
+            $pc = isProfileComplete($updUser) ? 1 : 0;
+            $stmt = $pdo->prepare("UPDATE users SET profile_completed = ? WHERE id = ?");
+            $stmt->execute([$pc, $userId]);
+            jsonResponse([
+                'success' => true,
+                'filename' => $filename,
+                'path' => '/uploads/user_' . $userId . '/' . $filename,
+                'profile_completed' => $pc,
+                'message' => 'تم رفع الصورة بنجاح'
+            ]);
             break;
 
         default:
