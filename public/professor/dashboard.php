@@ -136,7 +136,7 @@ $isAr = getLang() === 'ar';
                         <thead class="table-light">
                             <tr>
                                 <th>#</th>
-                                <th><?= $isAr ? 'اسم المشروع' : 'Project Name' ?></th>
+                                <th><?= __('project_name') ?></th>
                                 <th><?= __('team_leader') ?></th>
                                 <th><?= __('member_count') ?></th>
                                 <th><?= __('submission_date') ?></th>

@@ -163,8 +163,8 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                     <th>#</th>
                                     <th><?= __('name') ?></th>
                                     <th><?= __('student_code') ?></th>
-                                    <th><?= $isAr ? 'الدور' : 'Role' ?></th>
-                                    <th><?= $isAr ? 'الملف الشخصي' : 'Profile' ?></th>
+                                    <th><?= __('role') ?></th>
+                                    <th><?= __('profile') ?></th>
                                     <?php if ($isLeader && $project['status'] === 'draft'): ?>
                                         <th></th>
                                     <?php endif; ?>
@@ -208,22 +208,22 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                             <?php if ($inv['invited_name']): ?>
                                                 <?= sanitize($inv['invited_name']) ?>
                                             <?php else: ?>
-                                                <span class="text-muted fst-italic"><?= $isAr ? 'رابط دعوة' : 'Invite link' ?></span>
+                                                <span class="text-muted fst-italic"><?= __('invite_link_label') ?></span>
                                             <?php endif; ?>
-                                            <span class="badge bg-warning text-dark ms-1"><?= $isAr ? 'في الانتظار' : 'Pending' ?></span>
+                                            <span class="badge bg-warning text-dark ms-1"><?= __('pending_status') ?></span>
                                         </td>
                                         <td><code><?= $inv['invited_student_code'] ? sanitize($inv['invited_student_code']) : '-' ?></code></td>
                                         <td>
-                                            <span class="badge bg-warning text-dark"><?= $isAr ? 'مدعو' : 'Invited' ?></span>
+                                            <span class="badge bg-warning text-dark"><?= __('invited') ?></span>
                                         </td>
                                         <td>—</td>
                                         <?php if ($isLeader && $project['status'] === 'draft'): ?>
                                             <td>
                                                 <div class="btn-group btn-group-sm">
-                                                    <button class="btn btn-outline-primary" onclick="resendInvitation(<?= $inv['id'] ?>)" title="<?= $isAr ? 'إعادة إرسال الدعوة' : 'Resend Invitation' ?>">
+                                                    <button class="btn btn-outline-primary" onclick="resendInvitation(<?= $inv['id'] ?>)" title="<?= __('resend_invitation') ?>">
                                                         <i class="bi bi-arrow-repeat"></i>
                                                     </button>
-                                                    <button class="btn btn-outline-danger" onclick="cancelInvitation(<?= $inv['id'] ?>)" title="<?= $isAr ? 'إلغاء الدعوة' : 'Cancel Invitation' ?>">
+                                                    <button class="btn btn-outline-danger" onclick="cancelInvitation(<?= $inv['id'] ?>)" title="<?= __('cancel_invitation') ?>">
                                                         <i class="bi bi-x-lg"></i>
                                                     </button>
                                                 </div>
@@ -295,7 +295,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                 <label class="form-label fw-bold"><i class="bi bi-person-plus me-1"></i><?= __('invite_by_search') ?></label>
                                 <div class="input-group">
                                     <input type="text" class="form-control" id="directInviteSearch" 
-                                           placeholder="<?= $isAr ? 'بريد إلكتروني أو كود طالب' : 'Email or student code' ?>">
+                                           placeholder="<?= __('email_or_code_placeholder') ?>">
                                     <button class="btn btn-primary" onclick="sendDirectInvite()">
                                         <i class="bi bi-send"></i>
                                     </button>
@@ -322,7 +322,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                 </button>
                 <small class="text-muted align-self-center">
                     <?php if ($memberCount < $minSize): ?>
-                        <?= $isAr ? "يجب أن يكون الفريق $minSize أعضاء على الأقل" : "Team needs at least $minSize members" ?>
+                        <?= sprintf(__('team_min_size_msg'), $minSize) ?>
                     <?php elseif (!$allProfilesComplete): ?>
                         <?= __('profiles_incomplete') ?>
                     <?php endif; ?>
@@ -336,7 +336,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                     </button>
                 <?php else: ?>
                     <button class="btn btn-outline-danger" onclick="deleteProject()">
-                        <i class="bi bi-trash me-2"></i><?= $isAr ? 'حذف المشروع' : 'Delete Project' ?>
+                        <i class="bi bi-trash me-2"></i><?= __('delete_project') ?>
                     </button>
                 <?php endif; ?>
             <?php endif; ?>
@@ -430,7 +430,7 @@ function copyText(text, btn) {
 
 // Remove member
 async function removeMember(memberId, name) {
-    const msg = <?= json_encode($isAr ? 'هل تريد إزالة' : 'Remove') ?> + ' ' + name + '?';
+    const msg = <?= json_encode(__('confirm_remove_member')) ?> + ' ' + name + '?';
     if (!confirm(msg)) return;
     try {
         const res = await fetch('/api/project.php', {
@@ -446,7 +446,7 @@ async function removeMember(memberId, name) {
 
 // Leave project
 async function leaveProject() {
-    const msg = <?= json_encode($isAr ? 'هل تريد مغادرة هذا المشروع؟' : 'Leave this project?') ?>;
+    const msg = <?= json_encode(__('confirm_leave_project')) ?>;
     if (!confirm(msg)) return;
     try {
         const res = await fetch('/api/project.php', {
@@ -462,7 +462,7 @@ async function leaveProject() {
 
 // Delete project (leader)
 async function deleteProject() {
-    const msg = <?= json_encode($isAr ? 'هل أنت متأكد من حذف هذا المشروع؟ سيتم حذفه نهائياً.' : 'Are you sure you want to delete this project? This is permanent.') ?>;
+    const msg = <?= json_encode(__('confirm_delete_project')) ?>;
     if (!confirm(msg)) return;
     try {
         const res = await fetch('/api/project.php', {
@@ -478,7 +478,7 @@ async function deleteProject() {
 
 // Submit project
 async function submitProject() {
-    const msg = <?= json_encode($isAr ? 'تأكيد: سيتم تقديم المشروع للمراجعة. هل أنت متأكد؟' : 'Confirm: The project will be submitted for review. Are you sure?') ?>;
+    const msg = <?= json_encode(__('confirm_submit_project')) ?>;
     if (!confirm(msg)) return;
     try {
         const res = await fetch('/api/submit.php', {
@@ -494,7 +494,7 @@ async function submitProject() {
 
 // Cancel invitation
 async function cancelInvitation(invitationId) {
-    const msg = <?= json_encode($isAr ? 'هل تريد إلغاء هذه الدعوة؟' : 'Cancel this invitation?') ?>;
+    const msg = <?= json_encode(__('confirm_cancel_invitation')) ?>;
     if (!confirm(msg)) return;
     try {
         const res = await fetch('/api/invitations.php', {

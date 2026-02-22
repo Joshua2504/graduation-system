@@ -42,7 +42,7 @@ if (!empty($token) && preg_match('/^[a-f0-9]{64}$/', $token)) {
     $message = __('verification_invalid');
 }
 
-$pageTitle = getLang() === 'ar' ? 'تأكيد البريد الإلكتروني' : 'Email Verification';
+$pageTitle = __('email_verification_title');
 require_once __DIR__ . '/includes/header.php';
 ?>
 
@@ -73,9 +73,7 @@ require_once __DIR__ . '/includes/header.php';
                         </div>
                         <h4 class="text-danger mb-3"><?= sanitize($message) ?></h4>
                         <p class="text-muted">
-                            <?= getLang() === 'ar' 
-                                ? 'يرجى تسجيل الدخول وطلب إعادة إرسال رابط التأكيد.' 
-                                : 'Please login and request a new verification link.' ?>
+                            <?= __('verification_request_new_link') ?>
                         </p>
                         <a href="/login.php" class="btn btn-outline-primary">
                             <i class="bi bi-box-arrow-in-right me-2"></i><?= __('login') ?>

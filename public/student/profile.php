@@ -72,7 +72,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             <div class="col-md-6">
                                 <label class="form-label fw-bold"><?= __('gender') ?> <span class="text-danger">*</span></label>
                                 <select class="form-select" name="gender" id="gender" required>
-                                    <option value=""><?= $isAr ? '-- اختر --' : '-- Select --' ?></option>
+                                    <option value=""><?= __('select_option_full') ?></option>
                                     <option value="male" <?= ($user['gender'] ?? '') === 'male' ? 'selected' : '' ?>><?= __('male') ?></option>
                                     <option value="female" <?= ($user['gender'] ?? '') === 'female' ? 'selected' : '' ?>><?= __('female') ?></option>
                                 </select>
@@ -82,7 +82,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                 <label class="form-label fw-bold"><?= __('national_id') ?> <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="national_id" id="national_id" 
                                        value="<?= sanitize($user['national_id'] ?? '') ?>" 
-                                       maxlength="14" pattern="\d{14}" placeholder="<?= $isAr ? '14 رقم' : '14 digits' ?>" required>
+                                       maxlength="14" pattern="\d{14}" placeholder="<?= __('fourteen_digits') ?>" required>
                             </div>
                             <!-- Birth Date -->
                             <div class="col-md-6">
@@ -94,7 +94,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             <div class="col-md-6">
                                 <label class="form-label fw-bold"><?= __('governorate') ?> <span class="text-danger">*</span></label>
                                 <select class="form-select" name="governorate" id="governorate" required>
-                                    <option value=""><?= $isAr ? '-- اختر المحافظة --' : '-- Select Governorate --' ?></option>
+                                    <option value=""><?= __('select_governorate_full') ?></option>
                                     <?php foreach ($governorates as $gov): ?>
                                         <option value="<?= $gov ?>" <?= ($user['governorate'] ?? '') === $gov ? 'selected' : '' ?>><?= $gov ?></option>
                                     <?php endforeach; ?>
@@ -111,7 +111,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                 <label class="form-label fw-bold"><?= __('phone') ?> <span class="text-danger">*</span></label>
                                 <input type="tel" class="form-control" name="phone" id="phone" 
                                        value="<?= sanitize($user['phone'] ?? '') ?>" 
-                                       maxlength="11" pattern="\d{11}" placeholder="<?= $isAr ? '11 رقم' : '11 digits' ?>" required>
+                                       maxlength="11" pattern="\d{11}" placeholder="<?= __('eleven_digits') ?>" required>
                             </div>
                             <!-- Section/Department -->
                             <div class="col-md-6">
@@ -165,7 +165,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                                onchange="uploadImage('<?= $type ?>', this.files[0])">
                                         <button type="button" class="btn btn-sm btn-outline-primary" 
                                                 onclick="document.getElementById('file-<?= $type ?>').click()">
-                                            <i class="bi bi-upload me-1"></i><?= $imgFile ? ($isAr ? 'تغيير' : 'Change') : __('upload_image') ?>
+                                            <i class="bi bi-upload me-1"></i><?= $imgFile ? __('change') : __('upload_image') ?>
                                         </button>
                                         <div class="progress mt-2 d-none" id="progress-<?= $type ?>" style="height: 4px;">
                                             <div class="progress-bar" role="progressbar" style="width: 0%"></div>

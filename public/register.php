@@ -30,11 +30,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $regOpen) {
     if (empty($name) || empty($email) || empty($password) || empty($studentCode)) {
         $error = __('required_field');
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = getLang() === 'ar' ? 'البريد الإلكتروني غير صالح' : 'Invalid email address';
+        $error = __('invalid_email');
     } elseif (strlen($password) < 6) {
-        $error = getLang() === 'ar' ? 'كلمة المرور يجب أن تكون 6 أحرف على الأقل' : 'Password must be at least 6 characters';
+        $error = __('password_min_length');
     } elseif (!preg_match('/^[A-Za-z0-9]{1,30}$/', $studentCode)) {
-        $error = getLang() === 'ar' ? 'كود الطالب يجب أن يكون أحرف وأرقام بحد أقصى 30 حرف' : 'Student code must be alphanumeric, max 30 characters';
+        $error = __('student_code_format');
     } else {
         $pdo = getDB();
 
@@ -134,7 +134,7 @@ require_once __DIR__ . '/includes/header.php';
                                 <label for="password" class="form-label"><?= __('password') ?> <span class="text-danger">*</span></label>
                                 <input type="password" class="form-control" id="password" name="password" required minlength="6">
                                 <div class="form-text">
-                                    <?= getLang() === 'ar' ? '6 أحرف على الأقل' : 'At least 6 characters' ?>
+                                    <?= __('password_hint') ?>
                                 </div>
                             </div>
                             <div class="mb-3">
@@ -144,7 +144,7 @@ require_once __DIR__ . '/includes/header.php';
                                        maxlength="30" pattern="[A-Za-z0-9]{1,30}"
                                        oninput="this.value=this.value.replace(/[^A-Za-z0-9]/g,'').slice(0,30)">
                                 <div class="form-text">
-                                    <?= getLang() === 'ar' ? 'أحرف وأرقام، بحد أقصى 30 حرف' : 'Alphanumeric, max 30 characters' ?>
+                                    <?= __('student_code_hint') ?>
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-primary w-100">

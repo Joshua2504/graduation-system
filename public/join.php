@@ -37,11 +37,11 @@ if ($token) {
     $invitation = $stmt->fetch();
 
     if (!$invitation) {
-        $error = $isAr ? 'رابط الدعوة غير صالح أو منتهي الصلاحية' : 'Invalid or expired invitation link';
+        $error = __('invalid_invitation_link');
     } elseif ($invitation['expires_at'] && strtotime($invitation['expires_at']) < time()) {
         $error = __('invitation_expired');
     } elseif ($invitation['project_status'] !== 'draft') {
-        $error = $isAr ? 'هذا المشروع لم يعد يقبل أعضاء جدد' : 'This project is no longer accepting new members';
+        $error = __('project_not_accepting');
     } else {
         $project = [
             'id' => $invitation['project_id'],
@@ -67,9 +67,9 @@ if ($token) {
     $result = $stmt->fetch();
 
     if (!$result) {
-        $error = $isAr ? 'كود الانضمام غير صالح' : 'Invalid join code';
+        $error = __('invalid_join_code');
     } elseif ($result['status'] !== 'draft') {
-        $error = $isAr ? 'هذا المشروع لم يعد يقبل أعضاء جدد' : 'This project is no longer accepting new members';
+        $error = __('project_not_accepting');
     } else {
         $project = [
             'id' => $result['id'],
@@ -87,7 +87,7 @@ if ($token) {
     redirect('/student/dashboard.php');
 }
 
-$pageTitle = $isAr ? 'الانضمام لمشروع' : 'Join Project';
+$pageTitle = __('join_project_title');
 require_once __DIR__ . '/includes/header.php';
 require_once __DIR__ . '/includes/navbar.php';
 ?>
@@ -97,7 +97,7 @@ require_once __DIR__ . '/includes/navbar.php';
         <div class="col-md-6">
             <div class="card shadow">
                 <div class="card-header bg-primary text-white text-center">
-                    <h5 class="mb-0"><i class="bi bi-person-plus me-2"></i><?= $isAr ? 'دعوة للانضمام' : 'Project Invitation' ?></h5>
+                    <h5 class="mb-0"><i class="bi bi-person-plus me-2"></i><?= __('project_invitation') ?></h5>
                 </div>
                 <div class="card-body p-4 text-center">
                     <?php if ($error): ?>
@@ -111,7 +111,7 @@ require_once __DIR__ . '/includes/navbar.php';
                     <?php elseif ($alreadyMember): ?>
                         <div class="alert alert-info">
                             <i class="bi bi-check-circle me-2"></i>
-                            <?= $isAr ? 'أنت بالفعل عضو في هذا المشروع' : 'You are already a member of this project' ?>
+                            <?= __('already_in_project') ?>
                         </div>
                         <a href="/student/project.php?id=<?= $project['id'] ?>" class="btn btn-primary">
                             <i class="bi bi-eye me-1"></i><?= __('view_project') ?>
@@ -131,20 +131,20 @@ require_once __DIR__ . '/includes/navbar.php';
                         </div>
                         <h4 class="mb-3"><?= sanitize($project['title']) ?></h4>
                         <?php if ($project['type']): ?>
-                            <p class="text-muted"><?= $isAr ? 'النوع' : 'Type' ?>: <?= sanitize($project['type']) ?></p>
+                            <p class="text-muted"><?= __('type') ?>: <?= sanitize($project['type']) ?></p>
                         <?php endif; ?>
                         <p class="text-muted">
-                            <?= $isAr ? 'دعوة من' : 'Invited by' ?>: <strong><?= sanitize($project['invited_by_name']) ?></strong>
+                            <?= __('invited_by_label') ?>: <strong><?= sanitize($project['invited_by_name']) ?></strong>
                         </p>
 
                         <div id="joinAlert" class="alert d-none"></div>
 
                         <div class="d-flex gap-3 justify-content-center mt-4">
                             <button class="btn btn-success btn-lg" onclick="joinProject()">
-                                <i class="bi bi-check-lg me-2"></i><?= $isAr ? 'انضمام' : 'Join' ?>
+                                <i class="bi bi-check-lg me-2"></i><?= __('join') ?>
                             </button>
                             <a href="/student/dashboard.php" class="btn btn-outline-secondary btn-lg">
-                                <i class="bi bi-x-lg me-2"></i><?= $isAr ? 'تجاهل' : 'Decline' ?>
+                                <i class="bi bi-x-lg me-2"></i><?= __('decline') ?>
                             </a>
                         </div>
                     <?php endif; ?>

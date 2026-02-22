@@ -46,7 +46,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
     <!-- Back button -->
     <a href="/professor/dashboard.php" class="btn btn-outline-secondary mb-3">
         <i class="bi bi-arrow-<?= $isAr ? 'right' : 'left' ?> me-1"></i>
-        <?= $isAr ? 'العودة للقائمة' : 'Back to List' ?>
+        <?= __('back_to_list') ?>
     </a>
 
     <!-- Duplicate Warning -->
@@ -73,7 +73,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
         <div class="card-body">
             <div class="row">
                 <div class="col-md-4 mb-2">
-                    <strong><?= $isAr ? 'نوع المشروع' : 'Project Type' ?>:</strong>
+                    <strong><?= __('project_type') ?>:</strong>
                     <span><?= sanitize($project['type']) ?></span>
                 </div>
                 <div class="col-md-4 mb-2">
@@ -101,9 +101,9 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
     </div>
 
     <!-- Team Members -->
-    <h5 class="mb-3"><i class="bi bi-people-fill me-2"></i><?= $isAr ? 'أعضاء الفريق' : 'Team Members' ?> (<?= count($members) ?>)
+    <h5 class="mb-3"><i class="bi bi-people-fill me-2"></i><?= __('team_members') ?> (<?= count($members) ?>)
         <?php if (!empty($pendingInvites)): ?>
-            <span class="badge bg-warning text-dark ms-2"><?= count($pendingInvites) ?> <?= $isAr ? 'دعوات معلقة' : 'pending' ?></span>
+            <span class="badge bg-warning text-dark ms-2"><?= count($pendingInvites) ?> <?= __('pending') ?></span>
         <?php endif; ?>
     </h5>
 
@@ -111,7 +111,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
         <div class="card shadow-sm mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h6 class="mb-0">
-                    <?= $isAr ? 'الطالب' : 'Student' ?> <?= $i + 1 ?>: <?= sanitize($member['name']) ?>
+                    <?= __('student') ?> <?= $i + 1 ?>: <?= sanitize($member['name']) ?>
                     <?php if ($member['member_role'] === 'leader'): ?>
                         <span class="badge bg-primary ms-2"><?= __('leader') ?></span>
                     <?php endif; ?>
@@ -121,35 +121,35 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-3 mb-2">
-                        <small class="text-muted"><?= $isAr ? 'الجنس' : 'Gender' ?></small><br>
+                        <small class="text-muted"><?= __('gender') ?></small><br>
                         <?php if ($member['gender']): ?>
-                            <?= $member['gender'] === 'male' ? ($isAr ? 'ذكر' : 'Male') : ($isAr ? 'أنثى' : 'Female') ?>
+                            <?= $member['gender'] === 'male' ? __('male') : __('female') ?>
                         <?php else: ?>
                             <span class="text-muted">-</span>
                         <?php endif; ?>
                     </div>
                     <div class="col-md-3 mb-2">
-                        <small class="text-muted"><?= $isAr ? 'الرقم القومي' : 'National ID' ?></small><br>
+                        <small class="text-muted"><?= __('national_id') ?></small><br>
                         <?= sanitize($member['national_id'] ?? '-') ?>
                     </div>
                     <div class="col-md-3 mb-2">
-                        <small class="text-muted"><?= $isAr ? 'تاريخ الميلاد' : 'Birth Date' ?></small><br>
+                        <small class="text-muted"><?= __('birth_date') ?></small><br>
                         <?= $member['birth_date'] ?? '-' ?>
                     </div>
                     <div class="col-md-3 mb-2">
-                        <small class="text-muted"><?= $isAr ? 'المحافظة' : 'Governorate' ?></small><br>
+                        <small class="text-muted"><?= __('governorate') ?></small><br>
                         <?= sanitize($member['governorate'] ?? '-') ?>
                     </div>
                     <div class="col-md-4 mb-2">
-                        <small class="text-muted"><?= $isAr ? 'العنوان' : 'Address' ?></small><br>
+                        <small class="text-muted"><?= __('address') ?></small><br>
                         <?= sanitize($member['address'] ?? '-') ?>
                     </div>
                     <div class="col-md-4 mb-2">
-                        <small class="text-muted"><?= $isAr ? 'رقم الهاتف' : 'Phone' ?></small><br>
+                        <small class="text-muted"><?= __('phone') ?></small><br>
                         <?= sanitize($member['phone'] ?? '-') ?>
                     </div>
                     <div class="col-md-4 mb-2">
-                        <small class="text-muted"><?= $isAr ? 'القسم' : 'Department' ?></small><br>
+                        <small class="text-muted"><?= __('section') ?></small><br>
                         <?= sanitize($member['section'] ?? '-') ?>
                     </div>
                 </div>
@@ -159,9 +159,9 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                 <div class="row">
                     <?php
                     $imageTypes = [
-                        'card_image' => $isAr ? 'بطاقة المعهد' : 'Institute ID',
-                        'national_id_image' => $isAr ? 'البطاقة الشخصية' : 'National ID',
-                        'receipt_image' => $isAr ? 'إيصال الدفع' : 'Payment Receipt',
+                        'card_image' => __('institute_id'),
+                        'national_id_image' => __('national_id_card'),
+                        'receipt_image' => __('payment_receipt'),
                     ];
                     $memberId = $member['id'];
                     foreach ($imageTypes as $field => $label):
@@ -175,7 +175,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                      alt="<?= $label ?>" style="max-height: 150px; cursor: pointer;"
                                      onclick="showImageModal('<?= $imgPath ?>', '<?= $label ?>')">
                             <?php else: ?>
-                                <span class="text-danger"><i class="bi bi-x-circle"></i> <?= $isAr ? 'غير متوفرة' : 'Missing' ?></span>
+                                <span class="text-danger"><i class="bi bi-x-circle"></i> <?= __('missing') ?></span>
                             <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
@@ -187,19 +187,19 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
     <?php if (!empty($pendingInvites)): ?>
         <div class="card shadow-sm mb-3 border-warning">
             <div class="card-header bg-warning bg-opacity-25">
-                <h6 class="mb-0"><i class="bi bi-hourglass-split me-2"></i><?= $isAr ? 'الدعوات المعلقة' : 'Pending Invitations' ?></h6>
+                <h6 class="mb-0"><i class="bi bi-hourglass-split me-2"></i><?= __('pending_invitations') ?></h6>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-sm mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th><?= $isAr ? 'الطالب المدعو' : 'Invited Student' ?></th>
-                                <th><?= $isAr ? 'البريد' : 'Email' ?></th>
-                                <th><?= $isAr ? 'الكود' : 'Code' ?></th>
-                                <th><?= $isAr ? 'بواسطة' : 'Invited By' ?></th>
-                                <th><?= $isAr ? 'تاريخ الدعوة' : 'Invited At' ?></th>
-                                <th><?= $isAr ? 'تنتهي في' : 'Expires' ?></th>
+                                <th><?= __('invited_student') ?></th>
+                                <th><?= __('email_col') ?></th>
+                                <th><?= __('code') ?></th>
+                                <th><?= __('invited_by') ?></th>
+                                <th><?= __('invited_at') ?></th>
+                                <th><?= __('expires') ?></th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -210,7 +210,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                         <?php if ($inv['invited_name']): ?>
                                             <?= sanitize($inv['invited_name']) ?>
                                         <?php else: ?>
-                                            <span class="text-muted fst-italic"><?= $isAr ? 'رابط دعوة عام' : 'General invite link' ?></span>
+                                            <span class="text-muted fst-italic"><?= __('general_invite_link') ?></span>
                                         <?php endif; ?>
                                     </td>
                                     <td><?= $inv['invited_email'] ? sanitize($inv['invited_email']) : '-' ?></td>
@@ -219,7 +219,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                     <td><small><?= date('Y-m-d H:i', strtotime($inv['created_at'])) ?></small></td>
                                     <td><small><?= date('Y-m-d H:i', strtotime($inv['expires_at'])) ?></small></td>
                                     <td>
-                                        <button class="btn btn-sm btn-outline-primary" onclick="resendInvitation(<?= $inv['id'] ?>)" title="<?= $isAr ? 'إعادة إرسال' : 'Resend' ?>">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="resendInvitation(<?= $inv['id'] ?>)" title="<?= __('resend') ?>">
                                             <i class="bi bi-arrow-repeat"></i>
                                         </button>
                                     </td>
@@ -236,13 +236,13 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
     <?php if ($project['status'] === 'under_review'): ?>
         <div class="card shadow mt-4">
             <div class="card-header bg-dark text-white">
-                <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i><?= $isAr ? 'مراجعة المشروع' : 'Review Project' ?></h5>
+                <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i><?= __('review_project') ?></h5>
             </div>
             <div class="card-body p-4">
                 <div class="mb-3">
                     <label for="doctor_note" class="form-label fw-bold"><?= __('write_note') ?></label>
                     <textarea class="form-control" id="doctor_note" rows="3" 
-                              placeholder="<?= $isAr ? 'اكتب ملاحظتك هنا...' : 'Write your note here...' ?>"></textarea>
+                              placeholder="<?= __('write_note_placeholder') ?>"></textarea>
                 </div>
                 <div id="review-error" class="alert alert-danger d-none"></div>
                 <div id="review-success" class="alert alert-success d-none"></div>
@@ -311,8 +311,8 @@ async function reviewProject(action) {
 
     // Confirm
     const confirmMsg = action === 'accept' 
-        ? '<?= $isAr ? "هل أنت متأكد من قبول هذا المشروع؟" : "Are you sure you want to accept this project?" ?>'
-        : '<?= $isAr ? "هل أنت متأكد من رفض هذا المشروع؟" : "Are you sure you want to reject this project?" ?>';
+        ? <?= json_encode(__('confirm_accept_project')) ?>
+        : <?= json_encode(__('confirm_reject_project')) ?>;
     
     if (!confirm(confirmMsg)) return;
 

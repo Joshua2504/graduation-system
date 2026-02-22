@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $settings['email_verification_required'] = $emailVerReq;
     $settings['min_team_size'] = $minTeam;
     $settings['max_team_size'] = $maxTeam;
-    $message = $isAr ? 'تم حفظ الإعدادات بنجاح' : 'Settings saved successfully';
+    $message = __('settings_saved');
 }
 
 $pageTitle = __('settings');
@@ -51,9 +51,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             <div>
                                 <h6 class="mb-1"><?= __('toggle_registration') ?></h6>
                                 <small class="text-muted">
-                                    <?= $isAr 
-                                        ? 'التحكم في إمكانية تسجيل حسابات جديدة للطلاب'
-                                        : 'Control whether new student accounts can be registered' ?>
+                                    <?= __('registration_description') ?>
                                 </small>
                             </div>
                             <div class="form-check form-switch">
@@ -68,9 +66,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             <div>
                                 <h6 class="mb-1"><?= __('toggle_email_verification') ?></h6>
                                 <small class="text-muted">
-                                    <?= $isAr 
-                                        ? 'عند التفعيل، يجب على الطلاب تأكيد بريدهم الإلكتروني قبل تسجيل الدخول'
-                                        : 'When enabled, students must verify their email before logging in' ?>
+                                    <?= __('email_verification_description') ?>
                                 </small>
                             </div>
                             <div class="form-check form-switch">
@@ -85,9 +81,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                         <div class="p-3 bg-light rounded mb-3">
                             <h6 class="mb-2"><i class="bi bi-people me-1"></i><?= __('team_size') ?></h6>
                             <small class="text-muted d-block mb-3">
-                                <?= $isAr 
-                                    ? 'تحديد الحد الأدنى والأقصى لعدد أعضاء الفريق'
-                                    : 'Set the minimum and maximum number of team members' ?>
+                                <?= __('team_size_description') ?>
                             </small>
                             <div class="row g-3">
                                 <div class="col-6">
@@ -111,8 +105,8 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             <span class="badge fs-6 <?= !empty($settings['email_verification_required']) ? 'bg-info' : 'bg-secondary' ?>">
                                 <i class="bi bi-<?= !empty($settings['email_verification_required']) ? 'envelope-check' : 'envelope-x' ?> me-1"></i>
                                 <?= !empty($settings['email_verification_required']) 
-                                    ? ($isAr ? 'تأكيد البريد مطلوب' : 'Email Verification On')
-                                    : ($isAr ? 'تأكيد البريد معطل' : 'Email Verification Off') ?>
+                                    ? __('email_verification_on')
+                                    : __('email_verification_off') ?>
                             </span>
                         </div>
 

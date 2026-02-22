@@ -18,10 +18,10 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
 <?php if (is_impersonating()): ?>
 <div class="alert alert-warning text-center mb-0 py-2 rounded-0 d-flex justify-content-center align-items-center gap-2" id="impersonationBanner">
     <i class="bi bi-person-badge"></i>
-    <strong><?= getLang() === 'ar' ? 'أنت تتصفح كـ' : 'Viewing as' ?>:</strong>
+    <strong><?= __('viewing_as') ?>:</strong>
     <?= sanitize($_SESSION['name']) ?>
     <a href="/stop-impersonation.php" class="btn btn-sm btn-dark ms-2">
-        <i class="bi bi-box-arrow-left me-1"></i><?= getLang() === 'ar' ? 'العودة للدكتور' : 'Back to Professor' ?>
+        <i class="bi bi-box-arrow-left me-1"></i><?= __('back_to_professor') ?>
     </a>
 </div>
 <?php endif; ?>

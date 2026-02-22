@@ -126,20 +126,80 @@ if ($method === 'POST') {
     $userId = (int)($input['user_id'] ?? 0);
     $action = trim($input['action'] ?? '');
 
-    if ($userId === 0) {
+    // create_user doesn't need a user_id
+    if ($action === 'create_user') {
+        // handled in switch below
+    } elseif ($userId === 0) {
         jsonResponse(['error' => 'معرف المستخدم مطلوب'], 400);
     }
 
-    // Verify it's a student account
-    $stmt = $pdo->prepare("SELECT id, role, email_verified, account_enabled FROM users WHERE id = ?");
-    $stmt->execute([$userId]);
-    $user = $stmt->fetch();
+    // Verify it's a student account (skip for create_user)
+    if ($action !== 'create_user') {
+        $stmt = $pdo->prepare("SELECT id, role, email_verified, account_enabled FROM users WHERE id = ?");
+        $stmt->execute([$userId]);
+        $user = $stmt->fetch();
 
-    if (!$user || $user['role'] !== 'student') {
-        jsonResponse(['error' => 'المستخدم غير موجود'], 404);
+        if (!$user || $user['role'] !== 'student') {
+            jsonResponse(['error' => 'المستخدم غير موجود'], 404);
+        }
     }
 
     switch ($action) {
+        case 'create_user':
+            // Doctor creates a new student account
+            $name = trim($input['name'] ?? '');
+            $email = trim($input['email'] ?? '');
+            $password = $input['password'] ?? '';
+            $studentCode = trim($input['student_code'] ?? '');
+
+            if (empty($name) || empty($email) || empty($password)) {
+                jsonResponse(['error' => 'الاسم والبريد وكلمة المرور مطلوبين'], 400);
+            }
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                jsonResponse(['error' => 'البريد الإلكتروني غير صالح'], 400);
+            }
+            if (strlen($password) < 6) {
+                jsonResponse(['error' => 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'], 400);
+            }
+
+            // Check email uniqueness
+            $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
+            $stmt->execute([$email]);
+            if ($stmt->fetch()) {
+                jsonResponse(['error' => 'البريد الإلكتروني مستخدم بالفعل'], 400);
+            }
+
+            // Check student code uniqueness (if provided)
+            if (!empty($studentCode)) {
+                $stmt = $pdo->prepare("SELECT id FROM users WHERE student_code = ?");
+                $stmt->execute([$studentCode]);
+                if ($stmt->fetch()) {
+                    jsonResponse(['error' => 'كود الطالب مستخدم بالفعل'], 400);
+                }
+            }
+
+            $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+            $sendInvite = !empty($input['send_invite']);
+
+            // Create user — auto-verified and enabled
+            $stmt = $pdo->prepare("INSERT INTO users (name, email, password, student_code, role, email_verified, account_enabled) VALUES (?, ?, ?, ?, 'student', 1, 1)");
+            $stmt->execute([$name, $email, $hashedPassword, $studentCode ?: null]);
+            $newUserId = (int)$pdo->lastInsertId();
+
+            $emailSent = false;
+            if ($sendInvite) {
+                $lang = $_GET['lang'] ?? ($_COOKIE['lang'] ?? 'ar');
+                $emailSent = sendWelcomeEmail($email, $name, $password, $lang);
+            }
+
+            jsonResponse([
+                'success' => true,
+                'user_id' => $newUserId,
+                'email_sent' => $emailSent,
+                'message' => 'تم إنشاء حساب الطالب بنجاح'
+            ]);
+            break;
+
         case 'verify':
             $stmt = $pdo->prepare("UPDATE users SET email_verified = 1, verification_token = NULL, token_expires_at = NULL WHERE id = ?");
             $stmt->execute([$userId]);

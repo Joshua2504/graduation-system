@@ -28,15 +28,18 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3><i class="bi bi-people me-2"></i><?= __('student_accounts') ?></h3>
         <div class="d-flex gap-2 align-items-center">
-            <span class="badge bg-primary fs-6"><?= count($students) ?> <?= $isAr ? 'طالب' : 'students' ?></span>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createStudentModal">
+                <i class="bi bi-person-plus me-1"></i><?= __('add_student') ?>
+            </button>
+            <span class="badge bg-primary fs-6"><?= count($students) ?> <?= __('students_count') ?></span>
             <input type="text" class="form-control form-control-sm" id="searchInput" 
-                   placeholder="<?= $isAr ? 'بحث...' : 'Search...' ?>" style="width: 200px;">
+                   placeholder="<?= __('search_placeholder') ?>" style="width: 200px;">
         </div>
     </div>
 
     <?php if (empty($students)): ?>
         <div class="alert alert-info text-center">
-            <i class="bi bi-info-circle me-2"></i><?= $isAr ? 'لا يوجد طلاب مسجلين' : 'No registered students' ?>
+            <i class="bi bi-info-circle me-2"></i><?= __('no_registered_students') ?>
         </div>
     <?php else: ?>
         <div class="card shadow">
@@ -48,11 +51,11 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             <th><?= __('name') ?></th>
                             <th><?= __('email') ?></th>
                             <th><?= __('student_code') ?></th>
-                            <th><?= $isAr ? 'الملف' : 'Profile' ?></th>
-                            <th><?= $isAr ? 'البريد' : 'Email' ?></th>
-                            <th><?= $isAr ? 'الحساب' : 'Account' ?></th>
-                            <th><?= $isAr ? 'تاريخ التسجيل' : 'Registered' ?></th>
-                            <th><?= $isAr ? 'إجراءات' : 'Actions' ?></th>
+                            <th><?= __('profile') ?></th>
+                            <th><?= __('email_col') ?></th>
+                            <th><?= __('account') ?></th>
+                            <th><?= __('registered') ?></th>
+                            <th><?= __('actions') ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -71,51 +74,51 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             </td>
                             <td>
                                 <?php if ($s['email_verified']): ?>
-                                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i><?= $isAr ? 'مؤكد' : 'Verified' ?></span>
+                                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i><?= __('verified') ?></span>
                                 <?php else: ?>
-                                    <span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i><?= $isAr ? 'غير مؤكد' : 'Unverified' ?></span>
+                                    <span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i><?= __('unverified') ?></span>
                                 <?php endif; ?>
                             </td>
                             <td>
                                 <?php if ($s['account_enabled']): ?>
-                                    <span class="badge bg-success"><i class="bi bi-check-lg me-1"></i><?= $isAr ? 'نشط' : 'Active' ?></span>
+                                    <span class="badge bg-success"><i class="bi bi-check-lg me-1"></i><?= __('active') ?></span>
                                 <?php else: ?>
-                                    <span class="badge bg-danger"><i class="bi bi-x-lg me-1"></i><?= $isAr ? 'معطل' : 'Disabled' ?></span>
+                                    <span class="badge bg-danger"><i class="bi bi-x-lg me-1"></i><?= __('disabled') ?></span>
                                 <?php endif; ?>
                             </td>
                             <td><small class="text-muted"><?= date('Y-m-d', strtotime($s['created_at'])) ?></small></td>
                             <td>
                                 <div class="btn-group btn-group-sm">
-                                    <button class="btn btn-outline-primary" onclick="openEditModal(<?= $s['id'] ?>)" title="<?= $isAr ? 'تعديل الملف الشخصي' : 'Edit Profile' ?>">
+                                    <button class="btn btn-outline-primary" onclick="openEditModal(<?= $s['id'] ?>)" title="<?= __('edit_profile') ?>">
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
                                     <?php if (!$s['email_verified']): ?>
-                                        <button class="btn btn-outline-success" onclick="userAction(<?= $s['id'] ?>, 'verify')" title="<?= $isAr ? 'تأكيد البريد' : 'Verify Email' ?>">
+                                        <button class="btn btn-outline-success" onclick="userAction(<?= $s['id'] ?>, 'verify')" title="<?= __('verify_email') ?>">
                                             <i class="bi bi-envelope-check"></i>
                                         </button>
-                                        <button class="btn btn-outline-info" onclick="userAction(<?= $s['id'] ?>, 'resend_verification')" title="<?= $isAr ? 'إعادة إرسال رابط التأكيد' : 'Resend Verification Email' ?>">
+                                        <button class="btn btn-outline-info" onclick="userAction(<?= $s['id'] ?>, 'resend_verification')" title="<?= __('resend_verification_email') ?>">
                                             <i class="bi bi-envelope-arrow-up"></i>
                                         </button>
                                     <?php else: ?>
-                                        <button class="btn btn-outline-warning" onclick="userAction(<?= $s['id'] ?>, 'unverify')" title="<?= $isAr ? 'إلغاء التأكيد' : 'Unverify' ?>">
+                                        <button class="btn btn-outline-warning" onclick="userAction(<?= $s['id'] ?>, 'unverify')" title="<?= __('unverify') ?>">
                                             <i class="bi bi-envelope-x"></i>
                                         </button>
                                     <?php endif; ?>
 
                                     <?php if ($s['account_enabled']): ?>
-                                        <button class="btn btn-outline-danger" onclick="userAction(<?= $s['id'] ?>, 'disable')" title="<?= $isAr ? 'تعطيل الحساب' : 'Disable Account' ?>">
+                                        <button class="btn btn-outline-danger" onclick="userAction(<?= $s['id'] ?>, 'disable')" title="<?= __('disable_account') ?>">
                                             <i class="bi bi-person-x"></i>
                                         </button>
                                     <?php else: ?>
-                                        <button class="btn btn-outline-success" onclick="userAction(<?= $s['id'] ?>, 'enable')" title="<?= $isAr ? 'تفعيل الحساب' : 'Enable Account' ?>">
+                                        <button class="btn btn-outline-success" onclick="userAction(<?= $s['id'] ?>, 'enable')" title="<?= __('enable_account') ?>">
                                             <i class="bi bi-person-check"></i>
                                         </button>
                                     <?php endif; ?>
 
-                                    <button class="btn btn-outline-danger" onclick="userAction(<?= $s['id'] ?>, 'delete')" title="<?= $isAr ? 'حذف' : 'Delete' ?>">
+                                    <button class="btn btn-outline-danger" onclick="userAction(<?= $s['id'] ?>, 'delete')" title="<?= __('delete') ?>">
                                         <i class="bi bi-trash"></i>
                                     </button>
-                                    <button class="btn btn-outline-secondary" onclick="userAction(<?= $s['id'] ?>, 'impersonate')" title="<?= $isAr ? 'الدخول كطالب' : 'Login as Student' ?>">
+                                    <button class="btn btn-outline-secondary" onclick="userAction(<?= $s['id'] ?>, 'impersonate')" title="<?= __('login_as_student') ?>">
                                         <i class="bi bi-incognito"></i>
                                     </button>
                                 </div>
@@ -134,7 +137,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i><?= $isAr ? 'تعديل بيانات الطالب' : 'Edit Student Profile' ?></h5>
+                <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i><?= __('edit_student_profile') ?></h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -146,7 +149,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                     <input type="hidden" id="edit_user_id">
                     
                     <!-- Basic Info -->
-                    <h6 class="text-primary mb-3"><i class="bi bi-person me-1"></i><?= $isAr ? 'البيانات الأساسية' : 'Basic Info' ?></h6>
+                    <h6 class="text-primary mb-3"><i class="bi bi-person me-1"></i><?= __('basic_info') ?></h6>
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
                             <label class="form-label"><?= __('name') ?></label>
@@ -161,63 +164,63 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             <input type="text" class="form-control" id="edit_student_code">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label"><?= $isAr ? 'الجنس' : 'Gender' ?></label>
+                            <label class="form-label"><?= __('gender') ?></label>
                             <select class="form-select" id="edit_gender">
-                                <option value=""><?= $isAr ? 'اختر' : 'Select' ?></option>
-                                <option value="male"><?= $isAr ? 'ذكر' : 'Male' ?></option>
-                                <option value="female"><?= $isAr ? 'أنثى' : 'Female' ?></option>
+                                <option value=""><?= __('select_option') ?></option>
+                                <option value="male"><?= __('male') ?></option>
+                                <option value="female"><?= __('female') ?></option>
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label"><?= $isAr ? 'تاريخ الميلاد' : 'Birth Date' ?></label>
+                            <label class="form-label"><?= __('birth_date') ?></label>
                             <input type="date" class="form-control" id="edit_birth_date">
                         </div>
                     </div>
 
                     <!-- Personal Info -->
-                    <h6 class="text-primary mb-3"><i class="bi bi-card-text me-1"></i><?= $isAr ? 'البيانات الشخصية' : 'Personal Info' ?></h6>
+                    <h6 class="text-primary mb-3"><i class="bi bi-card-text me-1"></i><?= __('personal_info') ?></h6>
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
-                            <label class="form-label"><?= $isAr ? 'الرقم القومي' : 'National ID' ?></label>
+                            <label class="form-label"><?= __('national_id') ?></label>
                             <input type="text" class="form-control" id="edit_national_id" pattern="\d{14}" maxlength="14">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label"><?= $isAr ? 'رقم الهاتف' : 'Phone' ?></label>
+                            <label class="form-label"><?= __('phone') ?></label>
                             <input type="text" class="form-control" id="edit_phone" pattern="\d{11}" maxlength="11">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label"><?= $isAr ? 'المحافظة' : 'Governorate' ?></label>
+                            <label class="form-label"><?= __('governorate') ?></label>
                             <select class="form-select" id="edit_governorate">
-                                <option value=""><?= $isAr ? 'اختر المحافظة' : 'Select Governorate' ?></option>
+                                <option value=""><?= __('select_governorate') ?></option>
                                 <?php foreach ($governorates as $gov): ?>
                                     <option value="<?= $gov ?>"><?= $gov ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label"><?= $isAr ? 'القسم' : 'Department' ?></label>
+                            <label class="form-label"><?= __('section') ?></label>
                             <input type="text" class="form-control" id="edit_section">
                         </div>
                         <div class="col-12">
-                            <label class="form-label"><?= $isAr ? 'العنوان' : 'Address' ?></label>
+                            <label class="form-label"><?= __('address') ?></label>
                             <input type="text" class="form-control" id="edit_address">
                         </div>
                     </div>
 
                     <!-- Documents -->
-                    <h6 class="text-primary mb-3"><i class="bi bi-image me-1"></i><?= $isAr ? 'المستندات' : 'Documents' ?></h6>
+                    <h6 class="text-primary mb-3"><i class="bi bi-image me-1"></i><?= __('documents') ?></h6>
                     <div class="row g-3 mb-3">
                         <?php
                         $docTypes = [
-                            'card' => $isAr ? 'بطاقة المعهد' : 'Institute ID',
-                            'national_id' => $isAr ? 'البطاقة الشخصية' : 'National ID',
-                            'receipt' => $isAr ? 'إيصال الدفع' : 'Payment Receipt',
+                            'card' => __('institute_id'),
+                            'national_id' => __('national_id_card'),
+                            'receipt' => __('payment_receipt'),
                         ];
                         foreach ($docTypes as $dtype => $dlabel): ?>
                             <div class="col-md-4">
                                 <label class="form-label"><?= $dlabel ?></label>
                                 <div id="edit_img_preview_<?= $dtype ?>" class="mb-2 text-center">
-                                    <span class="text-muted small"><?= $isAr ? 'لا توجد صورة' : 'No image' ?></span>
+                                    <span class="text-muted small"><?= __('no_image') ?></span>
                                 </div>
                                 <input type="file" class="form-control form-control-sm" accept="image/jpeg,image/png"
                                        onchange="uploadStudentImage(<?= "this, '$dtype'" ?>)">
@@ -230,7 +233,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= $isAr ? 'إغلاق' : 'Close' ?></button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= __('close') ?></button>
                 <button type="button" class="btn btn-primary" id="saveProfileBtn" onclick="saveStudentProfile()">
                     <i class="bi bi-check-lg me-1"></i><?= __('save') ?>
                 </button>
@@ -249,6 +252,56 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
             </div>
             <div class="modal-body text-center">
                 <img src="" id="imgPreviewImg" class="img-fluid" alt="">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Student Modal -->
+<div class="modal fade" id="createStudentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="bi bi-person-plus me-2"></i><?= __('add_new_student') ?></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="createAlert" class="alert d-none"></div>
+                <form id="createStudentForm">
+                    <div class="mb-3">
+                        <label class="form-label"><?= __('name') ?> <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="create_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><?= __('email') ?> <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" id="create_email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><?= __('student_code') ?></label>
+                        <input type="text" class="form-control" id="create_student_code">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label"><?= __('password') ?> <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="create_password" required minlength="6">
+                            <button type="button" class="btn btn-outline-secondary" onclick="generatePassword()" title="<?= __('generate_password') ?>">
+                                <i class="bi bi-magic"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" id="create_send_invite" checked>
+                        <label class="form-check-label" for="create_send_invite">
+                            <i class="bi bi-envelope me-1"></i><?= __('send_welcome_email') ?>
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= __('close') ?></button>
+                <button type="button" class="btn btn-primary" id="createStudentBtn" onclick="createStudent()">
+                    <i class="bi bi-person-plus me-1"></i><?= __('create_account') ?>
+                </button>
             </div>
         </div>
     </div>
@@ -308,7 +361,7 @@ async function openEditModal(userId) {
                 const path = '/uploads/user_' + u.id + '/' + u[field];
                 container.innerHTML = `<img src="${path}" class="img-thumbnail" style="max-height:100px; cursor:pointer;" onclick="previewImage('${path}', '${type}')">`;
             } else {
-                container.innerHTML = `<span class="text-muted small">${isAr ? 'لا توجد صورة' : 'No image'}</span>`;
+                container.innerHTML = `<span class="text-muted small">${isAr ? <?= json_encode(__('no_image')) ?> : <?= json_encode(__('no_image')) ?>}</span>`;
             }
         }
 
@@ -426,16 +479,16 @@ function previewImage(src, type) {
 
 async function userAction(userId, action) {
     const confirmMsgs = {
-        verify:   isAr ? 'تأكيد بريد هذا الطالب؟' : 'Verify this student\'s email?',
-        unverify: isAr ? 'إلغاء تأكيد بريد هذا الطالب؟' : 'Unverify this student\'s email?',
-        enable:   isAr ? 'تفعيل حساب هذا الطالب؟' : 'Enable this student\'s account?',
-        disable:  isAr ? 'تعطيل حساب هذا الطالب؟' : 'Disable this student\'s account?',
-        delete:   isAr ? 'حذف هذا الحساب نهائياً؟ سيتم حذف جميع بياناته.' : 'Permanently delete this account? All data will be removed.',
-        resend_verification: isAr ? 'إعادة إرسال رابط التأكيد؟' : 'Resend verification email?',
-        impersonate: isAr ? 'الدخول كهذا الطالب؟' : 'Login as this student?',
+        verify:   <?= json_encode(__('confirm_verify_email')) ?>,
+        unverify: <?= json_encode(__('confirm_unverify_email')) ?>,
+        enable:   <?= json_encode(__('confirm_enable_account')) ?>,
+        disable:  <?= json_encode(__('confirm_disable_account')) ?>,
+        delete:   <?= json_encode(__('confirm_delete_account')) ?>,
+        resend_verification: <?= json_encode(__('confirm_resend_verification')) ?>,
+        impersonate: <?= json_encode(__('confirm_impersonate')) ?>,
     };
 
-    if (!confirm(confirmMsgs[action] || 'Are you sure?')) return;
+    if (action !== 'impersonate' && !confirm(confirmMsgs[action] || 'Are you sure?')) return;
 
     try {
         const res = await fetch('/api/users.php', {
@@ -455,6 +508,65 @@ async function userAction(userId, action) {
         }
     } catch (e) {
         alert('Network error');
+    }
+}
+
+// Generate random password
+function generatePassword() {
+    const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    let pass = '';
+    for (let i = 0; i < 10; i++) pass += chars.charAt(Math.floor(Math.random() * chars.length));
+    document.getElementById('create_password').value = pass;
+}
+
+// Create student account
+async function createStudent() {
+    const btn = document.getElementById('createStudentBtn');
+    const alertEl = document.getElementById('createAlert');
+    btn.disabled = true;
+    alertEl.classList.add('d-none');
+
+    const payload = {
+        user_id: 0,
+        action: 'create_user',
+        name: document.getElementById('create_name').value.trim(),
+        email: document.getElementById('create_email').value.trim(),
+        student_code: document.getElementById('create_student_code').value.trim(),
+        password: document.getElementById('create_password').value,
+        send_invite: document.getElementById('create_send_invite').checked,
+    };
+
+    if (!payload.name || !payload.email || !payload.password) {
+        alertEl.className = 'alert alert-danger';
+        alertEl.textContent = isAr ? <?= json_encode(__('name_email_password_required')) ?> : <?= json_encode(__('name_email_password_required')) ?>;
+        alertEl.classList.remove('d-none');
+        btn.disabled = false;
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/users.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+            alertEl.className = 'alert alert-success';
+            let msg = '<i class="bi bi-check-circle me-1"></i>' + data.message;
+            if (data.email_sent) msg += ' <span class="badge bg-info">' + <?= json_encode(__('email_sent')) ?> + '</span>';
+            alertEl.innerHTML = msg;
+            alertEl.classList.remove('d-none');
+            document.getElementById('createStudentForm').reset();
+            setTimeout(() => location.reload(), 1200);
+        } else {
+            throw new Error(data.error);
+        }
+    } catch (err) {
+        alertEl.className = 'alert alert-danger';
+        alertEl.textContent = err.message;
+        alertEl.classList.remove('d-none');
+        btn.disabled = false;
     }
 }
 </script>

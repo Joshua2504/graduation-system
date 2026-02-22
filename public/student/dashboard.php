@@ -42,7 +42,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
             <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
             <div>
                 <strong><?= __('profile_incomplete') ?></strong><br>
-                <small><?= $isAr ? 'يجب إكمال ملفك الشخصي قبل تقديم أي مشروع.' : 'You must complete your profile before submitting any project.' ?></small>
+                <small><?= __('profile_incomplete_msg') ?></small>
             </div>
             <a href="/student/profile.php" class="btn btn-warning btn-sm ms-auto">
                 <i class="bi bi-person-circle me-1"></i><?= __('complete_profile') ?>
@@ -66,7 +66,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                         <i class="bi bi-folder-plus text-muted" style="font-size: 4rem; opacity: 0.3;"></i>
                         <h5 class="text-muted mt-3"><?= __('no_projects_yet') ?></h5>
                         <p class="text-muted mb-0">
-                            <?= $isAr ? 'أنشئ مشروعًا جديدًا أو انضم لمشروع عن طريق كود الانضمام.' : 'Create a new project or join one using a join code.' ?>
+                            <?= __('no_projects_msg') ?>
                         </p>
                     </div>
                 </div>
@@ -147,7 +147,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                 <strong><?= sanitize($inv['project_title']) ?></strong>
                                 <br>
                                 <small class="text-muted">
-                                    <?= $isAr ? 'من' : 'From' ?>: <?= sanitize($inv['invited_by_name']) ?>
+                                    <?= __('from') ?>: <?= sanitize($inv['invited_by_name']) ?>
                                     &middot; <?= $inv['member_count'] ?> <?= __('team_members') ?>
                                 </small>
                                 <div class="mt-2 d-flex gap-2">
@@ -184,7 +184,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                     <div class="mb-3">
                         <label class="form-label fw-bold"><?= __('project_type') ?></label>
                         <input type="text" class="form-control" id="newType" maxlength="255"
-                               placeholder="<?= $isAr ? 'مثال: تطبيق ويب' : 'e.g., Web Application' ?>">
+                               placeholder="<?= __('project_type_placeholder') ?>">
                     </div>
                     <div id="createAlert" class="alert d-none"></div>
                 </form>
