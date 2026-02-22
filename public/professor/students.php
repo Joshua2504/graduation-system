@@ -93,6 +93,9 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                         <button class="btn btn-outline-success" onclick="userAction(<?= $s['id'] ?>, 'verify')" title="<?= $isAr ? 'تأكيد البريد' : 'Verify Email' ?>">
                                             <i class="bi bi-envelope-check"></i>
                                         </button>
+                                        <button class="btn btn-outline-info" onclick="userAction(<?= $s['id'] ?>, 'resend_verification')" title="<?= $isAr ? 'إعادة إرسال رابط التأكيد' : 'Resend Verification Email' ?>">
+                                            <i class="bi bi-envelope-arrow-up"></i>
+                                        </button>
                                     <?php else: ?>
                                         <button class="btn btn-outline-warning" onclick="userAction(<?= $s['id'] ?>, 'unverify')" title="<?= $isAr ? 'إلغاء التأكيد' : 'Unverify' ?>">
                                             <i class="bi bi-envelope-x"></i>
@@ -111,6 +114,9 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
 
                                     <button class="btn btn-outline-danger" onclick="userAction(<?= $s['id'] ?>, 'delete')" title="<?= $isAr ? 'حذف' : 'Delete' ?>">
                                         <i class="bi bi-trash"></i>
+                                    </button>
+                                    <button class="btn btn-outline-secondary" onclick="userAction(<?= $s['id'] ?>, 'impersonate')" title="<?= $isAr ? 'الدخول كطالب' : 'Login as Student' ?>">
+                                        <i class="bi bi-incognito"></i>
                                     </button>
                                 </div>
                             </td>
@@ -425,6 +431,8 @@ async function userAction(userId, action) {
         enable:   isAr ? 'تفعيل حساب هذا الطالب؟' : 'Enable this student\'s account?',
         disable:  isAr ? 'تعطيل حساب هذا الطالب؟' : 'Disable this student\'s account?',
         delete:   isAr ? 'حذف هذا الحساب نهائياً؟ سيتم حذف جميع بياناته.' : 'Permanently delete this account? All data will be removed.',
+        resend_verification: isAr ? 'إعادة إرسال رابط التأكيد؟' : 'Resend verification email?',
+        impersonate: isAr ? 'الدخول كهذا الطالب؟' : 'Login as this student?',
     };
 
     if (!confirm(confirmMsgs[action] || 'Are you sure?')) return;
@@ -437,7 +445,11 @@ async function userAction(userId, action) {
         });
         const data = await res.json();
         if (data.success) {
-            location.reload();
+            if (action === 'impersonate' && data.redirect) {
+                window.location.href = data.redirect;
+            } else {
+                location.reload();
+            }
         } else {
             alert(data.error || 'Error');
         }

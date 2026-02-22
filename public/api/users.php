@@ -10,6 +10,7 @@
 require_once dirname(__DIR__) . '/includes/db.php';
 require_once dirname(__DIR__) . '/includes/auth.php';
 require_once dirname(__DIR__) . '/includes/functions.php';
+require_once dirname(__DIR__) . '/includes/mailer.php';
 
 header('Content-Type: application/json; charset=utf-8');
 require_role('doctor', true);
@@ -168,6 +169,45 @@ if ($method === 'POST') {
             $stmt = $pdo->prepare("DELETE FROM users WHERE id = ? AND role = 'student'");
             $stmt->execute([$userId]);
             jsonResponse(['success' => true, 'message' => 'تم حذف الحساب']);
+            break;
+
+        case 'resend_verification':
+            // Resend verification email to student
+            if ($user['email_verified']) {
+                jsonResponse(['error' => 'البريد الإلكتروني مؤكد بالفعل'], 400);
+            }
+            $stmt2 = $pdo->prepare("SELECT name, email FROM users WHERE id = ?");
+            $stmt2->execute([$userId]);
+            $student = $stmt2->fetch();
+            $token = generateVerificationToken($userId);
+            $lang = $_GET['lang'] ?? ($_COOKIE['lang'] ?? 'ar');
+            $sent = sendVerificationEmail($student['email'], $student['name'], $token, $lang);
+            if ($sent) {
+                jsonResponse(['success' => true, 'message' => 'تم إرسال رابط التأكيد بنجاح']);
+            } else {
+                jsonResponse(['error' => 'فشل في إرسال البريد الإلكتروني. تحقق من إعدادات SMTP.'], 500);
+            }
+            break;
+
+        case 'impersonate':
+            // Allow doctor to login as a student
+            $stmt2 = $pdo->prepare("SELECT id, name, email, role FROM users WHERE id = ? AND role = 'student'");
+            $stmt2->execute([$userId]);
+            $student = $stmt2->fetch();
+            if (!$student) {
+                jsonResponse(['error' => 'الطالب غير موجود'], 404);
+            }
+            // Store original doctor session
+            $_SESSION['impersonator_id'] = $_SESSION['user_id'];
+            $_SESSION['impersonator_name'] = $_SESSION['name'];
+            $_SESSION['impersonator_email'] = $_SESSION['email'];
+            $_SESSION['impersonator_role'] = $_SESSION['role'];
+            // Switch to student session
+            $_SESSION['user_id'] = $student['id'];
+            $_SESSION['name'] = $student['name'];
+            $_SESSION['email'] = $student['email'];
+            $_SESSION['role'] = $student['role'];
+            jsonResponse(['success' => true, 'redirect' => '/student/dashboard.php', 'message' => 'تم الدخول كطالب']);
             break;
 
         case 'upload_image':

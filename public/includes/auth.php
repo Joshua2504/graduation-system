@@ -63,3 +63,27 @@ function current_role(): ?string {
 function is_logged_in(): bool {
     return !empty($_SESSION['user_id']);
 }
+
+/**
+ * Check if current session is an impersonation
+ */
+function is_impersonating(): bool {
+    return !empty($_SESSION['impersonator_id']);
+}
+
+/**
+ * Stop impersonation and restore original doctor session
+ */
+function stop_impersonation(): void {
+    if (!is_impersonating()) return;
+    $_SESSION['user_id'] = $_SESSION['impersonator_id'];
+    $_SESSION['name'] = $_SESSION['impersonator_name'];
+    $_SESSION['email'] = $_SESSION['impersonator_email'];
+    $_SESSION['role'] = $_SESSION['impersonator_role'];
+    unset(
+        $_SESSION['impersonator_id'],
+        $_SESSION['impersonator_name'],
+        $_SESSION['impersonator_email'],
+        $_SESSION['impersonator_role']
+    );
+}
