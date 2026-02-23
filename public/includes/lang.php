@@ -233,6 +233,11 @@ $translations = [
     'registration_description' => ['ar' => 'التحكم في إمكانية تسجيل حسابات جديدة للطلاب', 'en' => 'Control whether new student accounts can be registered'],
     'email_verification_description' => ['ar' => 'عند التفعيل، يجب على الطلاب تأكيد بريدهم الإلكتروني قبل تسجيل الدخول', 'en' => 'When enabled, students must verify their email before logging in'],
     'team_size_description' => ['ar' => 'تحديد الحد الأدنى والأقصى لعدد أعضاء الفريق', 'en' => 'Set the minimum and maximum number of team members'],
+    'toggle_student_project_creation' => ['ar' => 'إنشاء المشاريع بواسطة الطلاب', 'en' => 'Student Project Creation'],
+    'student_project_creation_description' => ['ar' => 'السماح للطلاب بإنشاء مشاريع جديدة بأنفسهم', 'en' => 'Allow students to create new projects on their own'],
+    'student_creation_on' => ['ar' => 'إنشاء المشاريع مفعل', 'en' => 'Student Creation On'],
+    'student_creation_off' => ['ar' => 'إنشاء المشاريع معطل', 'en' => 'Student Creation Off'],
+    'student_project_creation_disabled' => ['ar' => 'إنشاء المشاريع بواسطة الطلاب معطل حالياً', 'en' => 'Student project creation is currently disabled'],
     'email_verification_on' => ['ar' => 'تأكيد البريد مطلوب', 'en' => 'Email Verification On'],
     'email_verification_off' => ['ar' => 'تأكيد البريد معطل', 'en' => 'Email Verification Off'],
 

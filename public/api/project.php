@@ -99,6 +99,10 @@ if ($method === 'POST') {
         ]);
     } else {
         // Student creates project
+        $settings = getSettings();
+        if (empty($settings['student_project_creation'])) {
+            jsonResponse(['error' => 'إنشاء المشاريع بواسطة الطلاب معطل حالياً'], 403);
+        }
         $userId = current_user_id();
         
         $stmt = $pdo->prepare("INSERT INTO projects (title, type, description, join_code, status) VALUES (?, ?, ?, ?, 'draft')");

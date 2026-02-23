@@ -55,9 +55,11 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
         <div class="col-lg-8 mb-4">
             <div class="d-flex align-items-center justify-content-between mb-3">
                 <h4 class="mb-0"><i class="bi bi-folder2-open me-2"></i><?= __('my_projects') ?></h4>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createProjectModal">
-                    <i class="bi bi-plus-circle me-1"></i><?= __('create_project') ?>
-                </button>
+                <?php if (!empty($settings['student_project_creation'])): ?>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createProjectModal">
+                        <i class="bi bi-plus-circle me-1"></i><?= __('create_project') ?>
+                    </button>
+                <?php endif; ?>
             </div>
 
             <?php if (empty($projects)): ?>

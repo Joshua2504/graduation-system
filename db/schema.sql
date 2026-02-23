@@ -5,11 +5,12 @@ CREATE TABLE IF NOT EXISTS `settings` (
   `email_verification_required` TINYINT(1) NOT NULL DEFAULT 1,
   `min_team_size` TINYINT NOT NULL DEFAULT 2,
   `max_team_size` TINYINT NOT NULL DEFAULT 7,
+  `student_project_creation` TINYINT(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `settings` (`id`, `registration_open`, `email_verification_required`, `min_team_size`, `max_team_size`)
-VALUES (1, 1, 1, 2, 7)
+INSERT INTO `settings` (`id`, `registration_open`, `email_verification_required`, `min_team_size`, `max_team_size`, `student_project_creation`)
+VALUES (1, 1, 1, 2, 7, 1)
 ON DUPLICATE KEY UPDATE `id` = `id`;
 
 -- ─── Users (with profile fields) ───
@@ -104,6 +105,13 @@ ON DUPLICATE KEY UPDATE `id` = `id`;
 -- Add description column to projects (safe for existing databases)
 SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'projects' AND COLUMN_NAME = 'description');
 SET @sql = IF(@col_exists = 0, 'ALTER TABLE `projects` ADD COLUMN `description` TEXT DEFAULT NULL AFTER `type`', 'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Add student_project_creation column to settings (safe for existing databases)
+SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'settings' AND COLUMN_NAME = 'student_project_creation');
+SET @sql = IF(@col_exists = 0, 'ALTER TABLE `settings` ADD COLUMN `student_project_creation` TINYINT(1) NOT NULL DEFAULT 1 AFTER `max_team_size`', 'SELECT 1');
 PREPARE stmt FROM @sql;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
