@@ -4,6 +4,8 @@
 
 ---
 
+![Screenshot 1](.github/img/screenshot-1.png)
+
 ## ✨ Features
 
 ### Student Flow
