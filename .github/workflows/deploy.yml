@@ -46,6 +46,7 @@ jobs:
           MAIL_PORT: ${{ secrets.MAIL_PORT }}
           MAIL_USER: ${{ secrets.MAIL_USER }}
           MAIL_PASS: ${{ secrets.MAIL_PASS }}
+          DEMO_MODE: ${{ vars.DEMO_MODE }}
         run: |
           set -euo pipefail
           SSH_PATH="${{ env.SSH_PATH }}"
@@ -65,6 +66,7 @@ jobs:
           printf 'MAIL_PORT=%s\n' "${MAIL_PORT:-587}" >> "$TMP_ENV"
           printf 'MAIL_USER=%s\n' "${MAIL_USER:-system@treudler.net}" >> "$TMP_ENV"
           printf 'MAIL_PASS=%s\n' "${MAIL_PASS:-password_for_mail_user_here}" >> "$TMP_ENV"
+          printf 'DEMO_MODE=%s\n' "${DEMO_MODE:-}" >> "$TMP_ENV"
 
           # Upload the .env securely to the remote host
           cat "$TMP_ENV" | ssh -o StrictHostKeyChecking=no "$REMOTE" "cat > \"$REMOTE_DIR/.env\""
