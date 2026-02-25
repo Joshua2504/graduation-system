@@ -6,8 +6,7 @@
  * POST — triggers an immediate demo reset (only in demo mode)
  */
 
-require_once dirname(__DIR__) . '/includes/db.php';
-require_once dirname(__DIR__) . '/includes/functions.php';
+require_once dirname(__DIR__) . '/includes/bootstrap.php';
 require_once dirname(__DIR__) . '/includes/demo.php';
 
 header('Content-Type: application/json; charset=utf-8');

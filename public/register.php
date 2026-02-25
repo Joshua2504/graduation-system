@@ -2,10 +2,7 @@
 /**
  * Registration page (Team Leader / Student)
  */
-require_once __DIR__ . '/includes/db.php';
-require_once __DIR__ . '/includes/auth.php';
-require_once __DIR__ . '/includes/functions.php';
-require_once __DIR__ . '/includes/lang.php';
+require_once __DIR__ . '/includes/bootstrap.php';
 require_once __DIR__ . '/includes/mailer.php';
 
 // If already logged in, redirect
@@ -164,19 +161,7 @@ require_once __DIR__ . '/includes/header.php';
                         <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleTheme()" title="Toggle dark mode">
                             <i class="bi bi-moon-fill" id="themeIcon"></i>
                         </button>
-                        <?php
-                        $langLabels = ['ar' => 'العربية', 'en' => 'English', 'de' => 'Deutsch'];
-                        ?>
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-translate me-1"></i><?= $langLabels[getLang()] ?>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <?php foreach ($langLabels as $code => $label): ?>
-                                    <li><a class="dropdown-item <?= getLang() === $code ? 'active' : '' ?>" href="?lang=<?= $code ?>"><?= $label ?></a></li>
-                                <?php endforeach; ?>
-                            </ul>
-                        </div>
+                        <?php require_once __DIR__ . '/includes/lang_switcher.php'; ?>
                     </div>
                 </div>
             </div>

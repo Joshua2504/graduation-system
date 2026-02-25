@@ -3,10 +3,7 @@
  * Join Project Page — handles token-based and code-based join links
  * Routes: /join.php?token=X or /join.php?code=X
  */
-require_once __DIR__ . '/includes/db.php';
-require_once __DIR__ . '/includes/auth.php';
-require_once __DIR__ . '/includes/functions.php';
-require_once __DIR__ . '/includes/lang.php';
+require_once __DIR__ . '/includes/bootstrap.php';
 
 // Must be logged in as student
 if (!is_logged_in()) {

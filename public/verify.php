@@ -4,10 +4,7 @@
  * 
  * Handles ?token=... from the verification email link.
  */
-require_once __DIR__ . '/includes/db.php';
-require_once __DIR__ . '/includes/auth.php';
-require_once __DIR__ . '/includes/functions.php';
-require_once __DIR__ . '/includes/lang.php';
+require_once __DIR__ . '/includes/bootstrap.php';
 
 $status = 'invalid'; // invalid | success | already
 $message = '';
@@ -83,19 +80,9 @@ require_once __DIR__ . '/includes/header.php';
                     <hr>
                     <div class="text-center">
                         <?php
-                        $langLabels = ['ar' => 'العربية', 'en' => 'English', 'de' => 'Deutsch'];
-                        $currentToken = sanitize($token);
+                        $langSwitcherExtraParams = 'token=' . urlencode(sanitize($token));
+                        require __DIR__ . '/includes/lang_switcher.php';
                         ?>
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-translate me-1"></i><?= $langLabels[getLang()] ?>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <?php foreach ($langLabels as $code => $label): ?>
-                                    <li><a class="dropdown-item <?= getLang() === $code ? 'active' : '' ?>" href="?token=<?= $currentToken ?>&lang=<?= $code ?>"><?= $label ?></a></li>
-                                <?php endforeach; ?>
-                            </ul>
-                        </div>
                     </div>
                 </div>
             </div>

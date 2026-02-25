@@ -5,9 +5,7 @@
  * POST /api/review.php
  * Body: { project_id, action: "accept"|"reject", doctor_note }
  */
-require_once dirname(__DIR__) . '/includes/db.php';
-require_once dirname(__DIR__) . '/includes/auth.php';
-require_once dirname(__DIR__) . '/includes/functions.php';
+require_once dirname(__DIR__) . '/includes/bootstrap.php';
 
 header('Content-Type: application/json; charset=utf-8');
 require_role('doctor', true);

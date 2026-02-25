@@ -313,15 +313,102 @@ function getGovernorates(): array {
 }
 
 /**
- * Get project types
+ * Get status labels (translated) for project statuses
  */
-function getProjectTypes(): array {
+function getStatusLabels(): array {
     return [
-        ['ar' => 'تطبيق ويب', 'en' => 'Web Application'],
-        ['ar' => 'تطبيق موبايل', 'en' => 'Mobile Application'],
-        ['ar' => 'نظام ذكاء اصطناعي', 'en' => 'AI System'],
-        ['ar' => 'نظام إدارة', 'en' => 'Management System'],
-        ['ar' => 'نظام شبكات', 'en' => 'Network System'],
-        ['ar' => 'أخرى', 'en' => 'Other'],
+        'draft' => __('status_draft'),
+        'under_review' => __('status_under_review'),
+        'accepted' => __('status_accepted'),
+        'rejected' => __('status_rejected'),
+    ];
+}
+
+/**
+ * Get Bootstrap color classes for project statuses
+ */
+function getStatusColors(): array {
+    return [
+        'draft' => 'secondary',
+        'under_review' => 'warning',
+        'accepted' => 'success',
+        'rejected' => 'danger',
+    ];
+}
+
+/**
+ * Validate phone number (11 digits)
+ * Returns error string or null if valid
+ */
+function validatePhone(string $phone): ?string {
+    if (!empty($phone) && !preg_match('/^\d{11}$/', $phone)) {
+        return 'رقم الهاتف يجب أن يكون 11 رقم';
+    }
+    return null;
+}
+
+/**
+ * Validate national ID (14 digits)
+ * Returns error string or null if valid
+ */
+function validateNationalId(string $nationalId): ?string {
+    if (!empty($nationalId) && !preg_match('/^\d{14}$/', $nationalId)) {
+        return 'الرقم القومي يجب أن يكون 14 رقم';
+    }
+    return null;
+}
+
+/**
+ * Handle file upload: validate, move to destination, update DB, check profile completion.
+ * 
+ * @param int    $userId    The user who owns the file
+ * @param string $type      The image type (card, national_id, receipt, profile_picture)
+ * @param array  $file      The $_FILES['file'] array
+ * @param bool   $checkProfile  Whether to check/update profile_completed
+ * @return array Response array with success/error
+ */
+function handleFileUpload(int $userId, string $type, array $file, bool $checkProfile = true): array {
+    $validationError = validateUploadedFile($file);
+    if ($validationError) {
+        return ['error' => $validationError, 'code' => 400];
+    }
+
+    $uploadDir = dirname(__DIR__) . '/uploads/user_' . $userId;
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0775, true);
+    }
+
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mime = $finfo->file($file['tmp_name']);
+    $ext = $mime === 'image/png' ? 'png' : 'jpg';
+
+    $dbField = $type === 'profile_picture' ? 'profile_picture' : $type . '_image';
+    $filename = $userId . '_' . $type . '.' . $ext;
+    $destPath = $uploadDir . '/' . $filename;
+
+    if (!move_uploaded_file($file['tmp_name'], $destPath)) {
+        return ['error' => 'فشل في حفظ الملف', 'code' => 500];
+    }
+
+    chmod($destPath, 0644);
+
+    $pdo = getDB();
+    $stmt = $pdo->prepare("UPDATE users SET `$dbField` = ? WHERE id = ?");
+    $stmt->execute([$filename, $userId]);
+
+    $profileComplete = 0;
+    if ($checkProfile) {
+        $user = getUserProfile($userId);
+        $profileComplete = isProfileComplete($user) ? 1 : 0;
+        $stmt = $pdo->prepare("UPDATE users SET profile_completed = ? WHERE id = ?");
+        $stmt->execute([$profileComplete, $userId]);
+    }
+
+    return [
+        'success' => true,
+        'filename' => $filename,
+        'path' => secureFileUrl($userId, $filename),
+        'profile_completed' => $profileComplete,
+        'message' => 'تم رفع الملف بنجاح'
     ];
 }

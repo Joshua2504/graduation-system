@@ -2,10 +2,7 @@
 /**
  * Professor Dashboard — stats + project lists
  */
-require_once dirname(__DIR__) . '/includes/db.php';
-require_once dirname(__DIR__) . '/includes/auth.php';
-require_once dirname(__DIR__) . '/includes/functions.php';
-require_once dirname(__DIR__) . '/includes/lang.php';
+require_once dirname(__DIR__) . '/includes/bootstrap.php';
 
 require_role('doctor');
 
@@ -223,15 +220,8 @@ $isAr = getLang() === 'ar';
     </div>
 </div>
 
+<script src="/assets/js/editor.js"></script>
 <script>
-function editorCmd(command) {
-    document.execCommand(command, false, null);
-}
-function editorInsertLink() {
-    const url = prompt('URL:', 'https://');
-    if (url) document.execCommand('createLink', false, url);
-}
-
 let selectedStudents = [];
 let selectedLeaderId = null;
 

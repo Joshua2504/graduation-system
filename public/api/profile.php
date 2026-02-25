@@ -6,9 +6,7 @@
  * PUT    /api/profile.php          — Update profile fields
  * POST   /api/profile.php          — Upload profile image
  */
-require_once dirname(__DIR__) . '/includes/db.php';
-require_once dirname(__DIR__) . '/includes/auth.php';
-require_once dirname(__DIR__) . '/includes/functions.php';
+require_once dirname(__DIR__) . '/includes/bootstrap.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -59,15 +57,13 @@ if ($method === 'PUT') {
     
     // Validation
     if (isset($input['national_id']) && !empty($input['national_id'])) {
-        if (!preg_match('/^\d{14}$/', $input['national_id'])) {
-            jsonResponse(['error' => 'الرقم القومي يجب أن يكون 14 رقم'], 400);
-        }
+        $err = validateNationalId($input['national_id']);
+        if ($err) jsonResponse(['error' => $err], 400);
     }
     
     if (isset($input['phone']) && !empty($input['phone'])) {
-        if (!preg_match('/^\d{11}$/', $input['phone'])) {
-            jsonResponse(['error' => 'رقم الهاتف يجب أن يكون 11 رقم'], 400);
-        }
+        $err = validatePhone($input['phone']);
+        if ($err) jsonResponse(['error' => $err], 400);
     }
     
     if (isset($input['gender']) && !in_array($input['gender'], ['male', 'female'])) {
@@ -117,54 +113,15 @@ if ($method === 'POST') {
         jsonResponse(['error' => "فشل رفع الملف (خطأ: $errCode)"], 400);
     }
     
-    $file = $_FILES['file'];
-    $validationError = validateUploadedFile($file);
-    if ($validationError) {
-        jsonResponse(['error' => $validationError], 400);
-    }
-    
     $userId = current_user_id();
-    $uploadDir = dirname(__DIR__) . '/uploads/user_' . $userId;
-    if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0775, true);
+    $checkProfile = ($role === 'student');
+    $result = handleFileUpload($userId, $type, $_FILES['file'], $checkProfile);
+    
+    if (isset($result['error'])) {
+        jsonResponse(['error' => $result['error']], $result['code']);
     }
     
-    // Determine extension
-    $finfo = new finfo(FILEINFO_MIME_TYPE);
-    $mime = $finfo->file($file['tmp_name']);
-    $ext = $mime === 'image/png' ? 'png' : 'jpg';
-    
-    $dbField = $type === 'profile_picture' ? 'profile_picture' : $type . '_image';
-    $filename = $userId . '_' . $type . '.' . $ext;
-    $destPath = $uploadDir . '/' . $filename;
-    
-    if (!move_uploaded_file($file['tmp_name'], $destPath)) {
-        jsonResponse(['error' => 'فشل في حفظ الملف'], 500);
-    }
-    
-    chmod($destPath, 0644);
-    
-    // Update user record
-    $pdo = getDB();
-    $stmt = $pdo->prepare("UPDATE users SET `$dbField` = ? WHERE id = ?");
-    $stmt->execute([$filename, $userId]);
-    
-    // Check if profile is now complete (students only)
-    $profileComplete = 0;
-    if ($role === 'student') {
-        $user = getUserProfile($userId);
-        $profileComplete = isProfileComplete($user) ? 1 : 0;
-        $stmt = $pdo->prepare("UPDATE users SET profile_completed = ? WHERE id = ?");
-        $stmt->execute([$profileComplete, $userId]);
-    }
-    
-    jsonResponse([
-        'success' => true,
-        'filename' => $filename,
-        'path' => secureFileUrl($userId, $filename),
-        'profile_completed' => $profileComplete,
-        'message' => 'تم رفع الملف بنجاح'
-    ]);
+    jsonResponse($result);
 }
 
 jsonResponse(['error' => 'Method not allowed'], 405);

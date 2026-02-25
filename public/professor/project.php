@@ -2,10 +2,7 @@
 /**
  * Professor — Single Project Review Page
  */
-require_once dirname(__DIR__) . '/includes/db.php';
-require_once dirname(__DIR__) . '/includes/auth.php';
-require_once dirname(__DIR__) . '/includes/functions.php';
-require_once dirname(__DIR__) . '/includes/lang.php';
+require_once dirname(__DIR__) . '/includes/bootstrap.php';
 
 require_role('doctor');
 
@@ -24,18 +21,8 @@ $pendingInvites = getProjectPendingInvitations($projectId);
 $duplicates = findDuplicateProjects($projectId, $project['title']);
 $isAr = getLang() === 'ar';
 
-$statusLabels = [
-    'draft' => __('status_draft'),
-    'under_review' => __('status_under_review'),
-    'accepted' => __('status_accepted'),
-    'rejected' => __('status_rejected'),
-];
-$statusColors = [
-    'draft' => 'secondary',
-    'under_review' => 'warning',
-    'accepted' => 'success',
-    'rejected' => 'danger',
-];
+$statusLabels = getStatusLabels();
+$statusColors = getStatusColors();
 
 $pageTitle = sanitize($project['title']);
 require_once dirname(__DIR__) . '/includes/header.php';
@@ -141,7 +128,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             <button type="button" class="btn" onclick="editorInsertLink()" title="<?= __('insert_link') ?>"><i class="bi bi-link-45deg"></i></button>
                             <div class="vr mx-1 opacity-25"></div>
                             <button type="button" class="btn" onclick="document.getElementById('editorFileInput').click()" title="<?= __('upload_file') ?>"><i class="bi bi-image"></i></button>
-                            <input type="file" id="editorFileInput" accept="image/jpeg,image/png,image/gif,image/webp" class="d-none" onchange="editorUploadFile(this.files[0])">
+                            <input type="file" id="editorFileInput" accept="image/jpeg,image/png,image/gif,image/webp" class="d-none">
                         </div>
                         <div id="editDescription" class="simple-editor-content" contenteditable="true" data-placeholder="<?= __('description_placeholder') ?>"><?= sanitizeHtml($project['description'] ?? '') ?></div>
                     </div>
@@ -415,6 +402,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
     </div>
 </div>
 
+<script src="/assets/js/editor.js"></script>
 <script>
 function showImageModal(src, title) {
     document.getElementById('imageModalLabel').textContent = title;
@@ -442,187 +430,8 @@ async function resendInvitation(invitationId) {
 
 const PROJECT_ID = <?= $projectId ?>;
 
-// ─── Edit project (toggle view/edit mode) ───
-function toggleEditMode(editing) {
-    document.getElementById('projectViewMode').classList.toggle('d-none', editing);
-    document.getElementById('projectEditMode').classList.toggle('d-none', !editing);
-    if (editing) {
-        document.getElementById('editTitle')?.focus();
-    }
-}
-
-// Simple editor commands
-function editorCmd(command) {
-    document.execCommand(command, false, null);
-    document.getElementById('editDescription')?.focus();
-}
-function editorInsertLink() {
-    const url = prompt('URL:', 'https://');
-    if (url) document.execCommand('createLink', false, url);
-}
-
-// Upload image into editor
-async function editorUploadFile(file) {
-    if (!file || !file.type.startsWith('image/')) return;
-    const editor = document.getElementById('editDescription');
-    const placeholder = document.createElement('span');
-    placeholder.className = 'upload-placeholder';
-    placeholder.textContent = <?= json_encode(__('uploading_file')) ?>;
-    editor.appendChild(placeholder);
-
-    const fd = new FormData();
-    fd.append('file', file);
-    fd.append('project_id', PROJECT_ID);
-    try {
-        const res = await fetch('/api/description-upload', { method: 'POST', body: fd });
-        const data = await res.json();
-        if (data.success) {
-            const img = document.createElement('img');
-            img.src = data.url;
-            img.alt = file.name;
-            img.className = 'desc-img';
-            placeholder.replaceWith(img);
-            editor.appendChild(document.createElement('br'));
-        } else {
-            placeholder.remove();
-            alert(data.error);
-        }
-    } catch (err) {
-        placeholder.remove();
-        alert(err.message);
-    }
-    // Reset file input
-    const fi = document.getElementById('editorFileInput');
-    if (fi) fi.value = '';
-}
-
-// Paste image from clipboard
-document.getElementById('editDescription')?.addEventListener('paste', (e) => {
-    const items = e.clipboardData?.items;
-    if (!items) return;
-    for (const item of items) {
-        if (item.type.startsWith('image/')) {
-            e.preventDefault();
-            editorUploadFile(item.getAsFile());
-            return;
-        }
-    }
-});
-
-// Drag & drop images
-(function() {
-    const el = document.getElementById('editDescription');
-    if (!el) return;
-    el.addEventListener('dragover', (e) => { e.preventDefault(); el.classList.add('border-primary'); });
-    el.addEventListener('dragleave', () => { el.classList.remove('border-primary'); });
-    el.addEventListener('drop', (e) => {
-        e.preventDefault();
-        el.classList.remove('border-primary');
-        const files = e.dataTransfer?.files;
-        if (files) {
-            for (const f of files) {
-                if (f.type.startsWith('image/')) editorUploadFile(f);
-            }
-        }
-    });
-})();
-
-// Image resize in editor
-(function() {
-    const editor = document.getElementById('editDescription');
-    if (!editor) return;
-    let activeImg = null, startX, startW;
-
-    editor.addEventListener('click', (e) => {
-        // Deselect previous
-        if (activeImg && activeImg !== e.target) {
-            activeImg.classList.remove('img-resizing');
-            removeHandle();
-            activeImg = null;
-        }
-        if (e.target.tagName === 'IMG' && editor.contains(e.target)) {
-            e.preventDefault();
-            activeImg = e.target;
-            activeImg.classList.add('img-resizing');
-            showHandle();
-        }
-    });
-
-    document.addEventListener('click', (e) => {
-        if (activeImg && !editor.contains(e.target)) {
-            activeImg.classList.remove('img-resizing');
-            removeHandle();
-            activeImg = null;
-        }
-    });
-
-    function showHandle() {
-        removeHandle();
-        const handle = document.createElement('div');
-        handle.className = 'img-resize-handle';
-        handle.id = 'imgResizeHandle';
-        // Position handle at bottom-right of image
-        positionHandle(handle);
-        editor.style.position = 'relative';
-        editor.appendChild(handle);
-        handle.addEventListener('mousedown', onMouseDown);
-        handle.addEventListener('touchstart', onTouchStart, { passive: false });
-    }
-
-    function positionHandle(handle) {
-        if (!activeImg || !handle) return;
-        const editorRect = editor.getBoundingClientRect();
-        const imgRect = activeImg.getBoundingClientRect();
-        handle.style.left = (imgRect.right - editorRect.left - 5 + editor.scrollLeft) + 'px';
-        handle.style.top = (imgRect.bottom - editorRect.top - 5 + editor.scrollTop) + 'px';
-    }
-
-    function removeHandle() {
-        document.getElementById('imgResizeHandle')?.remove();
-    }
-
-    function onMouseDown(e) {
-        e.preventDefault();
-        startX = e.clientX;
-        startW = activeImg.offsetWidth;
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
-    }
-
-    function onTouchStart(e) {
-        e.preventDefault();
-        startX = e.touches[0].clientX;
-        startW = activeImg.offsetWidth;
-        document.addEventListener('touchmove', onTouchMove, { passive: false });
-        document.addEventListener('touchend', onTouchEnd);
-    }
-
-    function onMouseMove(e) { resize(e.clientX); }
-    function onTouchMove(e) { e.preventDefault(); resize(e.touches[0].clientX); }
-
-    function resize(clientX) {
-        if (!activeImg) return;
-        const diff = clientX - startX;
-        const newW = Math.max(50, startW + diff);
-        const maxW = editor.clientWidth - 20;
-        activeImg.style.width = Math.min(newW, maxW) + 'px';
-        activeImg.style.height = 'auto';
-        activeImg.removeAttribute('width');
-        activeImg.removeAttribute('height');
-        const handle = document.getElementById('imgResizeHandle');
-        if (handle) positionHandle(handle);
-    }
-
-    function onMouseUp() {
-        document.removeEventListener('mousemove', onMouseMove);
-        document.removeEventListener('mouseup', onMouseUp);
-    }
-
-    function onTouchEnd() {
-        document.removeEventListener('touchmove', onTouchMove);
-        document.removeEventListener('touchend', onTouchEnd);
-    }
-})();
+// Initialize shared editor with paste/drag-drop/resize
+initEditor('editDescription', PROJECT_ID, <?= json_encode(__('uploading_file')) ?>);
 
 // Save project edits
 document.getElementById('editProjectForm')?.addEventListener('submit', async (e) => {

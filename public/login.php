@@ -2,10 +2,7 @@
 /**
  * Login page
  */
-require_once __DIR__ . '/includes/db.php';
-require_once __DIR__ . '/includes/auth.php';
-require_once __DIR__ . '/includes/functions.php';
-require_once __DIR__ . '/includes/lang.php';
+require_once __DIR__ . '/includes/bootstrap.php';
 require_once __DIR__ . '/includes/mailer.php';
 require_once __DIR__ . '/includes/demo.php';
 

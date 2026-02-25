@@ -5,9 +5,7 @@
  * GET  /api/settings.php       — Get current settings
  * POST /api/settings.php       — Update settings (doctor only)
  */
-require_once dirname(__DIR__) . '/includes/db.php';
-require_once dirname(__DIR__) . '/includes/auth.php';
-require_once dirname(__DIR__) . '/includes/functions.php';
+require_once dirname(__DIR__) . '/includes/bootstrap.php';
 
 header('Content-Type: application/json; charset=utf-8');
 

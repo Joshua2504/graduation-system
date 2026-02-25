@@ -120,7 +120,6 @@ graduation-system/
     │   ├── project.php           # CRUD for projects
     │   ├── invitations.php       # Invitation management
     │   ├── profile.php           # Profile read/update/image upload
-    │   ├── upload.php            # Document image uploads
     │   ├── description-upload.php # Project description image uploads
     │   ├── file.php              # Secure authenticated file serving
     │   ├── submit.php            # Project submission
@@ -138,18 +137,22 @@ graduation-system/
     │   ├── settings.php          # System configuration
     │   └── students.php          # Student account management
     ├── includes/                 # Shared PHP modules
+    │   ├── bootstrap.php         # Common includes loader
     │   ├── auth.php              # Session auth & role enforcement
     │   ├── db.php                # PDO database connection
-    │   ├── functions.php         # Helper functions
+    │   ├── functions.php         # Helper functions & validators
     │   ├── lang.php              # Multilingual translations (AR/EN/DE)
-    │   ├── mailer.php            # SMTP mailer
+    │   ├── lang_switcher.php     # Reusable language switcher dropdown
+    │   ├── mailer.php            # SMTP mailer (verification, invitation, welcome)
     │   ├── demo.php              # Demo mode helpers
     │   ├── header.php            # HTML head template
     │   ├── navbar.php            # Navigation bar
     │   └── footer.php            # HTML footer
     └── assets/
         ├── css/app.css           # Custom styles
-        └── js/uploader.js        # File upload utility
+        └── js/
+            ├── editor.js         # Shared rich text editor (toolbar, upload, resize)
+            └── profile-upload.js # Profile image upload with progress
 ```
 
 ---

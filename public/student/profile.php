@@ -2,10 +2,7 @@
 /**
  * Student Profile — edit personal data & upload documents
  */
-require_once dirname(__DIR__) . '/includes/db.php';
-require_once dirname(__DIR__) . '/includes/auth.php';
-require_once dirname(__DIR__) . '/includes/functions.php';
-require_once dirname(__DIR__) . '/includes/lang.php';
+require_once dirname(__DIR__) . '/includes/bootstrap.php';
 
 require_role('student');
 
@@ -254,51 +251,7 @@ document.getElementById('profileForm').addEventListener('submit', async (e) => {
         alertEl.classList.remove('d-none');
     }
 });
-
-// Image upload
-function uploadImage(type, file) {
-    if (!file) return;
-    const progressEl = document.getElementById('progress-' + type);
-    const progressBar = progressEl.querySelector('.progress-bar');
-    progressEl.classList.remove('d-none');
-    progressBar.style.width = '0%';
-
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('type', type);
-
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/api/profile', true);
-
-    xhr.upload.onprogress = (e) => {
-        if (e.lengthComputable) {
-            progressBar.style.width = Math.round((e.loaded / e.total) * 100) + '%';
-        }
-    };
-
-    xhr.onload = () => {
-        try {
-            const data = JSON.parse(xhr.responseText);
-            if (data.success) {
-                // Reload to show updated image
-                location.reload();
-            } else {
-                alert(data.error || 'Upload failed');
-                progressEl.classList.add('d-none');
-            }
-        } catch {
-            alert('Upload failed');
-            progressEl.classList.add('d-none');
-        }
-    };
-
-    xhr.onerror = () => {
-        alert('Upload failed');
-        progressEl.classList.add('d-none');
-    };
-
-    xhr.send(formData);
-}
 </script>
+<script src="/assets/js/profile-upload.js"></script>
 
 <?php require_once dirname(__DIR__) . '/includes/footer.php'; ?>

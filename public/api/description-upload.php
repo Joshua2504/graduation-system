@@ -11,9 +11,7 @@
  * Files are stored in uploads/project_{projectId}/
  * Accessible via /api/file.php?project={projectId}&file={filename}
  */
-require_once dirname(__DIR__) . '/includes/db.php';
-require_once dirname(__DIR__) . '/includes/auth.php';
-require_once dirname(__DIR__) . '/includes/functions.php';
+require_once dirname(__DIR__) . '/includes/bootstrap.php';
 
 header('Content-Type: application/json; charset=utf-8');
 require_login(true);

@@ -279,3 +279,71 @@ HTML;
 
     return sendMail($email, $subject, $body);
 }
+
+/**
+ * Send welcome email with login credentials (used when doctor creates a student account)
+ *
+ * @param string $email    Student email
+ * @param string $name     Student name
+ * @param string $password Plain-text password (sent once)
+ * @param string $lang     Language code (ar/en)
+ * @return bool
+ */
+function sendWelcomeEmail(string $email, string $name, string $password, string $lang = 'ar'): bool {
+    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost:8642';
+    $loginUrl = "$protocol://$host/login";
+
+    if ($lang === 'ar') {
+        $subject = 'حساب جديد - نظام مشاريع التخرج';
+        $heading = 'مرحباً بك في نظام مشاريع التخرج';
+        $greeting = "مرحباً $name،";
+        $message = 'تم إنشاء حساب لك في نظام إدارة مشاريع التخرج. يمكنك تسجيل الدخول باستخدام البيانات التالية:';
+        $emailLabel = 'البريد الإلكتروني';
+        $passLabel = 'كلمة المرور';
+        $btnText = 'تسجيل الدخول';
+        $changePass = 'يرجى تغيير كلمة المرور بعد تسجيل الدخول الأول.';
+        $dir = 'rtl';
+    } else {
+        $subject = 'New Account - Graduation Project System';
+        $heading = 'Welcome to the Graduation Project System';
+        $greeting = "Hello $name,";
+        $message = 'An account has been created for you in the Graduation Project Management System. You can log in using the following credentials:';
+        $emailLabel = 'Email';
+        $passLabel = 'Password';
+        $btnText = 'Log In';
+        $changePass = 'Please change your password after your first login.';
+        $dir = 'ltr';
+    }
+
+    $safeEmail = htmlspecialchars($email, ENT_QUOTES, 'UTF-8');
+    $safePass = htmlspecialchars($password, ENT_QUOTES, 'UTF-8');
+
+    $body = <<<HTML
+<!DOCTYPE html>
+<html dir="$dir" lang="$lang">
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background:#f4f6f9;">
+    <div style="max-width:520px;margin:40px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);">
+        <div style="background:#0d6efd;padding:24px;text-align:center;">
+            <h1 style="margin:0;color:#fff;font-size:22px;">🎓 $heading</h1>
+        </div>
+        <div style="padding:28px 32px;">
+            <p style="font-size:16px;color:#333;">$greeting</p>
+            <p style="font-size:15px;color:#555;line-height:1.6;">$message</p>
+            <div style="background:#f8f9fa;border-radius:8px;padding:16px;margin:20px 0;">
+                <p style="margin:4px 0;font-size:14px;"><strong>$emailLabel:</strong> $safeEmail</p>
+                <p style="margin:4px 0;font-size:14px;"><strong>$passLabel:</strong> <code style="background:#e9ecef;padding:2px 6px;border-radius:4px;">$safePass</code></p>
+            </div>
+            <div style="text-align:center;margin:32px 0;">
+                <a href="$loginUrl" style="display:inline-block;background:#0d6efd;color:#fff;padding:14px 36px;border-radius:8px;text-decoration:none;font-size:16px;font-weight:bold;">$btnText</a>
+            </div>
+            <p style="font-size:13px;color:#888;text-align:center;">$changePass</p>
+        </div>
+    </div>
+</body>
+</html>
+HTML;
+
+    return sendMail($email, $subject, $body);
+}

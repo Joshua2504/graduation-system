@@ -2,10 +2,7 @@
 /**
  * Student Dashboard — projects list, invitations, join code
  */
-require_once dirname(__DIR__) . '/includes/db.php';
-require_once dirname(__DIR__) . '/includes/auth.php';
-require_once dirname(__DIR__) . '/includes/functions.php';
-require_once dirname(__DIR__) . '/includes/lang.php';
+require_once dirname(__DIR__) . '/includes/bootstrap.php';
 
 require_role('student');
 
@@ -17,18 +14,8 @@ $profileComplete = isProfileComplete($user);
 $isAr = getLang() === 'ar';
 $settings = getSettings();
 
-$statusLabels = [
-    'draft' => __('status_draft'),
-    'under_review' => __('status_under_review'),
-    'accepted' => __('status_accepted'),
-    'rejected' => __('status_rejected'),
-];
-$statusColors = [
-    'draft' => 'secondary',
-    'under_review' => 'warning',
-    'accepted' => 'success', 
-    'rejected' => 'danger',
-];
+$statusLabels = getStatusLabels();
+$statusColors = getStatusColors();
 
 $pageTitle = __('dashboard');
 require_once dirname(__DIR__) . '/includes/header.php';
@@ -215,16 +202,8 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
     </div>
 </div>
 
+<script src="/assets/js/editor.js"></script>
 <script>
-function editorCmd(command, targetId) {
-    document.execCommand(command, false, null);
-    document.getElementById(targetId)?.focus();
-}
-function editorInsertLink(targetId) {
-    const url = prompt('URL:', 'https://');
-    if (url) document.execCommand('createLink', false, url);
-}
-
 async function createProject() {
     const title = document.getElementById('newTitle').value.trim();
     const type = document.getElementById('newType').value.trim();
