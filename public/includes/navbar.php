@@ -52,11 +52,6 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
                             <i class="bi bi-house-door me-1"></i><?= __('dashboard') ?>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?= $currentPage === 'profile' ? 'active' : '' ?>" href="/student/profile.php">
-                            <i class="bi bi-person me-1"></i><?= __('my_profile') ?>
-                        </a>
-                    </li>
                 <?php elseif ($isLoggedIn && $role === 'doctor'): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= $currentPage === 'dashboard' ? 'active' : '' ?>" href="/professor/dashboard.php">
@@ -87,20 +82,30 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
                     </a>
                 </li>
                 <?php if ($isLoggedIn): ?>
-                    <li class="nav-item">
-                        <span class="nav-link text-light d-flex align-items-center gap-1">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <?php if ($navProfilePic): ?>
                                 <img src="<?= $navProfilePic ?>" class="navbar-profile-pic rounded-circle" alt="">
                             <?php else: ?>
                                 <i class="bi bi-person-circle me-1"></i>
                             <?php endif; ?>
                             <?= sanitize($userName) ?>
-                        </span>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/logout.php">
-                            <i class="bi bi-box-arrow-right me-1"></i><?= __('logout') ?>
                         </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <?php if ($role === 'student'): ?>
+                                <li>
+                                    <a class="dropdown-item" href="/student/profile.php">
+                                        <i class="bi bi-person me-2"></i><?= __('my_profile') ?>
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                            <?php endif; ?>
+                            <li>
+                                <a class="dropdown-item" href="/logout.php">
+                                    <i class="bi bi-box-arrow-right me-2"></i><?= __('logout') ?>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                 <?php endif; ?>
             </ul>

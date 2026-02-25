@@ -29,7 +29,8 @@
 
 ### General
 - 🌍 Bilingual: Arabic (RTL, default) & English (LTR) — toggle via navbar
-- 📱 Fully responsive (Bootstrap 5)
+- � User dropdown menu — click username in navbar for profile & logout
+- �📱 Fully responsive (Bootstrap 5)
 - 🐳 Dockerized — one command to run
 
 ---
