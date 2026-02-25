@@ -17,11 +17,40 @@ function sanitize(?string $str): string {
  */
 function sanitizeHtml(?string $html): string {
     if (empty($html)) return '';
-    $allowed = '<b><i><u><strong><em><ul><ol><li><a><br><p><div><span>';
+    $allowed = '<b><i><u><strong><em><ul><ol><li><a><br><p><div><span><img>';
     $clean = strip_tags(trim($html), $allowed);
     // Remove event handlers and javascript: URLs
-    $clean = preg_replace('/\bon\w+\s*=\s*["\'][^"\']*["\']/i', '', $clean);
-    $clean = preg_replace('/href\s*=\s*["\']javascript:[^"\']*["\']/i', 'href="#"', $clean);
+    $clean = preg_replace('/\bon\w+\s*=\s*["\'][^"\']*["\']\s*/i', '', $clean);
+    $clean = preg_replace('/href\s*=\s*["\']javascript:[^"\']*["\']\s*/i', 'href="#"', $clean);
+    // Only allow img src from our file API
+    $clean = preg_replace_callback('/<img\s[^>]*>/i', function($match) {
+        $tag = $match[0];
+        // Extract src (browser innerHTML may have &amp; instead of &)
+        if (preg_match('/src\s*=\s*["\'](\/api\/file\.php\?[^"\']+)["\']/', $tag, $srcMatch)) {
+            // Decode first to normalize, then re-encode once
+            $src = html_entity_decode($srcMatch[1], ENT_QUOTES, 'UTF-8');
+            $src = htmlspecialchars($src, ENT_QUOTES, 'UTF-8');
+            // Extract alt if present
+            $alt = '';
+            if (preg_match('/alt\s*=\s*["\']([^"\']*)["\']/', $tag, $altMatch)) {
+                $alt = htmlspecialchars(html_entity_decode($altMatch[1], ENT_QUOTES, 'UTF-8'), ENT_QUOTES, 'UTF-8');
+            }
+            // Preserve width/height if set
+            $style = '';
+            if (preg_match('/width\s*=\s*["\']?(\d+(%|px)?)["\']?/', $tag, $wMatch)) {
+                $style .= 'width:' . htmlspecialchars($wMatch[1], ENT_QUOTES, 'UTF-8') . (strpos($wMatch[1], '%') === false && strpos($wMatch[1], 'px') === false ? 'px' : '') . ';';
+            }
+            if (preg_match('/style\s*=\s*["\']([^"\']*)["\']/', $tag, $sMatch)) {
+                // Extract only width/height from inline style
+                if (preg_match('/width\s*:\s*([\d.]+(?:px|%))/', $sMatch[1], $sw)) {
+                    $style .= 'width:' . htmlspecialchars($sw[1], ENT_QUOTES, 'UTF-8') . ';';
+                }
+            }
+            $styleAttr = $style ? ' style="' . $style . '"' : '';
+            return '<img src="' . $src . '" alt="' . $alt . '" class="desc-img"' . $styleAttr . '>';
+        }
+        return ''; // Strip img tags with non-API sources
+    }, $clean);
     return $clean;
 }
 

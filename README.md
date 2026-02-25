@@ -16,6 +16,7 @@
   - 🔑 Join code (6-char alphanumeric)
   - 👤 Direct invite (search by email or student code)
 - **Submit for review** — once team meets size requirements and all member profiles are complete
+- **Rich description editor** — bold, italic, underline, lists, links, and image uploads (click, paste, or drag & drop)
 - **Track status** — view doctor feedback, resubmit if rejected
 
 ### Professor (Doctor) Flow
@@ -106,6 +107,7 @@ graduation-system/
     │   ├── invitations.php       # Invitation management
     │   ├── profile.php           # Profile read/update/image upload
     │   ├── upload.php            # Document image uploads
+    │   ├── description-upload.php # Project description image uploads
     │   ├── file.php              # Secure authenticated file serving
     │   ├── submit.php            # Project submission
     │   ├── review.php            # Doctor accept/reject

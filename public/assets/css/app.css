@@ -240,6 +240,49 @@ body {
     text-decoration: underline;
 }
 
+.simple-editor-content img,
+.project-description img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    margin: 8px 0;
+    cursor: default;
+}
+
+.simple-editor-content img {
+    cursor: pointer;
+}
+
+.simple-editor-content img.img-resizing {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+}
+
+.img-resize-handle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: var(--bs-primary);
+    border: 1px solid #fff;
+    border-radius: 2px;
+    cursor: nwse-resize;
+    z-index: 10;
+}
+
+.img-resize-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.simple-editor-content .upload-placeholder {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--bs-secondary-bg);
+    border-radius: 4px;
+    color: var(--bs-secondary-color);
+    font-size: 0.85rem;
+}
+
 /* Description display */
 .project-description {
     line-height: 1.7;

@@ -259,6 +259,8 @@ $translations = [
     'bullet_list' => ['ar' => 'قائمة نقطية', 'en' => 'Bullet List'],
     'numbered_list' => ['ar' => 'قائمة مرقمة', 'en' => 'Numbered List'],
     'insert_link' => ['ar' => 'إدراج رابط', 'en' => 'Insert Link'],
+    'upload_file' => ['ar' => 'رفع صورة', 'en' => 'Upload Image'],
+    'uploading_file' => ['ar' => 'جاري الرفع...', 'en' => 'Uploading...'],
     'no_description' => ['ar' => 'لا يوجد وصف للمشروع بعد.', 'en' => 'No project description yet.'],
     'edit_project_info' => ['ar' => 'تعديل المشروع', 'en' => 'Edit Project'],
     'save_changes' => ['ar' => 'حفظ التغييرات', 'en' => 'Save Changes'],
