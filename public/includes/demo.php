@@ -22,12 +22,12 @@ define('DEMO_RESET_INTERVAL', 30 * 60);
 
 /** Demo seed accounts — email => [name, role, student_code] */
 define('DEMO_SEED_ACCOUNTS', [
-    'doctor@treudler.net'   => ['name' => 'دكتور',       'role' => 'doctor',  'student_code' => null],
-    'student1@treudler.net' => ['name' => 'طالب 1',      'role' => 'student', 'student_code' => '001'],
-    'student2@treudler.net' => ['name' => 'طالب 2',      'role' => 'student', 'student_code' => '002'],
-    'student3@treudler.net' => ['name' => 'طالب 3',      'role' => 'student', 'student_code' => '003'],
-    'student4@treudler.net' => ['name' => 'طالب 4',      'role' => 'student', 'student_code' => '004'],
-    'student5@treudler.net' => ['name' => 'طالب 5',      'role' => 'student', 'student_code' => '005'],
+    'doctor@treudler.net'   => ['name' => 'Doctor',      'role' => 'doctor',  'student_code' => null],
+    'student1@treudler.net' => ['name' => 'Student 1',   'role' => 'student', 'student_code' => '001'],
+    'student2@treudler.net' => ['name' => 'Student 2',   'role' => 'student', 'student_code' => '002'],
+    'student3@treudler.net' => ['name' => 'Student 3',   'role' => 'student', 'student_code' => '003'],
+    'student4@treudler.net' => ['name' => 'Student 4',   'role' => 'student', 'student_code' => '004'],
+    'student5@treudler.net' => ['name' => 'Student 5',   'role' => 'student', 'student_code' => '005'],
 ]);
 
 /**
@@ -146,6 +146,47 @@ function performDemoReset(): void {
             max_team_size = 7,
             student_project_creation = 1
             WHERE id = 1");
+
+        // Re-seed demo projects
+        $pdo->exec("INSERT INTO projects (title, type, description, join_code, status, group_number, submission_date)
+            VALUES ('Library Management System', 'Web Application',
+            'A comprehensive library management system that allows registering books and members, handling borrowing and return operations, and generating periodic reports. The system includes a user-friendly interface for patrons and an advanced admin panel for librarians.',
+            'DEMO0001', 'accepted', 1, NOW())");
+        $proj1 = $pdo->lastInsertId();
+
+        $pdo->exec("INSERT INTO projects (title, type, description, join_code, status, submission_date)
+            VALUES ('Fitness Tracking App', 'Mobile Application',
+            'A smartphone application that helps users track their physical activity, log workouts, count calories, and monitor progress toward their health goals.',
+            'DEMO0002', 'under_review', NOW())");
+        $proj2 = $pdo->lastInsertId();
+
+        // Re-seed demo project members
+        $seedUserIds = [];
+        $stmt = $pdo->prepare("SELECT id, email FROM users WHERE email IN ($placeholders)");
+        $stmt->execute($seedEmails);
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $seedUserIds[$row['email']] = $row['id'];
+        }
+
+        // Project 1: student1 = leader, student2 & student3 = members
+        $memberStmt = $pdo->prepare("INSERT INTO project_members (project_id, user_id, role) VALUES (?, ?, ?)");
+        if (isset($seedUserIds['student1@treudler.net'])) {
+            $memberStmt->execute([$proj1, $seedUserIds['student1@treudler.net'], 'leader']);
+        }
+        if (isset($seedUserIds['student2@treudler.net'])) {
+            $memberStmt->execute([$proj1, $seedUserIds['student2@treudler.net'], 'member']);
+        }
+        if (isset($seedUserIds['student3@treudler.net'])) {
+            $memberStmt->execute([$proj1, $seedUserIds['student3@treudler.net'], 'member']);
+        }
+
+        // Project 2: student4 = leader, student5 = member
+        if (isset($seedUserIds['student4@treudler.net'])) {
+            $memberStmt->execute([$proj2, $seedUserIds['student4@treudler.net'], 'leader']);
+        }
+        if (isset($seedUserIds['student5@treudler.net'])) {
+            $memberStmt->execute([$proj2, $seedUserIds['student5@treudler.net'], 'member']);
+        }
 
         $pdo->commit();
     } catch (Exception $e) {

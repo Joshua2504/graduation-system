@@ -35,6 +35,9 @@
 - **Auto-reset** — 30-minute countdown timer starts after any login; resets all data to seed state
 - **Countdown banner** — live timer above the navbar shows remaining time before reset
 - **Seed users** — 7 pre-created accounts (1 doctor + 1 test student + 5 demo students) survive every reset
+- **Seed projects** — 2 pre-created projects survive every reset:
+  - 📚 *نظام إدارة المكتبات* (Library Management System) — accepted, 3 members (students 1-3)
+  - 🏋️ *تطبيق تتبع اللياقة البدنية* (Fitness Tracking App) — under review, 2 members (students 4-5)
 - Enable with `DEMO_MODE=true` in `.env`
 
 ### General
