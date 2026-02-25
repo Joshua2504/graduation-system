@@ -9,8 +9,8 @@ require_once __DIR__ . '/demo.php';
 $isLoggedIn = is_logged_in();
 $role = current_role();
 $userName = $_SESSION['name'] ?? '';
-$otherLang = getLang() === 'ar' ? 'en' : 'ar';
-$otherLangLabel = getLang() === 'ar' ? 'English' : 'العربية';
+$langLabels = ['ar' => 'العربية', 'en' => 'English', 'de' => 'Deutsch'];
+$currentLangLabel = $langLabels[getLang()] ?? 'العربية';
 
 // Load profile picture for logged-in users
 $navProfilePic = '';
@@ -123,10 +123,19 @@ if ($demoActive) {
                         <i class="bi bi-moon-fill" id="themeIcon"></i>
                     </button>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="?lang=<?= $otherLang ?>">
-                        <i class="bi bi-translate me-1"></i><?= $otherLangLabel ?>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-translate me-1"></i><?= $currentLangLabel ?>
                     </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <?php foreach ($langLabels as $code => $label): ?>
+                            <li>
+                                <a class="dropdown-item <?= getLang() === $code ? 'active' : '' ?>" href="?lang=<?= $code ?>">
+                                    <?= $label ?>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
                 </li>
                 <?php if ($isLoggedIn): ?>
                     <li class="nav-item dropdown">

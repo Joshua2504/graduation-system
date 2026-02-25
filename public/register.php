@@ -165,12 +165,18 @@ require_once __DIR__ . '/includes/header.php';
                             <i class="bi bi-moon-fill" id="themeIcon"></i>
                         </button>
                         <?php
-                        $otherLang = getLang() === 'ar' ? 'en' : 'ar';
-                        $otherLangLabel = getLang() === 'ar' ? 'English' : 'العربية';
+                        $langLabels = ['ar' => 'العربية', 'en' => 'English', 'de' => 'Deutsch'];
                         ?>
-                        <a href="?lang=<?= $otherLang ?>" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-translate me-1"></i><?= $otherLangLabel ?>
-                        </a>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-translate me-1"></i><?= $langLabels[getLang()] ?>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <?php foreach ($langLabels as $code => $label): ?>
+                                    <li><a class="dropdown-item <?= getLang() === $code ? 'active' : '' ?>" href="?lang=<?= $code ?>"><?= $label ?></a></li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>

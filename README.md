@@ -1,13 +1,13 @@
 # 🎓 Graduation Project Management System
 
-**نظام إدارة مشاريع التخرج** — A bilingual (Arabic / English) web application for managing university graduation projects. Students form teams, complete profiles, submit projects for review, and professors approve or reject them.
+**نظام إدارة مشاريع التخرج** — A multilingual (Arabic / English / German) web application for managing university graduation projects. Students form teams, complete profiles, submit projects for review, and professors approve or reject them.
 
 ---
 
 ## ✨ Features
 
 ### Student Flow
-- **Landing page** — one-page login screen with system introduction, feature highlights, and bilingual support
+- **Landing page** — one-page login screen with system introduction, feature highlights, and multilingual support
 - **Register & verify** — create account with student code, optionally verify email
 - **Complete profile** — personal info (gender, national ID, birth date, governorate, address, phone, department) + upload 3 documents (institute card, national ID, payment receipt) + optional profile picture shown across the platform
 - **Create project** — become team leader, get a unique 6-character join code
@@ -37,7 +37,7 @@
 - Enable with `DEMO_MODE=true` in `.env`
 
 ### General
-- 🌍 Bilingual: Arabic (RTL) & English (LTR) — default language auto-detected from browser; toggle via navbar- 🌙 Dark mode — toggle available on login/register pages and in the navbar; preference saved in browser- � User dropdown menu — click username in navbar for profile & logout
+- 🌍 Multilingual: Arabic (RTL), English (LTR) & German (LTR) — default language auto-detected from browser; switch via navbar dropdown- 🌙 Dark mode — toggle available on login/register pages and in the navbar; preference saved in browser- � User dropdown menu — click username in navbar for profile & logout
 - �📱 Fully responsive (Bootstrap 5)
 - 🐳 Dockerized — one command to run
 
@@ -137,7 +137,7 @@ graduation-system/
     │   ├── auth.php              # Session auth & role enforcement
     │   ├── db.php                # PDO database connection
     │   ├── functions.php         # Helper functions
-    │   ├── lang.php              # Bilingual translations (AR/EN)
+    │   ├── lang.php              # Multilingual translations (AR/EN/DE)
     │   ├── mailer.php            # SMTP mailer
     │   ├── demo.php              # Demo mode helpers
     │   ├── header.php            # HTML head template
@@ -317,7 +317,7 @@ docker exec -it grad-db mariadb -u grad_user -p graduation
 
 ## 🌍 Internationalization
 
-The application supports **Arabic** (default, RTL) and **English** (LTR). Language is toggled via the navbar and persisted in the session. All UI strings are managed in `public/includes/lang.php` with 100+ translation keys.
+The application supports **Arabic** (RTL), **English** (LTR), and **German** (LTR). Language is auto-detected from the browser's `Accept-Language` header on first visit, switchable via the navbar dropdown, and persisted in the session. All UI strings are managed in `public/includes/lang.php` with 150+ translation keys.
 
 Bootstrap RTL CSS is automatically loaded when Arabic is active.
 
