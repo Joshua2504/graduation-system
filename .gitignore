@@ -1,6 +1,7 @@
 .env
 public/uploads/*
 !public/uploads/.gitkeep
+!public/uploads/.htaccess
 vendor/
 node_modules/
 data/

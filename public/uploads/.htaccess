@@ -1,0 +1,3 @@
+# Block all direct access to uploaded files.
+# Files must be served through the authenticated /api/file.php endpoint.
+Deny from all

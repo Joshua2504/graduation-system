@@ -77,95 +77,110 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
             </span>
         </div>
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-3 mb-2">
-                    <strong><?= __('project_type') ?>:</strong>
-                    <span><?= sanitize($project['type']) ?: '-' ?></span>
-                </div>
-                <div class="col-md-3 mb-2">
-                    <strong><?= __('team_leader') ?>:</strong>
-                    <span><?= sanitize($project['leader_name']) ?></span>
-                </div>
-                <div class="col-md-3 mb-2">
-                    <strong><?= __('member_count') ?>:</strong>
-                    <span><?= $memberCount ?>/<?= $maxSize ?></span>
-                </div>
-                <?php if ($project['group_number']): ?>
+            <!-- View mode -->
+            <div id="projectViewMode">
+                <div class="row">
                     <div class="col-md-3 mb-2">
-                        <strong><?= __('group_number') ?>:</strong>
-                        <span class="badge bg-success fs-6"><?= $project['group_number'] ?></span>
+                        <strong><?= __('project_type') ?>:</strong>
+                        <span><?= sanitize($project['type']) ?: '-' ?></span>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <strong><?= __('team_leader') ?>:</strong>
+                        <span><?= sanitize($project['leader_name']) ?></span>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <strong><?= __('member_count') ?>:</strong>
+                        <span><?= $memberCount ?>/<?= $maxSize ?></span>
+                    </div>
+                    <?php if ($project['group_number']): ?>
+                        <div class="col-md-3 mb-2">
+                            <strong><?= __('group_number') ?>:</strong>
+                            <span class="badge bg-success fs-6"><?= $project['group_number'] ?></span>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($project['submission_date']): ?>
+                        <div class="col-md-3 mb-2">
+                            <strong><?= __('submission_date') ?>:</strong>
+                            <span><?= date('Y-m-d H:i', strtotime($project['submission_date'])) ?></span>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <?php if (!empty($project['description'])): ?>
+                    <hr>
+                    <div>
+                        <strong><i class="bi bi-card-text me-1"></i><?= __('project_description') ?>:</strong>
+                        <div class="mt-2 p-3 bg-light rounded project-description"><?= sanitizeHtml($project['description']) ?></div>
+                    </div>
+                <?php elseif (empty($project['description'])): ?>
+                    <hr>
+                    <div class="text-muted"><i class="bi bi-card-text me-1"></i><?= __('no_description') ?></div>
+                <?php endif; ?>
+
+                <?php if ($project['status'] === 'rejected' && !empty($project['doctor_note'])): ?>
+                    <div class="alert alert-warning mt-3 mb-0">
+                        <strong><i class="bi bi-chat-left-text me-2"></i><?= __('doctor_note') ?>:</strong>
+                        <p class="mb-0 mt-1"><?= sanitize($project['doctor_note']) ?></p>
                     </div>
                 <?php endif; ?>
-                <?php if ($project['submission_date']): ?>
-                    <div class="col-md-3 mb-2">
-                        <strong><?= __('submission_date') ?>:</strong>
-                        <span><?= date('Y-m-d H:i', strtotime($project['submission_date'])) ?></span>
+
+                <?php if ($project['status'] === 'accepted'): ?>
+                    <div class="alert alert-success mt-3 mb-0">
+                        <i class="bi bi-check-circle me-2"></i><?= __('project_accepted_msg') ?>
+                    </div>
+                <?php elseif ($project['status'] === 'under_review'): ?>
+                    <div class="alert alert-info mt-3 mb-0">
+                        <i class="bi bi-hourglass-split me-2"></i><?= __('project_submitted') ?>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($isLeader && in_array($project['status'], ['draft', 'rejected'])): ?>
+                    <div class="text-end mt-3">
+                        <button type="button" class="btn btn-outline-primary" onclick="toggleEditMode(true)">
+                            <i class="bi bi-pencil-square me-1"></i><?= __('edit_project_info') ?>
+                        </button>
                     </div>
                 <?php endif; ?>
             </div>
 
-            <?php if (!empty($project['description']) && !($isLeader && $project['status'] === 'draft')): ?>
-                <hr>
-                <div>
-                    <strong><i class="bi bi-card-text me-1"></i><?= __('project_description') ?>:</strong>
-                    <div class="mt-2 p-3 bg-light rounded project-description"><?= sanitizeHtml($project['description']) ?></div>
-                </div>
-            <?php elseif (empty($project['description']) && !($isLeader && $project['status'] === 'draft')): ?>
-                <hr>
-                <div class="text-muted"><i class="bi bi-card-text me-1"></i><?= __('no_description') ?></div>
-            <?php endif; ?>
-
-            <?php if ($project['status'] === 'rejected' && !empty($project['doctor_note'])): ?>
-                <div class="alert alert-warning mt-3 mb-0">
-                    <strong><i class="bi bi-chat-left-text me-2"></i><?= __('doctor_note') ?>:</strong>
-                    <p class="mb-0 mt-1"><?= sanitize($project['doctor_note']) ?></p>
-                </div>
-            <?php endif; ?>
-
-            <?php if ($project['status'] === 'accepted'): ?>
-                <div class="alert alert-success mt-3 mb-0">
-                    <i class="bi bi-check-circle me-2"></i><?= __('project_accepted_msg') ?>
-                </div>
-            <?php elseif ($project['status'] === 'under_review'): ?>
-                <div class="alert alert-info mt-3 mb-0">
-                    <i class="bi bi-hourglass-split me-2"></i><?= __('project_submitted') ?>
-                </div>
-            <?php endif; ?>
-
-            <!-- Edit title/type/description (leader, draft only) -->
-            <?php if ($isLeader && $project['status'] === 'draft'): ?>
-                <hr>
-                <form id="editProjectForm">
-                    <div class="row g-2 align-items-end mb-3">
-                        <div class="col-md-5">
-                            <label class="form-label small fw-bold"><?= __('project_name') ?></label>
-                            <input type="text" class="form-control" id="editTitle" value="<?= sanitize($project['title']) ?>" required>
+            <!-- Edit mode (leader, draft/rejected only) -->
+            <?php if ($isLeader && in_array($project['status'], ['draft', 'rejected'])): ?>
+                <div id="projectEditMode" class="d-none">
+                    <form id="editProjectForm">
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold"><?= __('project_name') ?></label>
+                                <input type="text" class="form-control" id="editTitle" value="<?= sanitize($project['title']) ?>" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold"><?= __('project_type') ?></label>
+                                <input type="text" class="form-control" id="editType" value="<?= sanitize($project['type']) ?>">
+                            </div>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label small fw-bold"><?= __('project_type') ?></label>
-                            <input type="text" class="form-control" id="editType" value="<?= sanitize($project['type']) ?>">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold"><i class="bi bi-card-text me-1"></i><?= __('project_description') ?></label>
+                            <div class="simple-editor-toolbar">
+                                <button type="button" class="btn" onclick="editorCmd('bold')" title="<?= __('bold') ?>"><i class="bi bi-type-bold"></i></button>
+                                <button type="button" class="btn" onclick="editorCmd('italic')" title="<?= __('italic') ?>"><i class="bi bi-type-italic"></i></button>
+                                <button type="button" class="btn" onclick="editorCmd('underline')" title="<?= __('underline_text') ?>"><i class="bi bi-type-underline"></i></button>
+                                <div class="vr mx-1 opacity-25"></div>
+                                <button type="button" class="btn" onclick="editorCmd('insertUnorderedList')" title="<?= __('bullet_list') ?>"><i class="bi bi-list-ul"></i></button>
+                                <button type="button" class="btn" onclick="editorCmd('insertOrderedList')" title="<?= __('numbered_list') ?>"><i class="bi bi-list-ol"></i></button>
+                                <div class="vr mx-1 opacity-25"></div>
+                                <button type="button" class="btn" onclick="editorInsertLink()" title="<?= __('insert_link') ?>"><i class="bi bi-link-45deg"></i></button>
+                            </div>
+                            <div id="editDescription" class="simple-editor-content" contenteditable="true" data-placeholder="<?= __('description_placeholder') ?>"><?= sanitizeHtml($project['description'] ?? '') ?></div>
                         </div>
-                        <div class="col-md-3">
-                            <button type="submit" class="btn btn-outline-primary w-100">
-                                <i class="bi bi-check-lg me-1"></i><?= __('save') ?>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-outline-secondary" onclick="toggleEditMode(false)">
+                                <i class="bi bi-x-lg me-1"></i><?= __('cancel') ?>
+                            </button>
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="bi bi-check-lg me-2"></i><?= __('save_changes') ?>
                             </button>
                         </div>
-                    </div>
-                    <div class="mb-0">
-                        <label class="form-label small fw-bold"><i class="bi bi-card-text me-1"></i><?= __('project_description') ?></label>
-                        <div class="simple-editor-toolbar">
-                            <button type="button" class="btn" onclick="editorCmd('bold')" title="<?= __('bold') ?>"><i class="bi bi-type-bold"></i></button>
-                            <button type="button" class="btn" onclick="editorCmd('italic')" title="<?= __('italic') ?>"><i class="bi bi-type-italic"></i></button>
-                            <button type="button" class="btn" onclick="editorCmd('underline')" title="<?= __('underline_text') ?>"><i class="bi bi-type-underline"></i></button>
-                            <div class="vr mx-1 opacity-25"></div>
-                            <button type="button" class="btn" onclick="editorCmd('insertUnorderedList')" title="<?= __('bullet_list') ?>"><i class="bi bi-list-ul"></i></button>
-                            <button type="button" class="btn" onclick="editorCmd('insertOrderedList')" title="<?= __('numbered_list') ?>"><i class="bi bi-list-ol"></i></button>
-                            <div class="vr mx-1 opacity-25"></div>
-                            <button type="button" class="btn" onclick="editorInsertLink()" title="<?= __('insert_link') ?>"><i class="bi bi-link-45deg"></i></button>
-                        </div>
-                        <div id="editDescription" class="simple-editor-content" contenteditable="true" data-placeholder="<?= __('description_placeholder') ?>"><?= sanitizeHtml($project['description'] ?? '') ?></div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             <?php endif; ?>
         </div>
     </div>

@@ -260,6 +260,8 @@ $translations = [
     'numbered_list' => ['ar' => 'قائمة مرقمة', 'en' => 'Numbered List'],
     'insert_link' => ['ar' => 'إدراج رابط', 'en' => 'Insert Link'],
     'no_description' => ['ar' => 'لا يوجد وصف للمشروع بعد.', 'en' => 'No project description yet.'],
+    'edit_project_info' => ['ar' => 'تعديل المشروع', 'en' => 'Edit Project'],
+    'save_changes' => ['ar' => 'حفظ التغييرات', 'en' => 'Save Changes'],
     'confirm_remove_member' => ['ar' => 'هل تريد إزالة', 'en' => 'Remove'],
     'confirm_leave_project' => ['ar' => 'هل تريد مغادرة هذا المشروع؟', 'en' => 'Leave this project?'],
     'confirm_delete_project' => ['ar' => 'هل أنت متأكد من حذف هذا المشروع؟ سيتم حذفه نهائياً.', 'en' => 'Are you sure you want to delete this project? This is permanent.'],

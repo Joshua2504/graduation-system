@@ -239,6 +239,17 @@ function findDuplicateProjects(int $excludeProjectId, string $title): array {
 }
 
 /**
+ * Generate a secure URL for serving an uploaded file through the authenticated endpoint.
+ * 
+ * @param int    $userId   The owner's user ID
+ * @param string $filename The filename stored in the database
+ * @return string The URL path to the secure file endpoint
+ */
+function secureFileUrl(int $userId, string $filename): string {
+    return '/api/file.php?user=' . urlencode($userId) . '&file=' . urlencode($filename);
+}
+
+/**
  * Validate file upload: MIME type + size
  * Returns error string or null if valid
  */

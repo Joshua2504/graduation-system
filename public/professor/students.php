@@ -358,7 +358,7 @@ async function openEditModal(userId) {
         for (const [type, field] of Object.entries(imgTypes)) {
             const container = document.getElementById('edit_img_preview_' + type);
             if (u[field]) {
-                const path = '/uploads/user_' + u.id + '/' + u[field];
+                const path = '/api/file.php?user=' + u.id + '&file=' + encodeURIComponent(u[field]);
                 container.innerHTML = `<img src="${path}" class="img-thumbnail" style="max-height:100px; cursor:pointer;" onclick="previewImage('${path}', '${type}')">`;
             } else {
                 container.innerHTML = `<span class="text-muted small">${isAr ? <?= json_encode(__('no_image')) ?> : <?= json_encode(__('no_image')) ?>}</span>`;
@@ -452,7 +452,8 @@ function uploadStudentImage(input, type) {
             const data = JSON.parse(xhr.responseText);
             if (data.success) {
                 const container = document.getElementById('edit_img_preview_' + type);
-                container.innerHTML = `<img src="${data.path}" class="img-thumbnail" style="max-height:100px; cursor:pointer;" onclick="previewImage('${data.path}', '${type}')">`;
+                const securePath = '/api/file.php?user=' + document.getElementById('edit_user_id').value + '&file=' + encodeURIComponent(data.filename);
+                container.innerHTML = `<img src="${securePath}" class="img-thumbnail" style="max-height:100px; cursor:pointer;" onclick="previewImage('${securePath}', '${type}')">`;
             } else {
                 alert(data.error || 'Upload failed');
             }

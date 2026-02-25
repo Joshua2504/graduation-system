@@ -65,46 +65,93 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
     <!-- Project Info Card -->
     <div class="card shadow mb-4">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="bi bi-clipboard-data me-2"></i><?= sanitize($project['title']) ?></h5>
+            <h5 class="mb-0"><i class="bi bi-clipboard-data me-2"></i><span id="projectTitleDisplay"><?= sanitize($project['title']) ?></span></h5>
             <span class="badge bg-<?= $statusColors[$project['status']] ?> fs-6">
                 <?= $statusLabels[$project['status']] ?>
             </span>
         </div>
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-4 mb-2">
-                    <strong><?= __('project_type') ?>:</strong>
-                    <span><?= sanitize($project['type']) ?></span>
-                </div>
-                <div class="col-md-4 mb-2">
-                    <strong><?= __('team_leader') ?>:</strong>
-                    <span><?= $project['leader_name'] ? sanitize($project['leader_name']) . ' (' . sanitize($project['leader_email']) . ')' : '<em class="text-muted">' . __('no_leader_assigned') . '</em>' ?></span>
-                </div>
-                <div class="col-md-4 mb-2">
-                    <strong><?= __('submission_date') ?>:</strong>
-                    <span><?= $project['submission_date'] ? date('Y-m-d H:i', strtotime($project['submission_date'])) : '-' ?></span>
-                </div>
-                <?php if ($project['group_number']): ?>
+            <!-- View mode -->
+            <div id="projectViewMode">
+                <div class="row">
                     <div class="col-md-4 mb-2">
-                        <strong><?= __('group_number') ?>:</strong>
-                        <span class="badge bg-success fs-6"><?= $project['group_number'] ?></span>
+                        <strong><?= __('project_type') ?>:</strong>
+                        <span><?= sanitize($project['type']) ?></span>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <strong><?= __('team_leader') ?>:</strong>
+                        <span><?= $project['leader_name'] ? sanitize($project['leader_name']) . ' (' . sanitize($project['leader_email']) . ')' : '<em class="text-muted">' . __('no_leader_assigned') . '</em>' ?></span>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <strong><?= __('submission_date') ?>:</strong>
+                        <span><?= $project['submission_date'] ? date('Y-m-d H:i', strtotime($project['submission_date'])) : '-' ?></span>
+                    </div>
+                    <?php if ($project['group_number']): ?>
+                        <div class="col-md-4 mb-2">
+                            <strong><?= __('group_number') ?>:</strong>
+                            <span class="badge bg-success fs-6"><?= $project['group_number'] ?></span>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($project['doctor_note']): ?>
+                        <div class="col-12 mt-2">
+                            <strong><?= __('doctor_note') ?>:</strong>
+                            <p class="mt-1 p-2 bg-light rounded"><?= sanitize($project['doctor_note']) ?></p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <?php if (!empty($project['description'])): ?>
+                    <hr>
+                    <div>
+                        <strong><i class="bi bi-card-text me-1"></i><?= __('project_description') ?>:</strong>
+                        <div class="mt-2 p-3 bg-light rounded project-description"><?= sanitizeHtml($project['description']) ?></div>
                     </div>
                 <?php endif; ?>
-                <?php if ($project['doctor_note']): ?>
-                    <div class="col-12 mt-2">
-                        <strong><?= __('doctor_note') ?>:</strong>
-                        <p class="mt-1 p-2 bg-light rounded"><?= sanitize($project['doctor_note']) ?></p>
-                    </div>
-                <?php endif; ?>
+
+                <div class="text-end mt-3">
+                    <button type="button" class="btn btn-outline-primary" onclick="toggleEditMode(true)">
+                        <i class="bi bi-pencil-square me-1"></i><?= __('edit_project_info') ?>
+                    </button>
+                </div>
             </div>
 
-            <?php if (!empty($project['description'])): ?>
-                <hr>
-                <div>
-                    <strong><i class="bi bi-card-text me-1"></i><?= __('project_description') ?>:</strong>
-                    <div class="mt-2 p-3 bg-light rounded project-description"><?= sanitizeHtml($project['description']) ?></div>
-                </div>
-            <?php endif; ?>
+            <!-- Edit mode -->
+            <div id="projectEditMode" class="d-none">
+                <form id="editProjectForm">
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold"><?= __('project_name') ?></label>
+                            <input type="text" class="form-control" id="editTitle" value="<?= sanitize($project['title']) ?>" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold"><?= __('project_type') ?></label>
+                            <input type="text" class="form-control" id="editType" value="<?= sanitize($project['type']) ?>">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold"><i class="bi bi-card-text me-1"></i><?= __('project_description') ?></label>
+                        <div class="simple-editor-toolbar">
+                            <button type="button" class="btn" onclick="editorCmd('bold')" title="<?= __('bold') ?>"><i class="bi bi-type-bold"></i></button>
+                            <button type="button" class="btn" onclick="editorCmd('italic')" title="<?= __('italic') ?>"><i class="bi bi-type-italic"></i></button>
+                            <button type="button" class="btn" onclick="editorCmd('underline')" title="<?= __('underline_text') ?>"><i class="bi bi-type-underline"></i></button>
+                            <div class="vr mx-1 opacity-25"></div>
+                            <button type="button" class="btn" onclick="editorCmd('insertUnorderedList')" title="<?= __('bullet_list') ?>"><i class="bi bi-list-ul"></i></button>
+                            <button type="button" class="btn" onclick="editorCmd('insertOrderedList')" title="<?= __('numbered_list') ?>"><i class="bi bi-list-ol"></i></button>
+                            <div class="vr mx-1 opacity-25"></div>
+                            <button type="button" class="btn" onclick="editorInsertLink()" title="<?= __('insert_link') ?>"><i class="bi bi-link-45deg"></i></button>
+                        </div>
+                        <div id="editDescription" class="simple-editor-content" contenteditable="true" data-placeholder="<?= __('description_placeholder') ?>"><?= sanitizeHtml($project['description'] ?? '') ?></div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-outline-secondary" onclick="toggleEditMode(false)">
+                            <i class="bi bi-x-lg me-1"></i><?= __('cancel') ?>
+                        </button>
+                        <button type="submit" class="btn btn-primary btn-lg px-5">
+                            <i class="bi bi-check-lg me-2"></i><?= __('save_changes') ?>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -184,7 +231,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                     $memberId = $member['id'];
                     foreach ($imageTypes as $field => $label):
                         $imgFile = $member[$field] ?? '';
-                        $imgPath = "/uploads/user_{$memberId}/{$imgFile}";
+                        $imgPath = secureFileUrl($memberId, $imgFile);
                     ?>
                         <div class="col-md-4 text-center mb-2">
                             <small class="text-muted d-block mb-1"><?= $label ?></small>
@@ -337,6 +384,44 @@ async function resendInvitation(invitationId) {
 
 const PROJECT_ID = <?= $projectId ?>;
 
+// ─── Edit project (toggle view/edit mode) ───
+function toggleEditMode(editing) {
+    document.getElementById('projectViewMode').classList.toggle('d-none', editing);
+    document.getElementById('projectEditMode').classList.toggle('d-none', !editing);
+    if (editing) {
+        document.getElementById('editTitle')?.focus();
+    }
+}
+
+// Simple editor commands
+function editorCmd(command) {
+    document.execCommand(command, false, null);
+    document.getElementById('editDescription')?.focus();
+}
+function editorInsertLink() {
+    const url = prompt('URL:', 'https://');
+    if (url) document.execCommand('createLink', false, url);
+}
+
+// Save project edits
+document.getElementById('editProjectForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const title = document.getElementById('editTitle').value.trim();
+    const type = document.getElementById('editType').value.trim();
+    const descEl = document.getElementById('editDescription');
+    const description = descEl ? descEl.innerHTML.trim() : '';
+    try {
+        const res = await fetch('/api/project.php', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ project_id: PROJECT_ID, title, type, description })
+        });
+        const data = await res.json();
+        if (data.success) location.reload();
+        else alert(data.error);
+    } catch (err) { alert(err.message); }
+});
+
 // Search & assign students
 document.getElementById('assignStudentSearch')?.addEventListener('keydown', e => {
     if (e.key === 'Enter') { e.preventDefault(); searchAndAssign(); }
@@ -424,7 +509,6 @@ function showAssignAlert(msg, type) {
     el.textContent = msg;
     el.classList.remove('d-none');
     setTimeout(() => el.classList.add('d-none'), 3000);
-}
 }
 
 <?php if ($project['status'] === 'under_review'): ?>

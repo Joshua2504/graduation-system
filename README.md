@@ -21,6 +21,7 @@
 ### Professor (Doctor) Flow
 - **Dashboard** — projects organized by status tabs (Draft, Under Review, Accepted, Rejected) with sorting and member counts
 - **Review projects** — view all team members' profiles, documents, and images; accept or reject with notes
+- **Edit projects** — inline editing of project title, type, and rich-text description for any project
 - **Duplicate detection** — automatic warning when project titles match
 - **System settings** — toggle registration, email verification, min/max team size (2–10)
 - **Manage students** — list all student accounts, verify emails manually, enable/disable accounts
@@ -43,6 +44,7 @@
 | Containerization | Docker + Docker Compose |
 | Mail | Custom SMTP mailer (STARTTLS/TLS, no external dependencies) |
 | Auth | Session-based, bcrypt password hashing |
+| File Security | Uploads served via authenticated endpoint, direct access blocked |
 
 ---
 
@@ -104,6 +106,7 @@ graduation-system/
     │   ├── invitations.php       # Invitation management
     │   ├── profile.php           # Profile read/update/image upload
     │   ├── upload.php            # Document image uploads
+    │   ├── file.php              # Secure authenticated file serving
     │   ├── submit.php            # Project submission
     │   ├── review.php            # Doctor accept/reject
     │   ├── settings.php          # System settings
@@ -230,6 +233,11 @@ graduation-system/
 | `GET` | — | Get own profile |
 | `PUT` | `{gender, national_id, ...}` | Update profile fields |
 | `POST` | Multipart `{type, file}` | Upload document image |
+
+### File Serving — `/api/file.php`
+| Method | Params | Description |
+|--------|--------|-------------|
+| `GET` | `?user={id}&file={filename}` | Serve uploaded file with auth check (students: own files only; doctors: any) |
 
 ### Submit — `/api/submit.php`
 | Method | Params | Description |

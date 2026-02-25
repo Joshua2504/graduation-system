@@ -146,7 +146,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                         ];
                         foreach ($imageTypes as $type => $info):
                             $imgFile = $user[$info['field']] ?? '';
-                            $imgPath = $imgFile ? "/uploads/user_{$userId}/{$imgFile}" : '';
+                            $imgPath = $imgFile ? secureFileUrl($userId, $imgFile) : '';
                         ?>
                             <div class="col-md-4">
                                 <div class="card h-100 <?= $imgFile ? 'border-success' : '' ?>">

@@ -314,7 +314,7 @@ if ($method === 'POST') {
             jsonResponse([
                 'success' => true,
                 'filename' => $filename,
-                'path' => '/uploads/user_' . $userId . '/' . $filename,
+                'path' => secureFileUrl($userId, $filename),
                 'profile_completed' => $pc,
                 'message' => 'تم رفع الصورة بنجاح'
             ]);
