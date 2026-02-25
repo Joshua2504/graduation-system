@@ -144,7 +144,7 @@ if ($method === 'PUT') {
         if (!isProjectLeader($projectId, $userId)) {
             jsonResponse(['error' => 'فقط قائد الفريق يمكنه تعديل المشروع'], 403);
         }
-        if ($project['status'] !== 'draft') {
+        if (!in_array($project['status'], ['draft', 'rejected'])) {
             jsonResponse(['error' => 'لا يمكن تعديل المشروع في الحالة الحالية'], 400);
         }
     }

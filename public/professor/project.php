@@ -146,7 +146,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                         <button type="button" class="btn btn-outline-secondary" onclick="toggleEditMode(false)">
                             <i class="bi bi-x-lg me-1"></i><?= __('cancel') ?>
                         </button>
-                        <button type="submit" class="btn btn-primary btn-lg px-5">
+                        <button type="submit" class="btn btn-primary">
                             <i class="bi bi-check-lg me-2"></i><?= __('save_changes') ?>
                         </button>
                     </div>
