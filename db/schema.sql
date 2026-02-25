@@ -114,6 +114,9 @@ ON DUPLICATE KEY UPDATE `id` = `id`;
 INSERT INTO `users` (`name`, `email`, `password`, `student_code`, `role`, `email_verified`) VALUES
 ('طالب 4', 'student4@treudler.net', '$2y$10$yqqDmhPnvBeLXswbIx3dfepMRnibuYMv/UuUb8hp8T3NAWn0yNepO', '005', 'student', 1)
 ON DUPLICATE KEY UPDATE `id` = `id`;
+INSERT INTO `users` (`name`, `email`, `password`, `student_code`, `role`, `email_verified`) VALUES
+('طالب 5', 'student5@treudler.net', '$2y$10$yqqDmhPnvBeLXswbIx3dfepMRnibuYMv/UuUb8hp8T3NAWn0yNepO', '006', 'student', 1)
+ON DUPLICATE KEY UPDATE `id` = `id`;
 
 -- ─── Migrations ───
 

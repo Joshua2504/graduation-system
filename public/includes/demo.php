@@ -3,7 +3,8 @@
  * Demo mode helpers
  *
  * When DEMO_MODE=true in .env, the system runs in demo mode:
- * - Quick-login buttons on the login page (doctor / demo1)
+ * - Quick-login buttons on the login page (doctor / student1)
+ * - Random passwords generated on first boot and each reset
  * - 30-minute auto-reset timer after any user logs in
  * - Countdown banner above the navbar
  */
@@ -13,8 +14,22 @@ require_once __DIR__ . '/db.php';
 /** File that stores the UNIX timestamp when the next demo reset should happen */
 define('DEMO_RESET_FILE', sys_get_temp_dir() . '/demo_reset_at');
 
+/** File that stores the current demo credentials as JSON */
+define('DEMO_CREDENTIALS_FILE', sys_get_temp_dir() . '/demo_credentials.json');
+
 /** Demo reset interval in seconds (30 minutes) */
 define('DEMO_RESET_INTERVAL', 30 * 60);
+
+/** Demo seed accounts — email => [name, role, student_code] */
+define('DEMO_SEED_ACCOUNTS', [
+    'doctor@treudler.net'   => ['name' => 'دكتور',       'role' => 'doctor',  'student_code' => null],
+    'student@treudler.net'  => ['name' => 'طالب تجريبي', 'role' => 'student', 'student_code' => '001'],
+    'student1@treudler.net' => ['name' => 'طالب 1',      'role' => 'student', 'student_code' => '002'],
+    'student2@treudler.net' => ['name' => 'طالب 2',      'role' => 'student', 'student_code' => '003'],
+    'student3@treudler.net' => ['name' => 'طالب 3',      'role' => 'student', 'student_code' => '004'],
+    'student4@treudler.net' => ['name' => 'طالب 4',      'role' => 'student', 'student_code' => '005'],
+    'student5@treudler.net' => ['name' => 'طالب 5',      'role' => 'student', 'student_code' => '006'],
+]);
 
 /**
  * Check if demo mode is active
@@ -43,25 +58,60 @@ function scheduleDemoReset(): void {
 }
 
 /**
+ * Generate a random 8-char alphanumeric password
+ */
+function generateDemoPassword(): string {
+    return substr(str_shuffle('abcdefghjkmnpqrstuvwxyz23456789'), 0, 8);
+}
+
+/**
+ * Get current demo credentials. Generates them on first call.
+ * Returns array: [ 'doctor@treudler.net' => 'abc123', ... ]
+ */
+function getDemoCredentials(): array {
+    if (file_exists(DEMO_CREDENTIALS_FILE)) {
+        $data = json_decode(file_get_contents(DEMO_CREDENTIALS_FILE), true);
+        if (is_array($data) && count($data) === count(DEMO_SEED_ACCOUNTS)) {
+            return $data;
+        }
+    }
+    // First boot — generate and apply
+    return regenerateDemoPasswords();
+}
+
+/**
+ * Generate new random passwords for all demo accounts, hash & store in DB,
+ * and save the plaintext to the credentials file.
+ */
+function regenerateDemoPasswords(): array {
+    $pdo = getDB();
+    $credentials = [];
+
+    foreach (DEMO_SEED_ACCOUNTS as $email => $meta) {
+        $plain = generateDemoPassword();
+        $hash = password_hash($plain, PASSWORD_BCRYPT);
+        $credentials[$email] = $plain;
+
+        $stmt = $pdo->prepare("UPDATE users SET password = ? WHERE email = ?");
+        $stmt->execute([$hash, $email]);
+    }
+
+    file_put_contents(DEMO_CREDENTIALS_FILE, json_encode($credentials, JSON_UNESCAPED_UNICODE));
+    return $credentials;
+}
+
+/**
  * Reset all demo data back to the seed state.
  * - Deletes all non-seed users, projects, invitations, members
  * - Resets settings to defaults
+ * - Regenerates random passwords for all demo accounts
  * - Clears upload directories
  * - Clears the reset timer
  */
 function performDemoReset(): void {
     $pdo = getDB();
 
-    // Seed emails that should survive the reset
-    $seedEmails = [
-        'doctor@treudler.net',
-        'student@treudler.net',
-        'student1@treudler.net',
-        'student2@treudler.net',
-        'student3@treudler.net',
-        'student4@treudler.net',
-    ];
-
+    $seedEmails = array_keys(DEMO_SEED_ACCOUNTS);
     $placeholders = implode(',', array_fill(0, count($seedEmails), '?'));
 
     $pdo->beginTransaction();
@@ -104,6 +154,9 @@ function performDemoReset(): void {
         throw $e;
     }
 
+    // Regenerate random passwords for all demo accounts
+    regenerateDemoPasswords();
+
     // Clear upload directories
     $uploadsDir = dirname(__DIR__) . '/uploads';
     if (is_dir($uploadsDir)) {
@@ -120,7 +173,7 @@ function performDemoReset(): void {
         }
     }
 
-    // Clear all sessions except current
+    // Clear all sessions
     $sessDir = session_save_path() ?: '/var/lib/php/sessions';
     if (is_dir($sessDir)) {
         foreach (glob($sessDir . '/sess_*') as $sessFile) {

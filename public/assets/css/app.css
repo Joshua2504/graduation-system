@@ -68,6 +68,13 @@ body {
     50% { opacity: 0.8; }
 }
 
+.demo-credentials-box {
+    background: var(--bs-tertiary-bg, #f8f9fa);
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+}
+
 /* ─── Stats Cards ─── */
 .card.border-warning,
 .card.border-success,

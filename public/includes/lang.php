@@ -338,6 +338,7 @@ $translations = [
     'demo_doctor' => ['ar' => 'دكتور', 'en' => 'Doctor'],
     'demo_student' => ['ar' => 'طالب', 'en' => 'Student'],
     'demo_resets_in' => ['ar' => 'إعادة تعيين العرض خلال', 'en' => 'Demo resets in'],
+    'demo_credentials' => ['ar' => 'بيانات الدخول التجريبية', 'en' => 'Demo Credentials'],
 ];
 
 /**

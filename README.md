@@ -29,9 +29,10 @@
 
 ### Demo Mode
 - **Quick login** — one-click login buttons for doctor and student on the login page
+- **Random passwords** — generated on first boot and regenerated on each reset; displayed on the login page
 - **Auto-reset** — 30-minute countdown timer starts after any login; resets all data to seed state
 - **Countdown banner** — live timer above the navbar shows remaining time before reset
-- **Seed users** — 6 pre-created accounts (1 doctor + 5 students) survive every reset
+- **Seed users** — 7 pre-created accounts (1 doctor + 1 test student + 5 demo students) survive every reset
 - Enable with `DEMO_MODE=true` in `.env`
 
 ### General
@@ -88,7 +89,7 @@ The database schema and seed data are applied automatically on first run.
 |------|-------|----------|
 | Professor | `doctor@treudler.net` | `doctor123` |
 | Student | `student@treudler.net` | `student123` |
-| Demo Student 1–4 | `student1@treudler.net` … `student4@treudler.net` | `student123` |
+| Demo Student 1–5 | `student1@treudler.net` … `student5@treudler.net` | *random — shown on login page* |
 
 ---
 
