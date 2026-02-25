@@ -296,19 +296,6 @@ require_once __DIR__ . '/includes/header.php';
                             <?php if (isDemoMode()): ?>
                             <?php $demoCreds = getDemoCredentials(); ?>
                             <hr>
-                            <div class="text-center mb-2">
-                                <small class="text-muted fw-semibold"><?= __('demo_quick_login') ?></small>
-                            </div>
-                            <div class="d-flex gap-2 mb-3">
-                                <button type="button" class="btn btn-outline-primary flex-fill demo-login-btn"
-                                        data-email="doctor@treudler.net" data-password="<?= sanitize($demoCreds['doctor@treudler.net'] ?? '') ?>">
-                                    <i class="bi bi-mortarboard me-1"></i><?= __('demo_doctor') ?>
-                                </button>
-                                <button type="button" class="btn btn-outline-success flex-fill demo-login-btn"
-                                        data-email="student1@treudler.net" data-password="<?= sanitize($demoCreds['student1@treudler.net'] ?? '') ?>">
-                                    <i class="bi bi-person me-1"></i><?= __('demo_student') ?>
-                                </button>
-                            </div>
                             <div class="demo-credentials-box small">
                                 <div class="fw-semibold mb-1"><i class="bi bi-key me-1"></i><?= __('demo_credentials') ?></div>
                                 <table class="table table-sm table-borderless mb-0" style="font-size: 0.8rem;">
@@ -316,6 +303,12 @@ require_once __DIR__ . '/includes/header.php';
                                     <tr>
                                         <td class="text-muted py-0"><?= sanitize($email) ?></td>
                                         <td class="py-0"><code><?= sanitize($pass) ?></code></td>
+                                        <td class="py-0 text-end">
+                                            <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 demo-login-btn"
+                                                    data-email="<?= sanitize($email) ?>" data-password="<?= sanitize($pass) ?>">
+                                                <i class="bi bi-box-arrow-in-right me-1"></i><?= __('login') ?>
+                                            </button>
+                                        </td>
                                     </tr>
                                     <?php endforeach; ?>
                                 </table>
