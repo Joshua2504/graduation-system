@@ -12,7 +12,22 @@ if (isset($_GET['lang']) && in_array($_GET['lang'], ['ar', 'en'])) {
     $_SESSION['lang'] = $_GET['lang'];
 }
 
-$currentLang = $_SESSION['lang'] ?? 'ar';
+// Detect browser language if no session language is set
+if (!isset($_SESSION['lang'])) {
+    $browserLang = 'ar'; // ultimate fallback
+    if (!empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+        $acceptLang = strtolower($_SERVER['HTTP_ACCEPT_LANGUAGE']);
+        // Check if English appears before Arabic in the Accept-Language header
+        $enPos = strpos($acceptLang, 'en');
+        $arPos = strpos($acceptLang, 'ar');
+        if ($enPos !== false && ($arPos === false || $enPos < $arPos)) {
+            $browserLang = 'en';
+        }
+    }
+    $_SESSION['lang'] = $browserLang;
+}
+
+$currentLang = $_SESSION['lang'];
 
 $translations = [
     // General

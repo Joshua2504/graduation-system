@@ -4,8 +4,6 @@
 
 ---
 
-![Screenshot 1](.github/img/screenshot-1.png)
-
 ## ✨ Features
 
 ### Student Flow
@@ -39,7 +37,7 @@
 - Enable with `DEMO_MODE=true` in `.env`
 
 ### General
-- 🌍 Bilingual: Arabic (RTL, default) & English (LTR) — toggle via navbar- 🌙 Dark mode — toggle available on login/register pages and in the navbar; preference saved in browser- � User dropdown menu — click username in navbar for profile & logout
+- 🌍 Bilingual: Arabic (RTL) & English (LTR) — default language auto-detected from browser; toggle via navbar- 🌙 Dark mode — toggle available on login/register pages and in the navbar; preference saved in browser- � User dropdown menu — click username in navbar for profile & logout
 - �📱 Fully responsive (Bootstrap 5)
 - 🐳 Dockerized — one command to run
 
@@ -90,7 +88,8 @@ The database schema and seed data are applied automatically on first run.
 | Role | Email | Password |
 |------|-------|----------|
 | Professor | `doctor@treudler.net` | `doctor123` |
-| Student 1–5 | `student1@treudler.net` … `student5@treudler.net` | `student123` |
+| Student | `student@treudler.net` | `student123` |
+| Demo Student 1–5 | `student1@treudler.net` … `student5@treudler.net` | *random — shown on login page* |
 
 ---
 
