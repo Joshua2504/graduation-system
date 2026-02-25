@@ -86,6 +86,7 @@ $translations = [
     'profile_complete' => ['ar' => 'الملف الشخصي مكتمل', 'en' => 'Profile Complete', 'de' => 'Profil vollständig'],
     'complete_profile' => ['ar' => 'أكمل ملفك الشخصي', 'en' => 'Complete Your Profile', 'de' => 'Profil vervollständigen'],
     'profile_info' => ['ar' => 'بيانات الملف الشخصي تُستخدم في جميع المشاريع التي تنضم إليها', 'en' => 'Profile data is used across all projects you join', 'de' => 'Profildaten werden in allen Projekten verwendet, denen Sie beitreten'],
+    'professor_profile_info' => ['ar' => 'يمكنك تعديل بياناتك الشخصية وصورتك من هنا', 'en' => 'You can edit your personal information and photo here', 'de' => 'Hier können Sie Ihre persönlichen Daten und Ihr Foto bearbeiten'],
     'personal_info' => ['ar' => 'البيانات الشخصية', 'en' => 'Personal Information', 'de' => 'Persönliche Daten'],
     'documents' => ['ar' => 'المستندات', 'en' => 'Documents', 'de' => 'Dokumente'],
 

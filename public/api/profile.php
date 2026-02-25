@@ -32,13 +32,17 @@ if ($method === 'GET') {
 
 // ─── PUT: Update profile fields ───
 if ($method === 'PUT') {
-    require_role('student', true);
+    require_login(true);
     
     $input = json_decode(file_get_contents('php://input'), true);
     $userId = current_user_id();
     $pdo = getDB();
+    $role = $_SESSION['role'] ?? 'student';
     
-    $allowedFields = ['gender', 'national_id', 'birth_date', 'governorate', 'address', 'phone', 'section'];
+    // Students can edit more fields; professors have a smaller set
+    $allowedFields = $role === 'doctor'
+        ? ['gender', 'phone', 'section']
+        : ['gender', 'national_id', 'birth_date', 'governorate', 'address', 'phone', 'section'];
     $updates = [];
     $params = [];
     
@@ -70,13 +74,16 @@ if ($method === 'PUT') {
         jsonResponse(['error' => 'الجنس غير صالح'], 400);
     }
     
-    // Check profile completion after update
-    $user = getUserProfile($userId);
-    $tempUser = array_merge($user, array_intersect_key($input, array_flip($allowedFields)));
-    $profileComplete = isProfileComplete($tempUser) ? 1 : 0;
-    
-    $updates[] = "`profile_completed` = ?";
-    $params[] = $profileComplete;
+    // Check profile completion after update (students only)
+    $profileComplete = 0;
+    if ($role === 'student') {
+        $user = getUserProfile($userId);
+        $tempUser = array_merge($user, array_intersect_key($input, array_flip($allowedFields)));
+        $profileComplete = isProfileComplete($tempUser) ? 1 : 0;
+        
+        $updates[] = "`profile_completed` = ?";
+        $params[] = $profileComplete;
+    }
     
     $params[] = $userId;
     $sql = "UPDATE users SET " . implode(', ', $updates) . " WHERE id = ?";
@@ -92,10 +99,14 @@ if ($method === 'PUT') {
 
 // ─── POST: Upload profile image ───
 if ($method === 'POST') {
-    require_role('student', true);
+    require_login(true);
     
     $type = trim($_POST['type'] ?? '');
-    $allowedTypes = ['card', 'national_id', 'receipt', 'profile_picture'];
+    $role = $_SESSION['role'] ?? 'student';
+    // Professors can only upload profile pictures; students can upload documents too
+    $allowedTypes = $role === 'doctor'
+        ? ['profile_picture']
+        : ['card', 'national_id', 'receipt', 'profile_picture'];
     
     if (!in_array($type, $allowedTypes)) {
         jsonResponse(['error' => 'نوع الصورة غير صالح'], 400);
@@ -138,11 +149,14 @@ if ($method === 'POST') {
     $stmt = $pdo->prepare("UPDATE users SET `$dbField` = ? WHERE id = ?");
     $stmt->execute([$filename, $userId]);
     
-    // Check if profile is now complete
-    $user = getUserProfile($userId);
-    $profileComplete = isProfileComplete($user) ? 1 : 0;
-    $stmt = $pdo->prepare("UPDATE users SET profile_completed = ? WHERE id = ?");
-    $stmt->execute([$profileComplete, $userId]);
+    // Check if profile is now complete (students only)
+    $profileComplete = 0;
+    if ($role === 'student') {
+        $user = getUserProfile($userId);
+        $profileComplete = isProfileComplete($user) ? 1 : 0;
+        $stmt = $pdo->prepare("UPDATE users SET profile_completed = ? WHERE id = ?");
+        $stmt->execute([$profileComplete, $userId]);
+    }
     
     jsonResponse([
         'success' => true,

@@ -155,6 +155,13 @@ if ($demoActive) {
                                     </a>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
+                            <?php elseif ($role === 'doctor'): ?>
+                                <li>
+                                    <a class="dropdown-item" href="/professor/profile">
+                                        <i class="bi bi-person me-2"></i><?= __('my_profile') ?>
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
                             <?php endif; ?>
                             <li>
                                 <a class="dropdown-item" href="/logout">

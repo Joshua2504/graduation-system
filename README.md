@@ -21,6 +21,7 @@
 - **Track status** — view doctor feedback, resubmit if rejected
 
 ### Professor (Doctor) Flow
+- **Profile** — edit personal info (gender, phone, department) and upload a profile picture
 - **Dashboard** — projects organized by status tabs (Draft, Under Review, Accepted, Rejected) with sorting and member counts
 - **Review projects** — view all team members' profiles, documents, and images; accept or reject with notes
 - **Edit projects** — inline editing of project title, type, and rich-text description for any project
