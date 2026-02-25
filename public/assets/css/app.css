@@ -210,12 +210,12 @@ body {
     border-radius: 0 0 8px 8px;
     padding: 12px 16px;
     min-height: 150px;
-    max-height: 400px;
     overflow-y: auto;
     outline: none;
     font-size: 0.95rem;
     line-height: 1.6;
     background: var(--bs-body-bg);
+    resize: vertical;
 }
 
 .simple-editor-content:focus {
