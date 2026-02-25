@@ -159,107 +159,153 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
     </div>
 
     <!-- Team Members -->
-    <h5 class="mb-3"><i class="bi bi-people-fill me-2"></i><?= __('team_members') ?> (<?= count($members) ?>)
-        <?php if (!empty($pendingInvites)): ?>
-            <span class="badge bg-warning text-dark ms-2"><?= count($pendingInvites) ?> <?= __('pending') ?></span>
-        <?php endif; ?>
-    </h5>
-
-    <?php foreach ($members as $i => $member): ?>
-        <div class="card shadow-sm mb-3">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h6 class="mb-0 d-flex align-items-center gap-2">
-                    <?php
-                        $memberPic = $member['profile_picture'] ?? '';
-                        $memberPicUrl = $memberPic ? secureFileUrl($member['id'], $memberPic) : '';
-                    ?>
-                    <?php if ($memberPicUrl): ?>
-                        <img src="<?= $memberPicUrl ?>" class="profile-picture-sm rounded-circle" alt="">
-                    <?php else: ?>
-                        <i class="bi bi-person-circle fs-5 text-secondary"></i>
-                    <?php endif; ?>
-                    <?= __('student') ?> <?= $i + 1 ?>: <?= sanitize($member['name']) ?>
-                    <?php if ($member['member_role'] === 'leader'): ?>
-                        <span class="badge bg-primary ms-2"><?= __('leader') ?></span>
-                    <?php endif; ?>
-                </h6>
-                <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-secondary"><?= sanitize($member['student_code'] ?? '-') ?></span>
-                    <?php if ($member['member_role'] !== 'leader'): ?>
-                        <button class="btn btn-sm btn-outline-primary" onclick="setLeader(<?= $member['id'] ?>)" title="<?= __('set_as_leader') ?>">
-                            <i class="bi bi-star"></i>
-                        </button>
-                    <?php endif; ?>
-                    <button class="btn btn-sm btn-outline-danger" onclick="removeMember(<?= $member['id'] ?>, '<?= sanitize($member['name']) ?>')" title="<?= __('remove_from_project') ?>">
-                        <i class="bi bi-person-x"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3 mb-2">
-                        <small class="text-muted"><?= __('gender') ?></small><br>
-                        <?php if ($member['gender']): ?>
-                            <?= $member['gender'] === 'male' ? __('male') : __('female') ?>
-                        <?php else: ?>
-                            <span class="text-muted">-</span>
-                        <?php endif; ?>
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <small class="text-muted"><?= __('national_id') ?></small><br>
-                        <?= sanitize($member['national_id'] ?? '-') ?>
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <small class="text-muted"><?= __('birth_date') ?></small><br>
-                        <?= $member['birth_date'] ?? '-' ?>
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <small class="text-muted"><?= __('governorate') ?></small><br>
-                        <?= sanitize($member['governorate'] ?? '-') ?>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <small class="text-muted"><?= __('address') ?></small><br>
-                        <?= sanitize($member['address'] ?? '-') ?>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <small class="text-muted"><?= __('phone') ?></small><br>
-                        <?= sanitize($member['phone'] ?? '-') ?>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <small class="text-muted"><?= __('section') ?></small><br>
-                        <?= sanitize($member['section'] ?? '-') ?>
-                    </div>
-                </div>
-
-                <!-- Images -->
-                <hr>
-                <div class="row">
-                    <?php
-                    $imageTypes = [
-                        'card_image' => __('institute_id'),
-                        'national_id_image' => __('national_id_card'),
-                        'receipt_image' => __('payment_receipt'),
-                    ];
-                    $memberId = $member['id'];
-                    foreach ($imageTypes as $field => $label):
-                        $imgFile = $member[$field] ?? '';
-                        $imgPath = secureFileUrl($memberId, $imgFile);
-                    ?>
-                        <div class="col-md-4 text-center mb-2">
-                            <small class="text-muted d-block mb-1"><?= $label ?></small>
-                            <?php if ($imgFile): ?>
-                                <img src="<?= $imgPath ?>" class="img-thumbnail student-image" 
-                                     alt="<?= $label ?>" style="max-height: 150px; cursor: pointer;"
-                                     onclick="showImageModal('<?= $imgPath ?>', '<?= $label ?>')">
-                            <?php else: ?>
-                                <span class="text-danger"><i class="bi bi-x-circle"></i> <?= __('missing') ?></span>
-                            <?php endif; ?>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
+    <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i><?= __('team_members') ?> (<?= count($members) ?>)
+                <?php if (!empty($pendingInvites)): ?>
+                    <span class="badge bg-warning text-dark ms-2"><?= count($pendingInvites) ?> <?= __('pending') ?></span>
+                <?php endif; ?>
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th><?= __('name') ?></th>
+                            <th><?= __('student_code') ?></th>
+                            <th><?= __('role') ?></th>
+                            <th><?= __('profile') ?></th>
+                            <th><?= __('documents') ?></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($members as $i => $member):
+                            $memberPic = $member['profile_picture'] ?? '';
+                            $memberPicUrl = $memberPic ? secureFileUrl($member['id'], $memberPic) : '';
+                            $complete = isProfileComplete($member);
+                            $docsCount = 0;
+                            $docsTotal = 3;
+                            if (!empty($member['card_image'])) $docsCount++;
+                            if (!empty($member['national_id_image'])) $docsCount++;
+                            if (!empty($member['receipt_image'])) $docsCount++;
+                        ?>
+                            <tr>
+                                <td><?= $i + 1 ?></td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <?php if ($memberPicUrl): ?>
+                                            <img src="<?= $memberPicUrl ?>" class="profile-picture-sm rounded-circle" alt="">
+                                        <?php else: ?>
+                                            <i class="bi bi-person-circle fs-5 text-secondary"></i>
+                                        <?php endif; ?>
+                                        <?= sanitize($member['name']) ?>
+                                    </div>
+                                </td>
+                                <td><code><?= sanitize($member['student_code'] ?? '-') ?></code></td>
+                                <td>
+                                    <span class="badge bg-<?= $member['member_role'] === 'leader' ? 'primary' : 'info' ?>">
+                                        <?= $member['member_role'] === 'leader' ? __('leader') : __('member') ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <?php if ($complete): ?>
+                                        <span class="text-success"><i class="bi bi-check-circle-fill"></i></span>
+                                    <?php else: ?>
+                                        <span class="text-warning"><i class="bi bi-exclamation-circle-fill"></i></span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <span class="badge bg-<?= $docsCount === $docsTotal ? 'success' : ($docsCount > 0 ? 'warning text-dark' : 'danger') ?>">
+                                        <?= $docsCount ?>/<?= $docsTotal ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-1">
+                                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#memberDetail<?= $member['id'] ?>" title="<?= __('details') ?>">
+                                            <i class="bi bi-chevron-down"></i>
+                                        </button>
+                                        <?php if ($member['member_role'] !== 'leader'): ?>
+                                            <button class="btn btn-sm btn-outline-primary" onclick="setLeader(<?= $member['id'] ?>)" title="<?= __('set_as_leader') ?>">
+                                                <i class="bi bi-star"></i>
+                                            </button>
+                                        <?php endif; ?>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="removeMember(<?= $member['id'] ?>, '<?= sanitize($member['name']) ?>')" title="<?= __('remove_from_project') ?>">
+                                            <i class="bi bi-person-x"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="collapse" id="memberDetail<?= $member['id'] ?>">
+                                <td colspan="7" class="bg-light p-3">
+                                    <div class="row mb-3">
+                                        <div class="col-md-3 mb-2">
+                                            <small class="text-muted"><?= __('gender') ?></small><br>
+                                            <?php if ($member['gender']): ?>
+                                                <?= $member['gender'] === 'male' ? __('male') : __('female') ?>
+                                            <?php else: ?>
+                                                <span class="text-muted">-</span>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <small class="text-muted"><?= __('national_id') ?></small><br>
+                                            <?= sanitize($member['national_id'] ?? '-') ?>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <small class="text-muted"><?= __('birth_date') ?></small><br>
+                                            <?= $member['birth_date'] ?? '-' ?>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <small class="text-muted"><?= __('governorate') ?></small><br>
+                                            <?= sanitize($member['governorate'] ?? '-') ?>
+                                        </div>
+                                        <div class="col-md-4 mb-2">
+                                            <small class="text-muted"><?= __('address') ?></small><br>
+                                            <?= sanitize($member['address'] ?? '-') ?>
+                                        </div>
+                                        <div class="col-md-4 mb-2">
+                                            <small class="text-muted"><?= __('phone') ?></small><br>
+                                            <?= sanitize($member['phone'] ?? '-') ?>
+                                        </div>
+                                        <div class="col-md-4 mb-2">
+                                            <small class="text-muted"><?= __('section') ?></small><br>
+                                            <?= sanitize($member['section'] ?? '-') ?>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <?php
+                                        $imageTypes = [
+                                            'card_image' => __('institute_id'),
+                                            'national_id_image' => __('national_id_card'),
+                                            'receipt_image' => __('payment_receipt'),
+                                        ];
+                                        $memberId = $member['id'];
+                                        foreach ($imageTypes as $field => $label):
+                                            $imgFile = $member[$field] ?? '';
+                                            $imgPath = secureFileUrl($memberId, $imgFile);
+                                        ?>
+                                            <div class="col-md-4 text-center mb-2">
+                                                <small class="text-muted d-block mb-1"><?= $label ?></small>
+                                                <?php if ($imgFile): ?>
+                                                    <img src="<?= $imgPath ?>" class="img-thumbnail student-image" 
+                                                         alt="<?= $label ?>" style="max-height: 150px; cursor: pointer;"
+                                                         onclick="showImageModal('<?= $imgPath ?>', '<?= $label ?>')">
+                                                <?php else: ?>
+                                                    <span class="text-danger"><i class="bi bi-x-circle"></i> <?= __('missing') ?></span>
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
         </div>
-    <?php endforeach; ?>
+    </div>
 
     <?php if (!empty($pendingInvites)): ?>
         <div class="card shadow-sm mb-3 border-warning">

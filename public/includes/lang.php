@@ -391,6 +391,9 @@ $translations = [
     'landing_feature_responsive' => ['ar' => 'متجاوب مع جميع الأجهزة', 'en' => 'Fully Responsive', 'de' => 'Vollständig responsiv'],
     'landing_feature_responsive_desc' => ['ar' => 'يعمل بسلاسة على الكمبيوتر والجوال والتابلت', 'en' => 'Works seamlessly on desktop, mobile, and tablet', 'de' => 'Funktioniert nahtlos auf Desktop, Mobilgerät und Tablet'],
 
+    // Misc
+    'details' => ['ar' => 'التفاصيل', 'en' => 'Details', 'de' => 'Details'],
+
     // Landing — Stats
     'landing_stat_easy' => ['ar' => 'سهل الاستخدام', 'en' => 'Easy to Use', 'de' => 'Einfach zu bedienen'],
     'landing_stat_fast' => ['ar' => 'سريع وفعّال', 'en' => 'Fast & Efficient', 'de' => 'Schnell & Effizient'],
