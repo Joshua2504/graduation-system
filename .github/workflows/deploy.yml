@@ -31,7 +31,7 @@ jobs:
           SSH_PATH="${{ env.SSH_PATH }}"
           REMOTE="${SSH_PATH%%:*}"
           REMOTE_DIR="${SSH_PATH#*:}"
-          rsync -az --delete --exclude '.git' --exclude '.github' --exclude '.env' --exclude 'data/' -e "ssh -o StrictHostKeyChecking=no" ./ "$REMOTE:$REMOTE_DIR"
+          rsync -az --delete --exclude '.git' --exclude '.github' --exclude '.env' -e "ssh -o StrictHostKeyChecking=no" ./ "$REMOTE:$REMOTE_DIR"
 
       - name: Build remote .env from individual secrets and run Docker Compose
         env:
