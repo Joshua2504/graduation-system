@@ -36,8 +36,7 @@
 - Enable with `DEMO_MODE=true` in `.env`
 
 ### General
-- 🌍 Bilingual: Arabic (RTL, default) & English (LTR) — toggle via navbar
-- � User dropdown menu — click username in navbar for profile & logout
+- 🌍 Bilingual: Arabic (RTL, default) & English (LTR) — toggle via navbar- 🌙 Dark mode — toggle available on login/register pages and in the navbar; preference saved in browser- � User dropdown menu — click username in navbar for profile & logout
 - �📱 Fully responsive (Bootstrap 5)
 - 🐳 Dockerized — one command to run
 

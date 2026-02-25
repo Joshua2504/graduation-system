@@ -160,7 +160,10 @@ require_once __DIR__ . '/includes/header.php';
                     </div>
 
                     <hr>
-                    <div class="text-center">
+                    <div class="text-center d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleTheme()" title="Toggle dark mode">
+                            <i class="bi bi-moon-fill" id="themeIcon"></i>
+                        </button>
                         <?php
                         $otherLang = getLang() === 'ar' ? 'en' : 'ar';
                         $otherLangLabel = getLang() === 'ar' ? 'English' : 'العربية';

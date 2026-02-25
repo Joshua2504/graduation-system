@@ -339,6 +339,20 @@ $translations = [
     'demo_student' => ['ar' => 'طالب', 'en' => 'Student'],
     'demo_resets_in' => ['ar' => 'إعادة تعيين العرض خلال', 'en' => 'Demo resets in'],
     'demo_credentials' => ['ar' => 'بيانات الدخول التجريبية', 'en' => 'Demo Credentials'],
+
+    // Landing page
+    'landing_hero_title' => ['ar' => 'نظام إدارة مشاريع التخرج', 'en' => 'Graduation Project Management System'],
+    'landing_hero_subtitle' => ['ar' => 'منصة متكاملة لإدارة وتنظيم مشاريع التخرج الجامعية بكل سهولة ويسر', 'en' => 'A comprehensive platform for managing and organizing university graduation projects with ease'],
+    'landing_feature_team' => ['ar' => 'تكوين الفرق', 'en' => 'Team Building'],
+    'landing_feature_team_desc' => ['ar' => 'أنشئ فريقك وادعُ زملاءك عبر رابط أو كود انضمام أو رمز QR', 'en' => 'Create your team and invite classmates via link, join code, or QR code'],
+    'landing_feature_submit' => ['ar' => 'تقديم المشاريع', 'en' => 'Project Submission'],
+    'landing_feature_submit_desc' => ['ar' => 'أكمل ملفك الشخصي وقدّم مشروعك للمراجعة بخطوات بسيطة', 'en' => 'Complete your profile and submit your project for review in simple steps'],
+    'landing_feature_review' => ['ar' => 'المراجعة والمتابعة', 'en' => 'Review & Track'],
+    'landing_feature_review_desc' => ['ar' => 'تابع حالة مشروعك واحصل على ملاحظات الدكتور مباشرة', 'en' => 'Track your project status and get professor feedback directly'],
+    'landing_feature_bilingual' => ['ar' => 'دعم ثنائي اللغة', 'en' => 'Bilingual Support'],
+    'landing_feature_bilingual_desc' => ['ar' => 'واجهة كاملة باللغتين العربية والإنجليزية', 'en' => 'Full interface in both Arabic and English'],
+    'landing_welcome_back' => ['ar' => 'مرحباً بعودتك', 'en' => 'Welcome Back'],
+    'landing_sign_in_continue' => ['ar' => 'سجّل دخولك للمتابعة', 'en' => 'Sign in to continue'],
 ];
 
 /**
