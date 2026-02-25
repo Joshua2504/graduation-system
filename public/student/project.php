@@ -218,10 +218,21 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             <tbody>
                                 <?php foreach ($members as $i => $m): 
                                     $complete = isProfileComplete($m);
+                                    $mPic = $m['profile_picture'] ?? '';
+                                    $mPicUrl = $mPic ? secureFileUrl($m['id'], $mPic) : '';
                                 ?>
                                     <tr>
                                         <td><?= $i + 1 ?></td>
-                                        <td><?= sanitize($m['name']) ?></td>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <?php if ($mPicUrl): ?>
+                                                    <img src="<?= $mPicUrl ?>" class="profile-picture-sm rounded-circle" alt="">
+                                                <?php else: ?>
+                                                    <i class="bi bi-person-circle fs-5 text-secondary"></i>
+                                                <?php endif; ?>
+                                                <?= sanitize($m['name']) ?>
+                                            </div>
+                                        </td>
                                         <td><code><?= sanitize($m['student_code'] ?? '-') ?></code></td>
                                         <td>
                                             <span class="badge bg-<?= $m['member_role'] === 'leader' ? 'primary' : 'info' ?>">

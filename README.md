@@ -8,7 +8,7 @@
 
 ### Student Flow
 - **Register & verify** — create account with student code, optionally verify email
-- **Complete profile** — personal info (gender, national ID, birth date, governorate, address, phone, department) + upload 3 documents (institute card, national ID, payment receipt)
+- **Complete profile** — personal info (gender, national ID, birth date, governorate, address, phone, department) + upload 3 documents (institute card, national ID, payment receipt) + optional profile picture shown across the platform
 - **Create project** — become team leader, get a unique 6-character join code
 - **Build a team** — invite members via:
   - 🔗 Shareable invite link (token-based, with expiration)
@@ -174,6 +174,7 @@ graduation-system/
 | `student_code` | VARCHAR(50) | Unique student identifier |
 | `role` | ENUM | `student` or `doctor` |
 | `gender`, `national_id`, `birth_date`, `governorate`, `address`, `phone`, `section` | — | Profile fields |
+| `profile_picture` | VARCHAR(255) | Optional profile picture filename |
 | `card_image`, `national_id_image`, `receipt_image` | VARCHAR(255) | Document filenames |
 | `profile_completed` | TINYINT(1) | Auto-calculated completeness flag |
 | `email_verified` | TINYINT(1) | Email verification status |
@@ -234,7 +235,7 @@ graduation-system/
 |--------|--------|-------------|
 | `GET` | — | Get own profile |
 | `PUT` | `{gender, national_id, ...}` | Update profile fields |
-| `POST` | Multipart `{type, file}` | Upload document image |
+| `POST` | Multipart `{type, file}` | Upload document image or profile picture (type: card, national_id, receipt, profile_picture) |
 
 ### File Serving — `/api/file.php`
 | Method | Params | Description |

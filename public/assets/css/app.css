@@ -61,6 +61,35 @@ body {
     font-size: 1.1rem;
 }
 
+.navbar-profile-pic {
+    width: 28px;
+    height: 28px;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+/* ─── Profile Picture ─── */
+.profile-picture-lg {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.profile-picture-sm {
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.profile-picture-md {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
 /* ─── Table ─── */
 .table th {
     font-weight: 600;

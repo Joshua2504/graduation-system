@@ -168,7 +168,16 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
     <?php foreach ($members as $i => $member): ?>
         <div class="card shadow-sm mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h6 class="mb-0">
+                <h6 class="mb-0 d-flex align-items-center gap-2">
+                    <?php
+                        $memberPic = $member['profile_picture'] ?? '';
+                        $memberPicUrl = $memberPic ? secureFileUrl($member['id'], $memberPic) : '';
+                    ?>
+                    <?php if ($memberPicUrl): ?>
+                        <img src="<?= $memberPicUrl ?>" class="profile-picture-sm rounded-circle" alt="">
+                    <?php else: ?>
+                        <i class="bi bi-person-circle fs-5 text-secondary"></i>
+                    <?php endif; ?>
                     <?= __('student') ?> <?= $i + 1 ?>: <?= sanitize($member['name']) ?>
                     <?php if ($member['member_role'] === 'leader'): ?>
                         <span class="badge bg-primary ms-2"><?= __('leader') ?></span>

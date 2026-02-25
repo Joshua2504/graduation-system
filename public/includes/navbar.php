@@ -11,6 +11,16 @@ $userName = $_SESSION['name'] ?? '';
 $otherLang = getLang() === 'ar' ? 'en' : 'ar';
 $otherLangLabel = getLang() === 'ar' ? 'English' : 'العربية';
 
+// Load profile picture for logged-in users
+$navProfilePic = '';
+if ($isLoggedIn) {
+    require_once __DIR__ . '/functions.php';
+    $navUser = getUserProfile(current_user_id());
+    if (!empty($navUser['profile_picture'])) {
+        $navProfilePic = secureFileUrl(current_user_id(), $navUser['profile_picture']);
+    }
+}
+
 // Determine current page for active state
 $currentPage = basename($_SERVER['PHP_SELF'], '.php');
 ?>
@@ -78,8 +88,13 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
                 </li>
                 <?php if ($isLoggedIn): ?>
                     <li class="nav-item">
-                        <span class="nav-link text-light">
-                            <i class="bi bi-person-circle me-1"></i><?= sanitize($userName) ?>
+                        <span class="nav-link text-light d-flex align-items-center gap-1">
+                            <?php if ($navProfilePic): ?>
+                                <img src="<?= $navProfilePic ?>" class="navbar-profile-pic rounded-circle" alt="">
+                            <?php else: ?>
+                                <i class="bi bi-person-circle me-1"></i>
+                            <?php endif; ?>
+                            <?= sanitize($userName) ?>
                         </span>
                     </li>
                     <li class="nav-item">

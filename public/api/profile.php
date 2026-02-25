@@ -95,7 +95,7 @@ if ($method === 'POST') {
     require_role('student', true);
     
     $type = trim($_POST['type'] ?? '');
-    $allowedTypes = ['card', 'national_id', 'receipt'];
+    $allowedTypes = ['card', 'national_id', 'receipt', 'profile_picture'];
     
     if (!in_array($type, $allowedTypes)) {
         jsonResponse(['error' => 'نوع الصورة غير صالح'], 400);
@@ -123,7 +123,7 @@ if ($method === 'POST') {
     $mime = $finfo->file($file['tmp_name']);
     $ext = $mime === 'image/png' ? 'png' : 'jpg';
     
-    $dbField = $type . '_image';
+    $dbField = $type === 'profile_picture' ? 'profile_picture' : $type . '_image';
     $filename = $userId . '_' . $type . '.' . $ext;
     $destPath = $uploadDir . '/' . $filename;
     

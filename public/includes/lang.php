@@ -95,6 +95,8 @@ $translations = [
     'card_image' => ['ar' => 'صورة بطاقة المعهد', 'en' => 'Institute ID Card'],
     'national_id_image' => ['ar' => 'صورة البطاقة الشخصية', 'en' => 'National ID Card'],
     'receipt_image' => ['ar' => 'صورة إيصال دفع مشروع التخرج', 'en' => 'Graduation Project Payment Receipt'],
+    'profile_picture' => ['ar' => 'صورة شخصية', 'en' => 'Profile Picture'],
+    'profile_picture_hint' => ['ar' => 'صورة شخصية اختيارية تظهر في جميع أنحاء المنصة', 'en' => 'Optional profile picture displayed across the platform'],
     'upload_image' => ['ar' => 'رفع صورة', 'en' => 'Upload Image'],
     'image_requirements' => ['ar' => 'JPG أو PNG فقط - الحد الأقصى 5 ميجابايت', 'en' => 'JPG or PNG only - Max 5MB'],
     'uploading' => ['ar' => 'جاري رفع الملفات...', 'en' => 'Uploading files...'],

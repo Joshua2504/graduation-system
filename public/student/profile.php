@@ -39,6 +39,45 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                 <?= __('profile_info') ?>
             </div>
 
+            <!-- Profile Picture Card -->
+            <?php
+                $profilePic = $user['profile_picture'] ?? '';
+                $profilePicUrl = $profilePic ? secureFileUrl($userId, $profilePic) : '';
+            ?>
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-camera me-2"></i><?= __('profile_picture') ?></h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-4">
+                        <div class="profile-picture-wrapper text-center">
+                            <?php if ($profilePic): ?>
+                                <img src="<?= $profilePicUrl ?>" class="profile-picture-lg rounded-circle" 
+                                     id="profile-picture-preview" alt="<?= __('profile_picture') ?>">
+                            <?php else: ?>
+                                <div class="profile-picture-lg rounded-circle bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center" 
+                                     id="profile-picture-placeholder">
+                                    <i class="bi bi-person-fill text-secondary" style="font-size: 3rem;"></i>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="flex-grow-1">
+                            <p class="text-muted mb-2"><small><?= __('profile_picture_hint') ?></small></p>
+                            <p class="text-muted mb-2"><small><?= __('image_requirements') ?></small></p>
+                            <input type="file" class="d-none" id="file-profile_picture" accept="image/jpeg,image/png"
+                                   onchange="uploadImage('profile_picture', this.files[0])">
+                            <button type="button" class="btn btn-sm btn-outline-primary" 
+                                    onclick="document.getElementById('file-profile_picture').click()">
+                                <i class="bi bi-upload me-1"></i><?= $profilePic ? __('change') : __('upload_image') ?>
+                            </button>
+                            <div class="progress mt-2 d-none" id="progress-profile_picture" style="height: 4px;">
+                                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Personal Info Card -->
             <div class="card shadow mb-4">
                 <div class="card-header bg-primary text-white">

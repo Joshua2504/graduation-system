@@ -15,7 +15,7 @@ $settings = getSettings();
 $emailVerRequired = !empty($settings['email_verification_required']);
 
 // Fetch all student accounts
-$stmt = $pdo->query("SELECT id, name, email, student_code, gender, national_id, birth_date, governorate, address, phone, section, card_image, national_id_image, receipt_image, profile_completed, email_verified, account_enabled, created_at FROM users WHERE role = 'student' ORDER BY created_at DESC");
+$stmt = $pdo->query("SELECT id, name, email, student_code, gender, national_id, birth_date, governorate, address, phone, section, card_image, national_id_image, receipt_image, profile_picture, profile_completed, email_verified, account_enabled, created_at FROM users WHERE role = 'student' ORDER BY created_at DESC");
 $students = $stmt->fetchAll();
 $governorates = getGovernorates();
 
@@ -62,7 +62,20 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                         <?php foreach ($students as $i => $s): ?>
                         <tr id="user-row-<?= $s['id'] ?>" class="<?= !$s['account_enabled'] ? 'table-secondary' : '' ?>">
                             <td><?= $i + 1 ?></td>
-                            <td class="fw-bold"><?= sanitize($s['name']) ?></td>
+                            <td class="fw-bold">
+                                <div class="d-flex align-items-center gap-2">
+                                    <?php
+                                        $sPic = $s['profile_picture'] ?? '';
+                                        $sPicUrl = $sPic ? secureFileUrl($s['id'], $sPic) : '';
+                                    ?>
+                                    <?php if ($sPicUrl): ?>
+                                        <img src="<?= $sPicUrl ?>" class="profile-picture-sm rounded-circle" alt="">
+                                    <?php else: ?>
+                                        <i class="bi bi-person-circle fs-5 text-secondary"></i>
+                                    <?php endif; ?>
+                                    <?= sanitize($s['name']) ?>
+                                </div>
+                            </td>
                             <td><small><?= sanitize($s['email']) ?></small></td>
                             <td><code><?= sanitize($s['student_code'] ?? '—') ?></code></td>
                             <td>

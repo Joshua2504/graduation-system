@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `phone` VARCHAR(20) DEFAULT NULL,
   `year` VARCHAR(10) NOT NULL DEFAULT '4th',
   `section` VARCHAR(100) DEFAULT NULL,
+  `profile_picture` VARCHAR(255) DEFAULT NULL,
   `card_image` VARCHAR(255) DEFAULT NULL,
   `national_id_image` VARCHAR(255) DEFAULT NULL,
   `receipt_image` VARCHAR(255) DEFAULT NULL,
@@ -112,6 +113,13 @@ DEALLOCATE PREPARE stmt;
 -- Add student_project_creation column to settings (safe for existing databases)
 SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'settings' AND COLUMN_NAME = 'student_project_creation');
 SET @sql = IF(@col_exists = 0, 'ALTER TABLE `settings` ADD COLUMN `student_project_creation` TINYINT(1) NOT NULL DEFAULT 1 AFTER `max_team_size`', 'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Add profile_picture column to users (safe for existing databases)
+SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'profile_picture');
+SET @sql = IF(@col_exists = 0, 'ALTER TABLE `users` ADD COLUMN `profile_picture` VARCHAR(255) DEFAULT NULL AFTER `section`', 'SELECT 1');
 PREPARE stmt FROM @sql;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
