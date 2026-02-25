@@ -92,12 +92,12 @@ CREATE TABLE IF NOT EXISTS `invitations` (
 
 -- ─── Seed: Doctor account (password: doctor123) ───
 INSERT INTO `users` (`name`, `email`, `password`, `role`, `email_verified`) VALUES
-('دكتور', 'doctor@university.edu', '$2y$10$1hH9/Y0Noq//YW5rA9Xwbu5K9yPtX8VlbYXKqiwlZa77.LxsmGHHy', 'doctor', 1)
+('دكتور', 'doctor@treudler.net', '$2y$10$1hH9/Y0Noq//YW5rA9Xwbu5K9yPtX8VlbYXKqiwlZa77.LxsmGHHy', 'doctor', 1)
 ON DUPLICATE KEY UPDATE `id` = `id`;
 
 -- ─── Seed: Test student account (password: student123) ───
 INSERT INTO `users` (`name`, `email`, `password`, `student_code`, `role`, `email_verified`) VALUES
-('طالب تجريبي', 'student@university.edu', '$2y$10$yqqDmhPnvBeLXswbIx3dfepMRnibuYMv/UuUb8hp8T3NAWn0yNepO', '001', 'student', 1)
+('طالب تجريبي', 'student@treudler.net', '$2y$10$yqqDmhPnvBeLXswbIx3dfepMRnibuYMv/UuUb8hp8T3NAWn0yNepO', '001', 'student', 1)
 ON DUPLICATE KEY UPDATE `id` = `id`;
 
 -- ─── Migrations ───

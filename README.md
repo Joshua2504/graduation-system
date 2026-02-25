@@ -75,8 +75,8 @@ The database schema and seed data are applied automatically on first run.
 
 | Role | Email | Password |
 |------|-------|----------|
-| Professor | `doctor@university.edu` | `doctor123` |
-| Student | `student@university.edu` | `student123` |
+| Professor | `doctor@treudler.net` | `doctor123` |
+| Student | `student@treudler.net` | `student123` |
 
 ---
 
