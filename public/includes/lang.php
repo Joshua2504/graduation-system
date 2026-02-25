@@ -353,6 +353,28 @@ $translations = [
     'landing_feature_bilingual_desc' => ['ar' => 'واجهة كاملة باللغتين العربية والإنجليزية', 'en' => 'Full interface in both Arabic and English'],
     'landing_welcome_back' => ['ar' => 'مرحباً بعودتك', 'en' => 'Welcome Back'],
     'landing_sign_in_continue' => ['ar' => 'سجّل دخولك للمتابعة', 'en' => 'Sign in to continue'],
+
+    // Landing — How it works
+    'landing_how_it_works' => ['ar' => 'كيف يعمل النظام', 'en' => 'How It Works'],
+    'landing_step1_title' => ['ar' => 'سجّل حسابك', 'en' => 'Create Account'],
+    'landing_step1_desc' => ['ar' => 'أنشئ حسابك باستخدام بريدك الإلكتروني وكود الطالب', 'en' => 'Sign up with your email and student code'],
+    'landing_step2_title' => ['ar' => 'أكمل ملفك', 'en' => 'Complete Profile'],
+    'landing_step2_desc' => ['ar' => 'أضف بياناتك الشخصية وارفع المستندات المطلوبة', 'en' => 'Add personal info and upload required documents'],
+    'landing_step3_title' => ['ar' => 'كوّن فريقك', 'en' => 'Build Your Team'],
+    'landing_step3_desc' => ['ar' => 'أنشئ مشروعاً وادعُ زملاءك للانضمام', 'en' => 'Create a project and invite classmates to join'],
+    'landing_step4_title' => ['ar' => 'قدّم مشروعك', 'en' => 'Submit Project'],
+    'landing_step4_desc' => ['ar' => 'أرسل مشروعك للمراجعة واحصل على الموافقة', 'en' => 'Submit for review and get approved'],
+
+    // Landing — Extra features
+    'landing_feature_secure' => ['ar' => 'آمن وموثوق', 'en' => 'Secure & Reliable'],
+    'landing_feature_secure_desc' => ['ar' => 'تشفير كامل للبيانات وحماية الملفات المرفوعة', 'en' => 'Full data encryption and secure file uploads'],
+    'landing_feature_responsive' => ['ar' => 'متجاوب مع جميع الأجهزة', 'en' => 'Fully Responsive'],
+    'landing_feature_responsive_desc' => ['ar' => 'يعمل بسلاسة على الكمبيوتر والجوال والتابلت', 'en' => 'Works seamlessly on desktop, mobile, and tablet'],
+
+    // Landing — Stats
+    'landing_stat_easy' => ['ar' => 'سهل الاستخدام', 'en' => 'Easy to Use'],
+    'landing_stat_fast' => ['ar' => 'سريع وفعّال', 'en' => 'Fast & Efficient'],
+    'landing_stat_complete' => ['ar' => 'نظام متكامل', 'en' => 'All-in-One'],
 ];
 
 /**

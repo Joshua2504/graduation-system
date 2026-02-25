@@ -101,7 +101,8 @@ require_once __DIR__ . '/includes/header.php';
                     <h1 class="landing-title mb-3"><?= __('landing_hero_title') ?></h1>
                     <p class="landing-subtitle mb-5"><?= __('landing_hero_subtitle') ?></p>
 
-                    <div class="row g-4 landing-features">
+                    <!-- Feature Grid -->
+                    <div class="row g-3 landing-features mb-5">
                         <div class="col-sm-6">
                             <div class="landing-feature-card">
                                 <div class="landing-feature-icon"><i class="bi bi-people-fill"></i></div>
@@ -130,6 +131,66 @@ require_once __DIR__ . '/includes/header.php';
                                 <p><?= __('landing_feature_bilingual_desc') ?></p>
                             </div>
                         </div>
+                        <div class="col-sm-6">
+                            <div class="landing-feature-card">
+                                <div class="landing-feature-icon"><i class="bi bi-shield-lock-fill"></i></div>
+                                <h5><?= __('landing_feature_secure') ?></h5>
+                                <p><?= __('landing_feature_secure_desc') ?></p>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="landing-feature-card">
+                                <div class="landing-feature-icon"><i class="bi bi-phone-fill"></i></div>
+                                <h5><?= __('landing_feature_responsive') ?></h5>
+                                <p><?= __('landing_feature_responsive_desc') ?></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- How It Works Steps -->
+                    <div class="landing-steps">
+                        <h4 class="mb-4 fw-bold"><i class="bi bi-signpost-split-fill me-2"></i><?= __('landing_how_it_works') ?></h4>
+                        <div class="landing-steps-row">
+                            <div class="landing-step">
+                                <div class="landing-step-num">1</div>
+                                <h6><?= __('landing_step1_title') ?></h6>
+                                <small><?= __('landing_step1_desc') ?></small>
+                            </div>
+                            <div class="landing-step-arrow"><i class="bi bi-arrow-<?= getLang() === 'ar' ? 'left' : 'right' ?>"></i></div>
+                            <div class="landing-step">
+                                <div class="landing-step-num">2</div>
+                                <h6><?= __('landing_step2_title') ?></h6>
+                                <small><?= __('landing_step2_desc') ?></small>
+                            </div>
+                            <div class="landing-step-arrow"><i class="bi bi-arrow-<?= getLang() === 'ar' ? 'left' : 'right' ?>"></i></div>
+                            <div class="landing-step">
+                                <div class="landing-step-num">3</div>
+                                <h6><?= __('landing_step3_title') ?></h6>
+                                <small><?= __('landing_step3_desc') ?></small>
+                            </div>
+                            <div class="landing-step-arrow"><i class="bi bi-arrow-<?= getLang() === 'ar' ? 'left' : 'right' ?>"></i></div>
+                            <div class="landing-step">
+                                <div class="landing-step-num">4</div>
+                                <h6><?= __('landing_step4_title') ?></h6>
+                                <small><?= __('landing_step4_desc') ?></small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="landing-stats mt-5">
+                        <div class="landing-stat">
+                            <i class="bi bi-hand-thumbs-up-fill"></i>
+                            <span><?= __('landing_stat_easy') ?></span>
+                        </div>
+                        <div class="landing-stat">
+                            <i class="bi bi-lightning-charge-fill"></i>
+                            <span><?= __('landing_stat_fast') ?></span>
+                        </div>
+                        <div class="landing-stat">
+                            <i class="bi bi-boxes"></i>
+                            <span><?= __('landing_stat_complete') ?></span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -155,7 +216,25 @@ require_once __DIR__ . '/includes/header.php';
                     <div class="d-lg-none text-center mb-4">
                         <i class="bi bi-mortarboard-fill text-primary" style="font-size: 2.5rem;"></i>
                         <h4 class="mt-2"><?= __('app_name') ?></h4>
-                        <p class="text-muted small"><?= __('landing_hero_subtitle') ?></p>
+                        <p class="text-muted small mb-3"><?= __('landing_hero_subtitle') ?></p>
+                        <div class="landing-mobile-features">
+                            <div class="landing-mobile-feature">
+                                <i class="bi bi-people-fill text-primary"></i>
+                                <span><?= __('landing_feature_team') ?></span>
+                            </div>
+                            <div class="landing-mobile-feature">
+                                <i class="bi bi-send-check-fill text-success"></i>
+                                <span><?= __('landing_feature_submit') ?></span>
+                            </div>
+                            <div class="landing-mobile-feature">
+                                <i class="bi bi-clipboard2-check-fill text-info"></i>
+                                <span><?= __('landing_feature_review') ?></span>
+                            </div>
+                            <div class="landing-mobile-feature">
+                                <i class="bi bi-translate text-warning"></i>
+                                <span><?= __('landing_feature_bilingual') ?></span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="card shadow landing-card">
