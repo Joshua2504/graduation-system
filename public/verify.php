@@ -56,7 +56,7 @@ require_once __DIR__ . '/includes/header.php';
                             <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
                         </div>
                         <h4 class="text-success mb-3"><?= sanitize($message) ?></h4>
-                        <a href="/login.php" class="btn btn-primary btn-lg">
+                        <a href="/login" class="btn btn-primary btn-lg">
                             <i class="bi bi-box-arrow-in-right me-2"></i><?= __('login') ?>
                         </a>
                     <?php elseif ($status === 'already'): ?>
@@ -64,7 +64,7 @@ require_once __DIR__ . '/includes/header.php';
                             <i class="bi bi-info-circle-fill text-info" style="font-size: 4rem;"></i>
                         </div>
                         <h4 class="text-info mb-3"><?= sanitize($message) ?></h4>
-                        <a href="/login.php" class="btn btn-primary">
+                        <a href="/login" class="btn btn-primary">
                             <i class="bi bi-box-arrow-in-right me-2"></i><?= __('login') ?>
                         </a>
                     <?php else: ?>
@@ -75,7 +75,7 @@ require_once __DIR__ . '/includes/header.php';
                         <p class="text-muted">
                             <?= __('verification_request_new_link') ?>
                         </p>
-                        <a href="/login.php" class="btn btn-outline-primary">
+                        <a href="/login" class="btn btn-outline-primary">
                             <i class="bi bi-box-arrow-in-right me-2"></i><?= __('login') ?>
                         </a>
                     <?php endif; ?>

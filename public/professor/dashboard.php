@@ -164,7 +164,7 @@ $isAr = getLang() === 'ar';
                                     $dupeStmt2->execute([$p['title'], $p['id']]);
                                     $dupeProject = $dupeStmt2->fetch();
                                     if ($dupeProject) {
-                                        $dupeLink = '/professor/project.php?id=' . $dupeProject['id'];
+                                        $dupeLink = '/professor/project?id=' . $dupeProject['id'];
                                     }
                                 }
                             ?>
@@ -189,7 +189,7 @@ $isAr = getLang() === 'ar';
                                         <td><span class="badge bg-success fs-6"><?= $p['group_number'] ?></span></td>
                                     <?php endif; ?>
                                     <td>
-                                        <a href="/professor/project.php?id=<?= $p['id'] ?>" class="btn btn-sm btn-outline-primary">
+                                        <a href="/professor/project?id=<?= $p['id'] ?>" class="btn btn-sm btn-outline-primary">
                                             <i class="bi bi-eye me-1"></i><?= __('view_project') ?>
                                         </a>
                                     </td>
@@ -281,7 +281,7 @@ function searchStudents() {
     
     // We use the project PATCH endpoint with a temporary project_id=0 for searching
     // But actually, let's search for all students not yet in this (new) project
-    fetch('/api/users.php?search=' + encodeURIComponent(query))
+    fetch('/api/users?search=' + encodeURIComponent(query))
         .then(r => r.json())
         .then(data => {
             const container = document.getElementById('profSearchResults');
@@ -377,14 +377,14 @@ async function profCreateProject() {
             students: selectedStudents.map(s => s.id),
             leader_id: selectedLeaderId
         };
-        const res = await fetch('/api/project.php', {
+        const res = await fetch('/api/project', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
         });
         const data = await res.json();
         if (data.success) {
-            window.location.href = '/professor/project.php?id=' + data.project_id;
+            window.location.href = '/professor/project?id=' + data.project_id;
         } else {
             throw new Error(data.error);
         }

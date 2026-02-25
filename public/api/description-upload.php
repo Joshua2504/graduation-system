@@ -87,7 +87,7 @@ if (!move_uploaded_file($file['tmp_name'], $destPath)) {
 
 chmod($destPath, 0644);
 
-$fileUrl = '/api/file.php?project=' . $projectId . '&file=' . urlencode($filename);
+$fileUrl = '/api/file?project=' . $projectId . '&file=' . urlencode($filename);
 
 jsonResponse([
     'success' => true,

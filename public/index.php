@@ -8,10 +8,10 @@ require_once __DIR__ . '/includes/functions.php';
 if (is_logged_in()) {
     $role = current_role();
     if ($role === 'doctor') {
-        redirect('/professor/dashboard.php');
+        redirect('/professor/dashboard');
     } else {
-        redirect('/student/dashboard.php');
+        redirect('/student/dashboard');
     }
 } else {
-    redirect('/login.php');
+    redirect('/login');
 }

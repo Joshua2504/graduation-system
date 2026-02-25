@@ -10,16 +10,16 @@ require_once dirname(__DIR__) . '/includes/lang.php';
 require_role('student');
 
 $projectId = (int)($_GET['id'] ?? 0);
-if ($projectId === 0) redirect('/student/dashboard.php');
+if ($projectId === 0) redirect('/student/dashboard');
 
 $userId = current_user_id();
 
 if (!isProjectMember($projectId, $userId)) {
-    redirect('/student/dashboard.php');
+    redirect('/student/dashboard');
 }
 
 $project = getProject($projectId);
-if (!$project) redirect('/student/dashboard.php');
+if (!$project) redirect('/student/dashboard');
 
 $members = getProjectMembers($projectId);
 $pendingInvites = getProjectPendingInvitations($projectId);
@@ -63,7 +63,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
 
 <div class="container">
     <!-- Back -->
-    <a href="/student/dashboard.php" class="btn btn-outline-secondary mb-3">
+    <a href="/student/dashboard" class="btn btn-outline-secondary mb-3">
         <i class="bi bi-arrow-<?= $isAr ? 'right' : 'left' ?> me-1"></i>
         <?= __('dashboard') ?>
     </a>
@@ -438,7 +438,7 @@ async function editorUploadFile(file) {
     fd.append('file', file);
     fd.append('project_id', PROJECT_ID);
     try {
-        const res = await fetch('/api/description-upload.php', { method: 'POST', body: fd });
+        const res = await fetch('/api/description-upload', { method: 'POST', body: fd });
         const data = await res.json();
         if (data.success) {
             const img = document.createElement('img');
@@ -596,7 +596,7 @@ document.getElementById('editProjectForm')?.addEventListener('submit', async (e)
     const descEl = document.getElementById('editDescription');
     const description = descEl ? descEl.innerHTML.trim() : '';
     try {
-        const res = await fetch('/api/project.php', {
+        const res = await fetch('/api/project', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ project_id: PROJECT_ID, title, type, description })
@@ -610,7 +610,7 @@ document.getElementById('editProjectForm')?.addEventListener('submit', async (e)
 // Generate invite link
 async function generateLink() {
     try {
-        const res = await fetch('/api/invitations.php', {
+        const res = await fetch('/api/invitations', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ project_id: PROJECT_ID, invite_type: 'link' })
@@ -639,7 +639,7 @@ async function sendDirectInvite() {
     const alertEl = document.getElementById('directInviteAlert');
     if (!search) return;
     try {
-        const res = await fetch('/api/invitations.php', {
+        const res = await fetch('/api/invitations', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ project_id: PROJECT_ID, invite_type: 'direct', search })
@@ -673,7 +673,7 @@ async function removeMember(memberId, name) {
     const msg = <?= json_encode(__('confirm_remove_member')) ?> + ' ' + name + '?';
     if (!confirm(msg)) return;
     try {
-        const res = await fetch('/api/project.php', {
+        const res = await fetch('/api/project', {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ project_id: PROJECT_ID, remove_user_id: memberId })
@@ -689,13 +689,13 @@ async function leaveProject() {
     const msg = <?= json_encode(__('confirm_leave_project')) ?>;
     if (!confirm(msg)) return;
     try {
-        const res = await fetch('/api/project.php', {
+        const res = await fetch('/api/project', {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ project_id: PROJECT_ID })
         });
         const data = await res.json();
-        if (data.success) window.location.href = '/student/dashboard.php';
+        if (data.success) window.location.href = '/student/dashboard';
         else alert(data.error);
     } catch (err) { alert(err.message); }
 }
@@ -705,13 +705,13 @@ async function deleteProject() {
     const msg = <?= json_encode(__('confirm_delete_project')) ?>;
     if (!confirm(msg)) return;
     try {
-        const res = await fetch('/api/project.php', {
+        const res = await fetch('/api/project', {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ project_id: PROJECT_ID })
         });
         const data = await res.json();
-        if (data.success) window.location.href = '/student/dashboard.php';
+        if (data.success) window.location.href = '/student/dashboard';
         else alert(data.error);
     } catch (err) { alert(err.message); }
 }
@@ -721,7 +721,7 @@ async function submitProject() {
     const msg = <?= json_encode(__('confirm_submit_project')) ?>;
     if (!confirm(msg)) return;
     try {
-        const res = await fetch('/api/submit.php', {
+        const res = await fetch('/api/submit', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ project_id: PROJECT_ID })
@@ -737,7 +737,7 @@ async function cancelInvitation(invitationId) {
     const msg = <?= json_encode(__('confirm_cancel_invitation')) ?>;
     if (!confirm(msg)) return;
     try {
-        const res = await fetch('/api/invitations.php', {
+        const res = await fetch('/api/invitations', {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ invitation_id: invitationId })
@@ -751,7 +751,7 @@ async function cancelInvitation(invitationId) {
 // Resend invitation (refresh token & expiry)
 async function resendInvitation(invitationId) {
     try {
-        const res = await fetch('/api/invitations.php', {
+        const res = await fetch('/api/invitations', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ invitation_id: invitationId })

@@ -11,7 +11,7 @@ require_once __DIR__ . '/includes/lang.php';
 // Must be logged in as student
 if (!is_logged_in()) {
     $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
-    redirect('/login.php');
+    redirect('/login');
 }
 require_role('student');
 
@@ -84,7 +84,7 @@ if ($token) {
         $isFull = $memberCount >= (int)$settings['max_team_size'];
     }
 } else {
-    redirect('/student/dashboard.php');
+    redirect('/student/dashboard');
 }
 
 $pageTitle = __('join_project_title');
@@ -104,7 +104,7 @@ require_once __DIR__ . '/includes/navbar.php';
                         <div class="alert alert-danger">
                             <i class="bi bi-exclamation-triangle me-2"></i><?= sanitize($error) ?>
                         </div>
-                        <a href="/student/dashboard.php" class="btn btn-primary">
+                        <a href="/student/dashboard" class="btn btn-primary">
                             <i class="bi bi-house-door me-1"></i><?= __('dashboard') ?>
                         </a>
 
@@ -113,7 +113,7 @@ require_once __DIR__ . '/includes/navbar.php';
                             <i class="bi bi-check-circle me-2"></i>
                             <?= __('already_in_project') ?>
                         </div>
-                        <a href="/student/project.php?id=<?= $project['id'] ?>" class="btn btn-primary">
+                        <a href="/student/project?id=<?= $project['id'] ?>" class="btn btn-primary">
                             <i class="bi bi-eye me-1"></i><?= __('view_project') ?>
                         </a>
 
@@ -121,7 +121,7 @@ require_once __DIR__ . '/includes/navbar.php';
                         <div class="alert alert-warning">
                             <i class="bi bi-people-fill me-2"></i><?= __('project_full') ?>
                         </div>
-                        <a href="/student/dashboard.php" class="btn btn-primary">
+                        <a href="/student/dashboard" class="btn btn-primary">
                             <i class="bi bi-house-door me-1"></i><?= __('dashboard') ?>
                         </a>
 
@@ -143,7 +143,7 @@ require_once __DIR__ . '/includes/navbar.php';
                             <button class="btn btn-success btn-lg" onclick="joinProject()">
                                 <i class="bi bi-check-lg me-2"></i><?= __('join') ?>
                             </button>
-                            <a href="/student/dashboard.php" class="btn btn-outline-secondary btn-lg">
+                            <a href="/student/dashboard" class="btn btn-outline-secondary btn-lg">
                                 <i class="bi bi-x-lg me-2"></i><?= __('decline') ?>
                             </a>
                         </div>
@@ -167,7 +167,7 @@ async function joinProject() {
         <?php endif; ?>
         body.action = 'accept';
 
-        const res = await fetch('/api/invitations.php', {
+        const res = await fetch('/api/invitations', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
@@ -178,7 +178,7 @@ async function joinProject() {
             alertEl.innerHTML = '<i class="bi bi-check-circle me-2"></i>' + (data.message || 'Joined!');
             alertEl.classList.remove('d-none');
             setTimeout(() => {
-                window.location.href = '/student/project.php?id=<?= $project['id'] ?>';
+                window.location.href = '/student/project?id=<?= $project['id'] ?>';
             }, 1000);
         } else {
             throw new Error(data.error);

@@ -11,12 +11,12 @@ require_role('doctor');
 
 $projectId = (int)($_GET['id'] ?? 0);
 if ($projectId === 0) {
-    redirect('/professor/dashboard.php');
+    redirect('/professor/dashboard');
 }
 
 $project = getProject($projectId);
 if (!$project) {
-    redirect('/professor/dashboard.php');
+    redirect('/professor/dashboard');
 }
 
 $members = getProjectMembers($projectId);
@@ -44,7 +44,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
 
 <div class="container">
     <!-- Back button -->
-    <a href="/professor/dashboard.php" class="btn btn-outline-secondary mb-3">
+    <a href="/professor/dashboard" class="btn btn-outline-secondary mb-3">
         <i class="bi bi-arrow-<?= $isAr ? 'right' : 'left' ?> me-1"></i>
         <?= __('back_to_list') ?>
     </a>
@@ -55,7 +55,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
             <i class="bi bi-exclamation-triangle-fill me-2"></i>
             <strong><?= __('duplicate_warning') ?></strong>
             <?php foreach ($duplicates as $dup): ?>
-                <a href="/professor/project.php?id=<?= $dup['id'] ?>" class="btn btn-sm btn-warning ms-2">
+                <a href="/professor/project?id=<?= $dup['id'] ?>" class="btn btn-sm btn-warning ms-2">
                     <i class="bi bi-link-45deg me-1"></i><?= __('view_similar') ?> (#<?= $dup['id'] ?>)
                 </a>
             <?php endforeach; ?>
@@ -379,7 +379,7 @@ function showImageModal(src, title) {
 
 async function resendInvitation(invitationId) {
     try {
-        const res = await fetch('/api/invitations.php', {
+        const res = await fetch('/api/invitations', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ invitation_id: invitationId })
@@ -428,7 +428,7 @@ async function editorUploadFile(file) {
     fd.append('file', file);
     fd.append('project_id', PROJECT_ID);
     try {
-        const res = await fetch('/api/description-upload.php', { method: 'POST', body: fd });
+        const res = await fetch('/api/description-upload', { method: 'POST', body: fd });
         const data = await res.json();
         if (data.success) {
             const img = document.createElement('img');
@@ -586,7 +586,7 @@ document.getElementById('editProjectForm')?.addEventListener('submit', async (e)
     const descEl = document.getElementById('editDescription');
     const description = descEl ? descEl.innerHTML.trim() : '';
     try {
-        const res = await fetch('/api/project.php', {
+        const res = await fetch('/api/project', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ project_id: PROJECT_ID, title, type, description })
@@ -607,7 +607,7 @@ async function searchAndAssign() {
     if (!query) return;
     
     try {
-        const res = await fetch('/api/project.php', {
+        const res = await fetch('/api/project', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'search_students', project_id: PROJECT_ID, query })
@@ -639,7 +639,7 @@ async function searchAndAssign() {
 
 async function assignStudent(studentId) {
     try {
-        const res = await fetch('/api/project.php', {
+        const res = await fetch('/api/project', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'add_student', project_id: PROJECT_ID, student_id: studentId })
@@ -653,7 +653,7 @@ async function assignStudent(studentId) {
 async function removeMember(studentId, name) {
     if (!confirm(<?= json_encode(__('confirm_remove_from_project')) ?>)) return;
     try {
-        const res = await fetch('/api/project.php', {
+        const res = await fetch('/api/project', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'remove_student', project_id: PROJECT_ID, student_id: studentId })
@@ -667,7 +667,7 @@ async function removeMember(studentId, name) {
 async function setLeader(studentId) {
     if (!confirm(<?= json_encode(__('set_as_leader')) ?> + '?')) return;
     try {
-        const res = await fetch('/api/project.php', {
+        const res = await fetch('/api/project', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'set_leader', project_id: PROJECT_ID, student_id: studentId })
@@ -708,7 +708,7 @@ async function reviewProject(action) {
     document.getElementById('btn-reject').disabled = true;
 
     try {
-        const res = await fetch('/api/review.php', {
+        const res = await fetch('/api/review', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -726,7 +726,7 @@ async function reviewProject(action) {
             successEl.classList.remove('d-none');
             
             setTimeout(() => {
-                window.location.href = '/professor/dashboard.php';
+                window.location.href = '/professor/dashboard';
             }, 1500);
         } else {
             throw new Error(data.error || 'Operation failed');

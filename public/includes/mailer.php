@@ -168,7 +168,7 @@ function sendVerificationEmail(string $email, string $name, string $token, strin
     // Build verification URL
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
     $host = $_SERVER['HTTP_HOST'] ?? 'localhost:8642';
-    $verifyUrl = "$protocol://$host/verify.php?token=$token";
+    $verifyUrl = "$protocol://$host/verify?token=$token";
 
     if ($lang === 'ar') {
         $subject = 'تأكيد البريد الإلكتروني - نظام مشاريع التخرج';
@@ -231,7 +231,7 @@ HTML;
 function sendInvitationEmail(string $email, string $inviteeName, string $inviterName, string $projectTitle, string $token, string $lang = 'ar'): bool {
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
     $host = $_SERVER['HTTP_HOST'] ?? 'localhost:8642';
-    $joinUrl = "$protocol://$host/join.php?token=$token";
+    $joinUrl = "$protocol://$host/join?token=$token";
 
     if ($lang === 'ar') {
         $subject = 'دعوة للانضمام لمشروع تخرج - ' . $projectTitle;

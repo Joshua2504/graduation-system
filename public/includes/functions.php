@@ -275,7 +275,7 @@ function findDuplicateProjects(int $excludeProjectId, string $title): array {
  * @return string The URL path to the secure file endpoint
  */
 function secureFileUrl(int $userId, string $filename): string {
-    return '/api/file.php?user=' . urlencode($userId) . '&file=' . urlencode($filename);
+    return '/api/file?user=' . urlencode($userId) . '&file=' . urlencode($filename);
 }
 
 /**

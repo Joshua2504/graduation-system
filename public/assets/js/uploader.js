@@ -20,7 +20,7 @@ const Uploader = {
             formData.append('type', type);
 
             const xhr = new XMLHttpRequest();
-            xhr.open('POST', '/api/upload.php', true);
+            xhr.open('POST', '/api/upload', true);
 
             // Track upload progress
             xhr.upload.addEventListener('progress', (e) => {

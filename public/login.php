@@ -7,6 +7,7 @@ require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/functions.php';
 require_once __DIR__ . '/includes/lang.php';
 require_once __DIR__ . '/includes/mailer.php';
+require_once __DIR__ . '/includes/demo.php';
 
 // If already logged in, redirect
 if (is_logged_in()) {
@@ -62,6 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['resend_verification'
                     $_SESSION['name'] = $user['name'];
                     $_SESSION['email'] = $user['email'];
                     $_SESSION['role'] = $user['role'];
+                    scheduleDemoReset();
                     $redir = $_SESSION['redirect_after_login'] ?? '/';
                     unset($_SESSION['redirect_after_login']);
                     redirect($redir);
@@ -71,6 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['resend_verification'
                 $_SESSION['name'] = $user['name'];
                 $_SESSION['email'] = $user['email'];
                 $_SESSION['role'] = $user['role'];
+                scheduleDemoReset();
                 $redir = $_SESSION['redirect_after_login'] ?? '/';
                 unset($_SESSION['redirect_after_login']);
                 redirect($redir);
@@ -130,8 +133,34 @@ require_once __DIR__ . '/includes/header.php';
 
                     <div class="text-center mt-3">
                         <span class="text-muted"><?= __('no_account') ?></span>
-                        <a href="/register.php"><?= __('register') ?></a>
+                        <a href="/register"><?= __('register') ?></a>
                     </div>
+
+                    <?php if (isDemoMode()): ?>
+                    <hr>
+                    <div class="text-center mb-2">
+                        <small class="text-muted fw-semibold"><?= __('demo_quick_login') ?></small>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-primary flex-fill demo-login-btn"
+                                data-email="doctor@treudler.net" data-password="doctor123">
+                            <i class="bi bi-mortarboard me-1"></i><?= __('demo_doctor') ?>
+                        </button>
+                        <button type="button" class="btn btn-outline-success flex-fill demo-login-btn"
+                                data-email="student1@treudler.net" data-password="student123">
+                            <i class="bi bi-person me-1"></i><?= __('demo_student') ?>
+                        </button>
+                    </div>
+                    <script>
+                    document.querySelectorAll('.demo-login-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            document.getElementById('email').value = btn.dataset.email;
+                            document.getElementById('password').value = btn.dataset.password;
+                            btn.closest('.card-body').querySelector('form[method="POST"]:not([class])').submit();
+                        });
+                    });
+                    </script>
+                    <?php endif; ?>
 
                     <hr>
                     <div class="text-center">

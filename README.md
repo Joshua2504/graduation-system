@@ -27,6 +27,13 @@
 - **System settings** — toggle registration, email verification, min/max team size (2–10)
 - **Manage students** — list all student accounts, verify emails manually, enable/disable accounts
 
+### Demo Mode
+- **Quick login** — one-click login buttons for doctor and student on the login page
+- **Auto-reset** — 30-minute countdown timer starts after any login; resets all data to seed state
+- **Countdown banner** — live timer above the navbar shows remaining time before reset
+- **Seed users** — 6 pre-created accounts (1 doctor + 5 students) survive every reset
+- Enable with `DEMO_MODE=true` in `.env`
+
 ### General
 - 🌍 Bilingual: Arabic (RTL, default) & English (LTR) — toggle via navbar
 - � User dropdown menu — click username in navbar for profile & logout
@@ -81,6 +88,7 @@ The database schema and seed data are applied automatically on first run.
 |------|-------|----------|
 | Professor | `doctor@treudler.net` | `doctor123` |
 | Student | `student@treudler.net` | `student123` |
+| Demo Student 1–4 | `student1@treudler.net` … `student4@treudler.net` | `student123` |
 
 ---
 
@@ -113,7 +121,8 @@ graduation-system/
     │   ├── submit.php            # Project submission
     │   ├── review.php            # Doctor accept/reject
     │   ├── settings.php          # System settings
-    │   └── users.php             # Student account management
+    │   ├── users.php             # Student account management
+    │   └── demo-reset.php        # Demo mode reset API
     ├── student/
     │   ├── dashboard.php         # Project list, join by code, invitations
     │   ├── project.php           # Project detail, team, invites, submit
@@ -129,6 +138,7 @@ graduation-system/
     │   ├── functions.php         # Helper functions
     │   ├── lang.php              # Bilingual translations (AR/EN)
     │   ├── mailer.php            # SMTP mailer
+    │   ├── demo.php              # Demo mode helpers
     │   ├── header.php            # HTML head template
     │   ├── navbar.php            # Navigation bar
     │   └── footer.php            # HTML footer
@@ -153,6 +163,7 @@ graduation-system/
 | `MAIL_PORT` | SMTP port | `587` |
 | `MAIL_USER` | SMTP username / sender email | — |
 | `MAIL_PASS` | SMTP password | — |
+| `DEMO_MODE` | Enable demo mode with quick-login & auto-reset | `false` |
 
 ---
 
@@ -212,7 +223,7 @@ graduation-system/
 
 ## 🔌 API Reference
 
-### Projects — `/api/project.php`
+### Projects — `/api/project`
 | Method | Params | Description |
 |--------|--------|-------------|
 | `GET` | — | List current user's projects |
@@ -221,7 +232,7 @@ graduation-system/
 | `PUT` | `{project_id, title?, type?}` | Update project (leader only, draft) |
 | `DELETE` | `{project_id, remove_user_id?}` | Leave project or remove member |
 
-### Invitations — `/api/invitations.php`
+### Invitations — `/api/invitations`
 | Method | Params | Description |
 |--------|--------|-------------|
 | `GET` | `?project_id=X` | List sent invitations (leader) |
@@ -231,35 +242,35 @@ graduation-system/
 | `PUT` | `{token/join_code/invitation_id, action}` | Accept or decline |
 | `DELETE` | `{invitation_id}` | Cancel invitation (leader) |
 
-### Profile — `/api/profile.php`
+### Profile — `/api/profile`
 | Method | Params | Description |
 |--------|--------|-------------|
 | `GET` | — | Get own profile |
 | `PUT` | `{gender, national_id, ...}` | Update profile fields |
 | `POST` | Multipart `{type, file}` | Upload document image or profile picture (type: card, national_id, receipt, profile_picture) |
 
-### File Serving — `/api/file.php`
+### File Serving — `/api/file`
 | Method | Params | Description |
 |--------|--------|-------------|
 | `GET` | `?user={id}&file={filename}` | Serve uploaded file with auth check (students: own files only; doctors: any) |
 
-### Submit — `/api/submit.php`
+### Submit — `/api/submit`
 | Method | Params | Description |
 |--------|--------|-------------|
 | `POST` | `{project_id}` | Submit project for review (validates team size + profile completeness) |
 
-### Review — `/api/review.php`
+### Review — `/api/review`
 | Method | Params | Description |
 |--------|--------|-------------|
 | `POST` | `{project_id, action, doctor_note?}` | Accept or reject project (doctor only) |
 
-### Settings — `/api/settings.php`
+### Settings — `/api/settings`
 | Method | Params | Description |
 |--------|--------|-------------|
 | `GET` | — | Get system settings |
 | `POST` | `{registration_open, email_verification_required, min_team_size, max_team_size}` | Update settings (doctor only) |
 
-### Users — `/api/users.php`
+### Users — `/api/users`
 | Method | Params | Description |
 |--------|--------|-------------|
 | `GET` | — | List all student accounts (doctor only) |
@@ -276,7 +287,7 @@ graduation-system/
 
 **Configuration:**
 - Upload limit: 50MB per file / 55MB POST
-- Apache `mod_rewrite` enabled for clean URLs
+- Apache `mod_rewrite` enabled for clean URLs (no `.php` extension in browser)
 - Schema auto-applied on first database initialization
 - Health check on MariaDB before app container starts
 

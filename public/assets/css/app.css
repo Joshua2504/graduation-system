@@ -49,6 +49,25 @@ body {
     border-radius: 12px 12px 0 0 !important;
 }
 
+/* ─── Demo Mode ─── */
+.demo-timer-banner {
+    background: linear-gradient(90deg, #0d6efd, #6610f2);
+    color: #fff;
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+    z-index: 1050;
+}
+
+.demo-timer-banner.demo-timer-urgent {
+    background: linear-gradient(90deg, #dc3545, #fd7e14);
+    animation: demo-pulse 1s ease-in-out infinite;
+}
+
+@keyframes demo-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
 /* ─── Stats Cards ─── */
 .card.border-warning,
 .card.border-success,

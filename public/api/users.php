@@ -274,7 +274,7 @@ if ($method === 'POST') {
             $_SESSION['name'] = $student['name'];
             $_SESSION['email'] = $student['email'];
             $_SESSION['role'] = $student['role'];
-            jsonResponse(['success' => true, 'redirect' => '/student/dashboard.php', 'message' => 'تم الدخول كطالب']);
+            jsonResponse(['success' => true, 'redirect' => '/student/dashboard', 'message' => 'تم الدخول كطالب']);
             break;
 
         case 'upload_image':

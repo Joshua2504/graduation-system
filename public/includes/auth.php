@@ -19,7 +19,7 @@ function require_login(bool $isApi = false): void {
             echo json_encode(['error' => 'غير مصرح - يرجى تسجيل الدخول', 'error_en' => 'Unauthorized']);
             exit;
         }
-        header('Location: /login.php');
+        header('Location: /login');
         exit;
     }
 }
@@ -38,7 +38,7 @@ function require_role(string $role, bool $isApi = false): void {
         }
         // Redirect to appropriate dashboard
         $r = $_SESSION['role'] ?? 'student';
-        header('Location: /' . ($r === 'doctor' ? 'professor' : 'student') . '/dashboard.php');
+        header('Location: /' . ($r === 'doctor' ? 'professor' : 'student') . '/dashboard');
         exit;
     }
 }

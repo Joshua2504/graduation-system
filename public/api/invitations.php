@@ -148,7 +148,7 @@ if ($method === 'POST') {
             'success' => true,
             'invitation_id' => (int)$pdo->lastInsertId(),
             'token' => $token,
-            'join_url' => '/join.php?token=' . $token,
+            'join_url' => '/join?token=' . $token,
             'expires_at' => $expiresAt,
             'message' => 'تم إنشاء رابط الدعوة'
         ]);
@@ -338,7 +338,7 @@ if ($method === 'PATCH') {
     // If it's a link invitation (no invited_user_id), return the new join URL
     if (empty($invitation['invited_user_id'])) {
         $response['token'] = $newToken;
-        $response['join_url'] = '/join.php?token=' . $newToken;
+        $response['join_url'] = '/join?token=' . $newToken;
     }
 
     jsonResponse($response);

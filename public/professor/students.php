@@ -349,7 +349,7 @@ async function openEditModal(userId) {
     editModal.show();
 
     try {
-        const res = await fetch('/api/users.php?id=' + userId);
+        const res = await fetch('/api/users?id=' + userId);
         const data = await res.json();
         if (!data.user) throw new Error(data.error || 'Error');
 
@@ -371,7 +371,7 @@ async function openEditModal(userId) {
         for (const [type, field] of Object.entries(imgTypes)) {
             const container = document.getElementById('edit_img_preview_' + type);
             if (u[field]) {
-                const path = '/api/file.php?user=' + u.id + '&file=' + encodeURIComponent(u[field]);
+                const path = '/api/file?user=' + u.id + '&file=' + encodeURIComponent(u[field]);
                 container.innerHTML = `<img src="${path}" class="img-thumbnail" style="max-height:100px; cursor:pointer;" onclick="previewImage('${path}', '${type}')">`;
             } else {
                 container.innerHTML = `<span class="text-muted small">${isAr ? <?= json_encode(__('no_image')) ?> : <?= json_encode(__('no_image')) ?>}</span>`;
@@ -410,7 +410,7 @@ async function saveStudentProfile() {
     };
 
     try {
-        const res = await fetch('/api/users.php', {
+        const res = await fetch('/api/users', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -448,7 +448,7 @@ function uploadStudentImage(input, type) {
     formData.append('image_type', type);
 
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/api/users.php', true);
+    xhr.open('POST', '/api/users', true);
 
     progressEl.classList.remove('d-none');
     progressBar.style.width = '0%';
@@ -465,7 +465,7 @@ function uploadStudentImage(input, type) {
             const data = JSON.parse(xhr.responseText);
             if (data.success) {
                 const container = document.getElementById('edit_img_preview_' + type);
-                const securePath = '/api/file.php?user=' + document.getElementById('edit_user_id').value + '&file=' + encodeURIComponent(data.filename);
+                const securePath = '/api/file?user=' + document.getElementById('edit_user_id').value + '&file=' + encodeURIComponent(data.filename);
                 container.innerHTML = `<img src="${securePath}" class="img-thumbnail" style="max-height:100px; cursor:pointer;" onclick="previewImage('${securePath}', '${type}')">`;
             } else {
                 alert(data.error || 'Upload failed');
@@ -505,7 +505,7 @@ async function userAction(userId, action) {
     if (action !== 'impersonate' && !confirm(confirmMsgs[action] || 'Are you sure?')) return;
 
     try {
-        const res = await fetch('/api/users.php', {
+        const res = await fetch('/api/users', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ user_id: userId, action: action })
@@ -559,7 +559,7 @@ async function createStudent() {
     }
 
     try {
-        const res = await fetch('/api/users.php', {
+        const res = await fetch('/api/users', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)

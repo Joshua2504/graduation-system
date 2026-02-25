@@ -233,7 +233,7 @@ document.getElementById('profileForm').addEventListener('submit', async (e) => {
     });
 
     try {
-        const res = await fetch('/api/profile.php', {
+        const res = await fetch('/api/profile', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
@@ -268,7 +268,7 @@ function uploadImage(type, file) {
     formData.append('type', type);
 
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/api/profile.php', true);
+    xhr.open('POST', '/api/profile', true);
 
     xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) {

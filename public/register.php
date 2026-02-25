@@ -77,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $regOpen) {
                     $_SESSION['name'] = $name;
                     $_SESSION['email'] = $email;
                     $_SESSION['role'] = 'student';
-                    redirect('/student/dashboard.php');
+                    redirect('/student/dashboard');
                 }
             }
         }
@@ -113,7 +113,7 @@ require_once __DIR__ . '/includes/header.php';
                                 <i class="bi bi-envelope-check me-2"></i><?= sanitize($success) ?>
                             </div>
                             <div class="text-center mt-3">
-                                <a href="/login.php" class="btn btn-primary">
+                                <a href="/login" class="btn btn-primary">
                                     <i class="bi bi-box-arrow-in-right me-1"></i><?= __('login') ?>
                                 </a>
                             </div>
@@ -156,7 +156,7 @@ require_once __DIR__ . '/includes/header.php';
 
                     <div class="text-center mt-3">
                         <span class="text-muted"><?= __('has_account') ?></span>
-                        <a href="/login.php"><?= __('login') ?></a>
+                        <a href="/login"><?= __('login') ?></a>
                     </div>
 
                     <hr>

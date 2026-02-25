@@ -101,6 +101,20 @@ INSERT INTO `users` (`name`, `email`, `password`, `student_code`, `role`, `email
 ('طالب تجريبي', 'student@treudler.net', '$2y$10$yqqDmhPnvBeLXswbIx3dfepMRnibuYMv/UuUb8hp8T3NAWn0yNepO', '001', 'student', 1)
 ON DUPLICATE KEY UPDATE `id` = `id`;
 
+-- ─── Seed: Demo student accounts (password: student123) ───
+INSERT INTO `users` (`name`, `email`, `password`, `student_code`, `role`, `email_verified`) VALUES
+('طالب 1', 'student1@treudler.net', '$2y$10$yqqDmhPnvBeLXswbIx3dfepMRnibuYMv/UuUb8hp8T3NAWn0yNepO', '002', 'student', 1)
+ON DUPLICATE KEY UPDATE `id` = `id`;
+INSERT INTO `users` (`name`, `email`, `password`, `student_code`, `role`, `email_verified`) VALUES
+('طالب 2', 'student2@treudler.net', '$2y$10$yqqDmhPnvBeLXswbIx3dfepMRnibuYMv/UuUb8hp8T3NAWn0yNepO', '003', 'student', 1)
+ON DUPLICATE KEY UPDATE `id` = `id`;
+INSERT INTO `users` (`name`, `email`, `password`, `student_code`, `role`, `email_verified`) VALUES
+('طالب 3', 'student3@treudler.net', '$2y$10$yqqDmhPnvBeLXswbIx3dfepMRnibuYMv/UuUb8hp8T3NAWn0yNepO', '004', 'student', 1)
+ON DUPLICATE KEY UPDATE `id` = `id`;
+INSERT INTO `users` (`name`, `email`, `password`, `student_code`, `role`, `email_verified`) VALUES
+('طالب 4', 'student4@treudler.net', '$2y$10$yqqDmhPnvBeLXswbIx3dfepMRnibuYMv/UuUb8hp8T3NAWn0yNepO', '005', 'student', 1)
+ON DUPLICATE KEY UPDATE `id` = `id`;
+
 -- ─── Migrations ───
 
 -- Add description column to projects (safe for existing databases)

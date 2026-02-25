@@ -44,7 +44,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                 <strong><?= __('profile_incomplete') ?></strong><br>
                 <small><?= __('profile_incomplete_msg') ?></small>
             </div>
-            <a href="/student/profile.php" class="btn btn-warning btn-sm ms-auto">
+            <a href="/student/profile" class="btn btn-warning btn-sm ms-auto">
                 <i class="bi bi-person-circle me-1"></i><?= __('complete_profile') ?>
             </a>
         </div>
@@ -106,7 +106,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                         <?= $statusLabels[$p['status']] ?>
                                     </span>
                                     <br>
-                                    <a href="/student/project.php?id=<?= $p['id'] ?>" class="btn btn-sm btn-outline-primary">
+                                    <a href="/student/project?id=<?= $p['id'] ?>" class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-eye me-1"></i><?= __('view_project') ?>
                                     </a>
                                 </div>
@@ -236,14 +236,14 @@ async function createProject() {
     if (!title) return;
     
     try {
-        const res = await fetch('/api/project.php', {
+        const res = await fetch('/api/project', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ title, type, description })
         });
         const data = await res.json();
         if (data.success) {
-            window.location.href = '/student/project.php?id=' + data.project_id;
+            window.location.href = '/student/project?id=' + data.project_id;
         } else {
             throw new Error(data.error);
         }
@@ -260,7 +260,7 @@ async function joinByCode() {
     if (!code) return;
     
     try {
-        const res = await fetch('/api/invitations.php', {
+        const res = await fetch('/api/invitations', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'accept', join_code: code })
@@ -283,7 +283,7 @@ async function joinByCode() {
 
 async function respondInvite(invitationId, action) {
     try {
-        const res = await fetch('/api/invitations.php', {
+        const res = await fetch('/api/invitations', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ invitation_id: invitationId, action })
