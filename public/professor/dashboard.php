@@ -55,46 +55,6 @@ $isAr = getLang() === 'ar';
         </button>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card shadow-sm border-secondary">
-                <div class="card-body text-center">
-                    <i class="bi bi-pencil-square text-secondary fs-1"></i>
-                    <h2 class="mt-2 mb-0"><?= $stats['draft'] ?></h2>
-                    <p class="text-muted"><?= __('draft_projects') ?></p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card shadow-sm border-warning">
-                <div class="card-body text-center">
-                    <i class="bi bi-hourglass-split text-warning fs-1"></i>
-                    <h2 class="mt-2 mb-0"><?= $stats['under_review'] ?></h2>
-                    <p class="text-muted"><?= __('projects_under_review') ?></p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card shadow-sm border-success">
-                <div class="card-body text-center">
-                    <i class="bi bi-check-circle-fill text-success fs-1"></i>
-                    <h2 class="mt-2 mb-0"><?= $stats['accepted'] ?></h2>
-                    <p class="text-muted"><?= __('accepted_projects') ?></p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card shadow-sm border-danger">
-                <div class="card-body text-center">
-                    <i class="bi bi-x-circle-fill text-danger fs-1"></i>
-                    <h2 class="mt-2 mb-0"><?= $stats['rejected'] ?></h2>
-                    <p class="text-muted"><?= __('rejected_projects') ?></p>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Tab Navigation + Sort -->
     <div class="card shadow">
         <div class="card-header">
