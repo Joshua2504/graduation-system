@@ -7,6 +7,7 @@
 ## ✨ Features
 
 ### Student Flow
+- **Landing page** — one-page login screen with system introduction, feature highlights, and bilingual support
 - **Register & verify** — create account with student code, optionally verify email
 - **Complete profile** — personal info (gender, national ID, birth date, governorate, address, phone, department) + upload 3 documents (institute card, national ID, payment receipt) + optional profile picture shown across the platform
 - **Create project** — become team leader, get a unique 6-character join code
@@ -87,8 +88,7 @@ The database schema and seed data are applied automatically on first run.
 | Role | Email | Password |
 |------|-------|----------|
 | Professor | `doctor@treudler.net` | `doctor123` |
-| Student | `student@treudler.net` | `student123` |
-| Demo Student 1–5 | `student1@treudler.net` … `student5@treudler.net` | *random — shown on login page* |
+| Student 1–5 | `student1@treudler.net` … `student5@treudler.net` | `student123` |
 
 ---
 

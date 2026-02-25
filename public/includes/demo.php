@@ -23,12 +23,11 @@ define('DEMO_RESET_INTERVAL', 30 * 60);
 /** Demo seed accounts — email => [name, role, student_code] */
 define('DEMO_SEED_ACCOUNTS', [
     'doctor@treudler.net'   => ['name' => 'دكتور',       'role' => 'doctor',  'student_code' => null],
-    'student@treudler.net'  => ['name' => 'طالب تجريبي', 'role' => 'student', 'student_code' => '001'],
-    'student1@treudler.net' => ['name' => 'طالب 1',      'role' => 'student', 'student_code' => '002'],
-    'student2@treudler.net' => ['name' => 'طالب 2',      'role' => 'student', 'student_code' => '003'],
-    'student3@treudler.net' => ['name' => 'طالب 3',      'role' => 'student', 'student_code' => '004'],
-    'student4@treudler.net' => ['name' => 'طالب 4',      'role' => 'student', 'student_code' => '005'],
-    'student5@treudler.net' => ['name' => 'طالب 5',      'role' => 'student', 'student_code' => '006'],
+    'student1@treudler.net' => ['name' => 'طالب 1',      'role' => 'student', 'student_code' => '001'],
+    'student2@treudler.net' => ['name' => 'طالب 2',      'role' => 'student', 'student_code' => '002'],
+    'student3@treudler.net' => ['name' => 'طالب 3',      'role' => 'student', 'student_code' => '003'],
+    'student4@treudler.net' => ['name' => 'طالب 4',      'role' => 'student', 'student_code' => '004'],
+    'student5@treudler.net' => ['name' => 'طالب 5',      'role' => 'student', 'student_code' => '005'],
 ]);
 
 /**
