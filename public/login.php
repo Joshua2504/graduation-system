@@ -32,15 +32,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['resend_verification'
         $success = __('verification_resent');
     }
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = trim($_POST['email'] ?? '');
+    $login_input = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    if (empty($email) || empty($password)) {
+    if (empty($login_input) || empty($password)) {
         $error = __('required_field');
     } else {
         $pdo = getDB();
-        $stmt = $pdo->prepare("SELECT id, name, email, password, role, email_verified FROM users WHERE email = ?");
-        $stmt->execute([$email]);
+        // Allow login with email or student code
+        if (strpos($login_input, '@') !== false) {
+            $stmt = $pdo->prepare("SELECT id, name, email, password, role, email_verified, account_enabled FROM users WHERE email = ?");
+        } else {
+            $stmt = $pdo->prepare("SELECT id, name, email, password, role, email_verified, account_enabled FROM users WHERE student_code = ?");
+        }
+        $stmt->execute([$login_input]);
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password'])) {
@@ -266,11 +271,12 @@ require_once __DIR__ . '/includes/header.php';
 
                             <form method="POST" novalidate>
                                 <div class="mb-3">
-                                    <label for="email" class="form-label"><?= __('email') ?></label>
+                                    <label for="email" class="form-label"><?= __('email_or_code') ?></label>
                                     <div class="input-group">
-                                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                                        <input type="email" class="form-control" id="email" name="email"
-                                               value="<?= sanitize($email ?? '') ?>" required autofocus>
+                                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                        <input type="text" class="form-control" id="email" name="email"
+                                               value="<?= sanitize($login_input ?? '') ?>" required autofocus
+                                               placeholder="<?= __('email_or_code_placeholder') ?>">
                                     </div>
                                 </div>
                                 <div class="mb-3">
