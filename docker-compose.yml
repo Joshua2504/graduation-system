@@ -1,7 +1,6 @@
 services:
   app:
     build: .
-    container_name: grad-app
     ports:
       - "${APP_PORT:-8642}:80"
     volumes:
@@ -18,7 +17,6 @@ services:
 
   db:
     image: mariadb:latest
-    container_name: grad-db
     environment:
       MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASS}
       MARIADB_DATABASE: ${DB_NAME}
@@ -36,7 +34,7 @@ services:
 
 #  phpmyadmin:
 #    image: phpmyadmin:latest
-#    container_name: grad-pma
+#    container_name: grad-pma  # not used; Compose derives names from COMPOSE_PROJECT_NAME
 #    ports:
 #      - "8080:80"
 #    environment:

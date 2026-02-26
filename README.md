@@ -175,6 +175,7 @@ graduation-system/
 | `MAIL_PASS` | SMTP password | — |
 | `DEMO_MODE` | Enable demo mode with quick-login & auto-reset | `false` |
 | `APP_PORT` | Host port mapped to the app container | `8642` |
+| `COMPOSE_PROJECT_NAME` | Docker Compose project name (isolates containers per environment) | `graduation-system` |
 
 ---
 
@@ -303,10 +304,12 @@ graduation-system/
 
 ## 🐳 Docker Details
 
-| Container | Port | Image |
-|-----------|------|-------|
-| `grad-app` | `APP_PORT` (default `8642`) → `80` | Custom PHP 8.2-Apache |
-| `grad-db` | Internal only | `mariadb:latest` |
+| Service | Port | Image |
+|---------|------|-------|
+| `app` | `APP_PORT` (default `8642`) → `80` | Custom PHP 8.2-Apache |
+| `db` | Internal only | `mariadb:latest` |
+
+Container names are derived from `COMPOSE_PROJECT_NAME` (e.g. `graduation-system-dev-app-1`).
 
 **Deployment environments:**
 
@@ -331,7 +334,7 @@ docker compose up -d
 docker compose up --build -d
 
 # View logs
-docker logs grad-app -f
+docker compose logs app -f
 
 # Reset database (wipe and recreate)
 docker compose down
@@ -339,7 +342,7 @@ rm -rf data/db_data
 docker compose up --build -d
 
 # Access database CLI
-docker exec -it grad-db mariadb -u grad_user -p graduation
+docker compose exec db mariadb -u grad_user -p graduation
 ```
 
 ---
