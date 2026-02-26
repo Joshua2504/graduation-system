@@ -140,7 +140,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                 <?= __('enabled_languages_description') ?>
                             </small>
                             <?php
-                            $enabledLangs = explode(',', $settings['enabled_languages'] ?? 'ar,en,de');
+                            $enabledLangs = explode(',', $settings['enabled_languages'] ?? 'ar');
                             $langOptions = [
                                 'ar' => 'العربية (Arabic)',
                                 'en' => 'English',

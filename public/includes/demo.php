@@ -138,14 +138,15 @@ function performDemoReset(): void {
             WHERE email IN ($placeholders)")
             ->execute($seedEmails);
 
-        // Reset settings to defaults
+        // Reset settings to defaults (demo mode enables all languages)
         $pdo->exec("UPDATE settings SET
             registration_open = 1,
             email_verification_required = 1,
             min_team_size = 2,
             max_team_size = 7,
             student_project_creation = 1,
-            show_reviewer_name = 0
+            show_reviewer_name = 0,
+            enabled_languages = 'ar,en,de'
             WHERE id = 1");
 
         // Get doctor ID for reviewed_by

@@ -9,6 +9,9 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Check if demo mode is active (inline check to avoid dependency on demo.php)
+$_isDemoMode = filter_var($_ENV['DEMO_MODE'] ?? getenv('DEMO_MODE') ?: 'false', FILTER_VALIDATE_BOOLEAN);
+
 // Load enabled languages from settings (DB)
 $enabledLangsStr = null;
 try {
@@ -21,12 +24,14 @@ try {
         }
     }
 } catch (Exception $e) {
-    // DB not ready yet, use all languages
+    // DB not ready yet, use fallback
 }
 
+// When demo mode is enabled, fall back to all languages; otherwise only Arabic
+$defaultLangs = $_isDemoMode ? $allLangs : ['ar'];
 $supportedLangs = $enabledLangsStr
     ? array_values(array_filter(explode(',', $enabledLangsStr), fn($l) => in_array($l, $allLangs)))
-    : $allLangs;
+    : $defaultLangs;
 if (empty($supportedLangs)) $supportedLangs = ['ar'];
 
 // Handle language switch

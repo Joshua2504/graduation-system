@@ -8,12 +8,12 @@ CREATE TABLE IF NOT EXISTS `settings` (
   `student_project_creation` TINYINT(1) NOT NULL DEFAULT 1,
   `show_reviewer_name` TINYINT(1) NOT NULL DEFAULT 0,
   `leader_transfer` TINYINT(1) NOT NULL DEFAULT 1,
-  `enabled_languages` VARCHAR(50) NOT NULL DEFAULT 'ar,en,de',
+  `enabled_languages` VARCHAR(50) NOT NULL DEFAULT 'ar',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `settings` (`id`, `registration_open`, `email_verification_required`, `min_team_size`, `max_team_size`, `student_project_creation`, `show_reviewer_name`, `leader_transfer`, `enabled_languages`)
-VALUES (1, 1, 1, 2, 7, 1, 0, 1, 'ar,en,de')
+VALUES (1, 1, 1, 2, 7, 1, 0, 1, 'ar')
 ON DUPLICATE KEY UPDATE `id` = `id`;
 
 -- ─── Users (with profile fields) ───
