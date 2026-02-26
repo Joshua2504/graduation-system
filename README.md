@@ -83,7 +83,7 @@ cp .env.example .env
 # 3. Start the application
 docker compose up --build -d
 
-# 4. Open in browser
+# 4. Open in browser (default port, configurable via APP_PORT)
 open http://localhost:8642
 ```
 
@@ -174,6 +174,7 @@ graduation-system/
 | `MAIL_USER` | SMTP username / sender email | — |
 | `MAIL_PASS` | SMTP password | — |
 | `DEMO_MODE` | Enable demo mode with quick-login & auto-reset | `false` |
+| `APP_PORT` | Host port mapped to the app container | `8642` |
 
 ---
 
@@ -304,8 +305,15 @@ graduation-system/
 
 | Container | Port | Image |
 |-----------|------|-------|
-| `grad-app` | `8642` → `80` | Custom PHP 8.2-Apache |
+| `grad-app` | `APP_PORT` (default `8642`) → `80` | Custom PHP 8.2-Apache |
 | `grad-db` | Internal only | `mariadb:latest` |
+
+**Deployment environments:**
+
+| Environment | Branch | SSH variable | Port | Demo Mode | Rsync excludes |
+|-------------|--------|-------------|------|-----------|----------------|
+| Dev | `main` | `SSH_PATH_DEV` | `8642` | enabled | `.git`, `.github`, `.env` |
+| Production | `production` | `SSH_PATH_PROD` | `8643` | disabled | `.git`, `.github`, `.env`, `data/` |
 
 **Configuration:**
 - Upload limit: 50MB per file / 55MB POST

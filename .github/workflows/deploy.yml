@@ -2,17 +2,15 @@ name: Deploy via rsync + SSH
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, production ]
   workflow_dispatch:
 
-env:
-  SSH_PATH: ${{ vars.SSH_PATH }}
-
 jobs:
-  deploy:
+  deploy-dev:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     concurrency:
-      group: deploy-graduation-system
+      group: deploy-dev
       cancel-in-progress: true
     steps:
       - name: Checkout
@@ -28,12 +26,12 @@ jobs:
       - name: Rsync files to remote host
         run: |
           set -euo pipefail
-          SSH_PATH="${{ env.SSH_PATH }}"
+          SSH_PATH="${{ vars.SSH_PATH_DEV }}"
           REMOTE="${SSH_PATH%%:*}"
           REMOTE_DIR="${SSH_PATH#*:}"
           rsync -az --delete --exclude '.git' --exclude '.github' --exclude '.env' -e "ssh -o StrictHostKeyChecking=no" ./ "$REMOTE:$REMOTE_DIR"
 
-      - name: Build remote .env from individual secrets and run Docker Compose
+      - name: Build remote .env and run Docker Compose
         env:
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
@@ -46,14 +44,12 @@ jobs:
           MAIL_PORT: ${{ secrets.MAIL_PORT }}
           MAIL_USER: ${{ secrets.MAIL_USER }}
           MAIL_PASS: ${{ secrets.MAIL_PASS }}
-          DEMO_MODE: ${{ vars.DEMO_MODE }}
         run: |
           set -euo pipefail
-          SSH_PATH="${{ env.SSH_PATH }}"
+          SSH_PATH="${{ vars.SSH_PATH_DEV }}"
           REMOTE="${SSH_PATH%%:*}"
           REMOTE_DIR="${SSH_PATH#*:}"
 
-          # Build .env content using secrets when present, otherwise fall back to .env.example defaults
           TMP_ENV=$(mktemp)
           printf 'DB_HOST=%s\n' "${DB_HOST:-db}" > "$TMP_ENV"
           printf 'DB_PORT=%s\n' "${DB_PORT:-3306}" >> "$TMP_ENV"
@@ -66,11 +62,74 @@ jobs:
           printf 'MAIL_PORT=%s\n' "${MAIL_PORT:-587}" >> "$TMP_ENV"
           printf 'MAIL_USER=%s\n' "${MAIL_USER:-system@treudler.net}" >> "$TMP_ENV"
           printf 'MAIL_PASS=%s\n' "${MAIL_PASS:-password_for_mail_user_here}" >> "$TMP_ENV"
-          printf 'DEMO_MODE=%s\n' "${DEMO_MODE:-}" >> "$TMP_ENV"
+          printf 'DEMO_MODE=true\n' >> "$TMP_ENV"
+          printf 'APP_PORT=8642\n' >> "$TMP_ENV"
 
-          # Upload the .env securely to the remote host
           cat "$TMP_ENV" | ssh -o StrictHostKeyChecking=no "$REMOTE" "cat > \"$REMOTE_DIR/.env\""
           rm -f "$TMP_ENV"
 
-          # Run Docker Compose on the remote
+          ssh -o StrictHostKeyChecking=no "$REMOTE" "cd \"$REMOTE_DIR\" && docker compose down && docker compose up --build -d --remove-orphans"
+
+  deploy-prod:
+    if: github.ref == 'refs/heads/production'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-prod
+      cancel-in-progress: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Start ssh-agent and add key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Rsync files to remote host
+        run: |
+          set -euo pipefail
+          SSH_PATH="${{ vars.SSH_PATH_PROD }}"
+          REMOTE="${SSH_PATH%%:*}"
+          REMOTE_DIR="${SSH_PATH#*:}"
+          rsync -az --delete --exclude '.git' --exclude '.github' --exclude '.env' --exclude 'data/' -e "ssh -o StrictHostKeyChecking=no" ./ "$REMOTE:$REMOTE_DIR"
+
+      - name: Build remote .env and run Docker Compose
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASS: ${{ secrets.DB_PASS }}
+          DB_ROOT_PASS: ${{ secrets.DB_ROOT_PASS }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          MAIL_HOST: ${{ secrets.MAIL_HOST }}
+          MAIL_PORT: ${{ secrets.MAIL_PORT }}
+          MAIL_USER: ${{ secrets.MAIL_USER }}
+          MAIL_PASS: ${{ secrets.MAIL_PASS }}
+        run: |
+          set -euo pipefail
+          SSH_PATH="${{ vars.SSH_PATH_PROD }}"
+          REMOTE="${SSH_PATH%%:*}"
+          REMOTE_DIR="${SSH_PATH#*:}"
+
+          TMP_ENV=$(mktemp)
+          printf 'DB_HOST=%s\n' "${DB_HOST:-db}" > "$TMP_ENV"
+          printf 'DB_PORT=%s\n' "${DB_PORT:-3306}" >> "$TMP_ENV"
+          printf 'DB_NAME=%s\n' "${DB_NAME:-graduation}" >> "$TMP_ENV"
+          printf 'DB_USER=%s\n' "${DB_USER:-grad_user}" >> "$TMP_ENV"
+          printf 'DB_PASS=%s\n' "${DB_PASS:-your_password_here}" >> "$TMP_ENV"
+          printf 'DB_ROOT_PASS=%s\n' "${DB_ROOT_PASS:-your_root_password_here}" >> "$TMP_ENV"
+          printf 'JWT_SECRET=%s\n' "${JWT_SECRET:-change_me_in_production}" >> "$TMP_ENV"
+          printf 'MAIL_HOST=%s\n' "${MAIL_HOST:-mail.treudler.net}" >> "$TMP_ENV"
+          printf 'MAIL_PORT=%s\n' "${MAIL_PORT:-587}" >> "$TMP_ENV"
+          printf 'MAIL_USER=%s\n' "${MAIL_USER:-system@treudler.net}" >> "$TMP_ENV"
+          printf 'MAIL_PASS=%s\n' "${MAIL_PASS:-password_for_mail_user_here}" >> "$TMP_ENV"
+          printf 'DEMO_MODE=false\n' >> "$TMP_ENV"
+          printf 'APP_PORT=8643\n' >> "$TMP_ENV"
+
+          cat "$TMP_ENV" | ssh -o StrictHostKeyChecking=no "$REMOTE" "cat > \"$REMOTE_DIR/.env\""
+          rm -f "$TMP_ENV"
+
           ssh -o StrictHostKeyChecking=no "$REMOTE" "cd \"$REMOTE_DIR\" && docker compose down && docker compose up --build -d --remove-orphans"

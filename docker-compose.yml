@@ -3,7 +3,7 @@ services:
     build: .
     container_name: grad-app
     ports:
-      - "8642:80"
+      - "${APP_PORT:-8642}:80"
     volumes:
       - ./public:/var/www/html/public
       - ./db:/var/www/html/db
