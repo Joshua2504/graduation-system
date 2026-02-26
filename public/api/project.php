@@ -145,6 +145,10 @@ if ($method === 'PUT') {
         if (!in_array($project['status'], ['draft', 'rejected'])) {
             jsonResponse(['error' => 'لا يمكن تعديل المشروع في الحالة الحالية'], 400);
         }
+        // Block edits on rejected projects if resubmission not allowed
+        if ($project['status'] === 'rejected' && empty($project['allow_resubmit'])) {
+            jsonResponse(['error' => __('resubmit_not_allowed')], 403);
+        }
     }
     // Doctors can update any project
     
@@ -329,6 +333,21 @@ if ($method === 'PATCH') {
         $pdo->prepare("UPDATE project_members SET role = 'leader' WHERE project_id = ? AND user_id = ?")->execute([$projectId, $studentId]);
         
         jsonResponse(['success' => true, 'message' => 'تم تغيير قائد الفريق']);
+    }
+    
+    // Toggle allow_resubmit on rejected projects (doctor only)
+    if ($action === 'toggle_resubmit') {
+        if (!$isDoctor) {
+            jsonResponse(['error' => 'غير مصرح'], 403);
+        }
+        if ($project['status'] !== 'rejected') {
+            jsonResponse(['error' => 'المشروع ليس مرفوضاً'], 400);
+        }
+        $newValue = !empty($input['allow_resubmit']) ? 1 : 0;
+        $stmt = $pdo->prepare("UPDATE projects SET allow_resubmit = ? WHERE id = ?");
+        $stmt->execute([$newValue, $projectId]);
+        
+        jsonResponse(['success' => true, 'allow_resubmit' => $newValue, 'message' => __($newValue ? 'allow_resubmit_enabled' : 'allow_resubmit_disabled')]);
     }
     
     jsonResponse(['error' => 'إجراء غير معروف'], 400);

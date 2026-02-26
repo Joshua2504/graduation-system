@@ -274,6 +274,18 @@ $translations = [
     'leader_transfer_disabled' => ['ar' => 'نقل القيادة معطل حالياً من قبل المشرف', 'en' => 'Leadership transfer is currently disabled by the administrator', 'de' => 'Die Leiterübertragung ist derzeit vom Administrator deaktiviert'],
     'reviewed_by' => ['ar' => 'تمت المراجعة بواسطة', 'en' => 'Reviewed by', 'de' => 'Geprüft von'],
 
+    // Review — Resubmission
+    'allow_resubmit' => ['ar' => 'السماح بإعادة التقديم', 'en' => 'Allow Resubmission', 'de' => 'Erneute Einreichung erlauben'],
+    'allow_resubmit_desc' => ['ar' => 'السماح للطالب بتعديل المشروع وإعادة تقديمه بعد الرفض', 'en' => 'Allow the student to edit and resubmit the project after rejection', 'de' => 'Dem Studenten erlauben, das Projekt nach Ablehnung zu bearbeiten und erneut einzureichen'],
+    'resubmit_not_allowed' => ['ar' => 'إعادة التقديم غير مسموح بها لهذا المشروع', 'en' => 'Resubmission is not allowed for this project', 'de' => 'Eine erneute Einreichung ist für dieses Projekt nicht erlaubt'],
+    'project_rejected_final' => ['ar' => 'تم رفض مشروعك بشكل نهائي.', 'en' => 'Your project has been permanently rejected.', 'de' => 'Ihr Projekt wurde endgültig abgelehnt.'],
+    'project_rejected_resubmit' => ['ar' => 'تم رفض مشروعك. يمكنك تعديل البيانات وإعادة التقديم.', 'en' => 'Your project has been rejected. You can edit and resubmit.', 'de' => 'Ihr Projekt wurde abgelehnt. Sie können es bearbeiten und erneut einreichen.'],
+    'review_history' => ['ar' => 'سجل المراجعات', 'en' => 'Review History', 'de' => 'Prüfungsverlauf'],
+    'rejected_final' => ['ar' => 'رفض نهائي', 'en' => 'Final Rejection', 'de' => 'Endgültige Ablehnung'],
+    'rejected_resubmittable' => ['ar' => 'قابل لإعادة التقديم', 'en' => 'Resubmittable', 'de' => 'Erneut einreichbar'],
+    'allow_resubmit_enabled' => ['ar' => 'تم السماح بإعادة التقديم', 'en' => 'Resubmission has been allowed', 'de' => 'Erneute Einreichung wurde erlaubt'],
+    'allow_resubmit_disabled' => ['ar' => 'تم منع إعادة التقديم', 'en' => 'Resubmission has been disallowed', 'de' => 'Erneute Einreichung wurde gesperrt'],
+
 
     // Student — Project Page
     'role' => ['ar' => 'الدور', 'en' => 'Role', 'de' => 'Rolle'],
@@ -386,7 +398,7 @@ $translations = [
     'landing_feature_review_desc' => ['ar' => 'تابع حالة مشروعك واحصل على ملاحظات الدكتور مباشرة', 'en' => 'Track your project status and get professor feedback directly', 'de' => 'Verfolgen Sie Ihren Projektstatus und erhalten Sie direkt Feedback vom Professor'],
     'landing_feature_bilingual' => ['ar' => 'دعم متعدد اللغات', 'en' => 'Multilingual Support', 'de' => 'Mehrsprachige Unterstützung'],
     'landing_feature_bilingual_desc' => ['ar' => 'واجهة كاملة بالعربية والإنجليزية والألمانية', 'en' => 'Full interface in Arabic, English, and German', 'de' => 'Vollständige Oberfläche in Arabisch, Englisch und Deutsch'],
-    'landing_welcome_back' => ['ar' => 'مرحباً بعودتك', 'en' => 'Welcome Back', 'de' => 'Willkommen zurück'],
+    'landing_welcome_back' => ['ar' => 'مرحباً', 'en' => 'Welcome', 'de' => 'Willkommen'],
     'landing_sign_in_continue' => ['ar' => 'سجّل دخولك للمتابعة', 'en' => 'Sign in to continue', 'de' => 'Melden Sie sich an, um fortzufahren'],
 
     // Landing — How it works

@@ -98,6 +98,12 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                     <span class="badge bg-<?= $statusColors[$p['status']] ?> mb-2">
                                         <?= $statusLabels[$p['status']] ?>
                                     </span>
+                                    <?php if ($p['status'] === 'rejected'): ?>
+                                        <br>
+                                        <small class="text-<?= !empty($p['allow_resubmit']) ? 'info' : 'danger' ?>">
+                                            <?= !empty($p['allow_resubmit']) ? __('rejected_resubmittable') : __('rejected_final') ?>
+                                        </small>
+                                    <?php endif; ?>
                                     <br>
                                     <a href="/student/project?id=<?= $p['id'] ?>" class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-eye me-1"></i><?= __('view_project') ?>

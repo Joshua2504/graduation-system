@@ -341,6 +341,22 @@ function getStatusColors(): array {
 }
 
 /**
+ * Get all review history entries for a project (newest first)
+ */
+function getProjectReviews(int $projectId): array {
+    $pdo = getDB();
+    $stmt = $pdo->prepare("
+        SELECT pr.*, u.name AS reviewer_name
+        FROM project_reviews pr
+        LEFT JOIN users u ON u.id = pr.reviewer_id
+        WHERE pr.project_id = ?
+        ORDER BY pr.created_at DESC
+    ");
+    $stmt->execute([$projectId]);
+    return $stmt->fetchAll();
+}
+
+/**
  * Validate phone number (11 digits)
  * Returns error string or null if valid
  */

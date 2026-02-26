@@ -38,8 +38,9 @@ foreach ($members as $m) {
 }
 
 $canSubmit = $isLeader && $project['status'] === 'draft' && $memberCount >= $minSize && $allProfilesComplete;
-$canResubmit = $isLeader && $project['status'] === 'rejected' && $memberCount >= $minSize && $allProfilesComplete;
+$canResubmit = $isLeader && $project['status'] === 'rejected' && !empty($project['allow_resubmit']) && $memberCount >= $minSize && $allProfilesComplete;
 $canTransferLeadership = $isLeader && !empty($settings['leader_transfer']) && $memberCount > 1;
+$reviews = getProjectReviews($projectId);
 
 $statusLabels = getStatusLabels();
 $statusColors = getStatusColors();
@@ -115,6 +116,18 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                     </div>
                 <?php endif; ?>
 
+                <?php if ($project['status'] === 'rejected'): ?>
+                    <?php if (!empty($project['allow_resubmit'])): ?>
+                        <div class="alert alert-info mt-3 mb-0">
+                            <i class="bi bi-arrow-repeat me-2"></i><?= __('project_rejected_resubmit') ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="alert alert-danger mt-3 mb-0">
+                            <i class="bi bi-x-octagon me-2"></i><?= __('project_rejected_final') ?>
+                        </div>
+                    <?php endif; ?>
+                <?php endif; ?>
+
                 <?php if ($project['status'] === 'accepted'): ?>
                     <div class="alert alert-success mt-3 mb-0">
                         <i class="bi bi-check-circle me-2"></i><?= __('project_accepted_msg') ?>
@@ -128,7 +141,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                     </div>
                 <?php endif; ?>
 
-                <?php if ($isLeader && in_array($project['status'], ['draft', 'rejected'])): ?>
+                <?php if ($isLeader && ($project['status'] === 'draft' || ($project['status'] === 'rejected' && !empty($project['allow_resubmit'])))): ?>
                     <div class="text-end mt-3">
                         <button type="button" class="btn btn-outline-primary" onclick="toggleEditMode(true)">
                             <i class="bi bi-pencil-square me-1"></i><?= __('edit_project_info') ?>
@@ -137,8 +150,8 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                 <?php endif; ?>
             </div>
 
-            <!-- Edit mode (leader, draft/rejected only) -->
-            <?php if ($isLeader && in_array($project['status'], ['draft', 'rejected'])): ?>
+            <!-- Edit mode (leader, draft/rejected-resubmittable only) -->
+            <?php if ($isLeader && ($project['status'] === 'draft' || ($project['status'] === 'rejected' && !empty($project['allow_resubmit'])))): ?>
                 <div id="projectEditMode" class="d-none">
                     <form id="editProjectForm">
                         <div class="row g-2 mb-3">
@@ -377,9 +390,20 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                 <button class="btn btn-success btn-lg" onclick="submitProject()">
                     <i class="bi bi-send me-2"></i><?= $canResubmit ? __('edit_resubmit') : __('submit_project') ?>
                 </button>
-            <?php elseif ($isLeader && in_array($project['status'], ['draft', 'rejected'])): ?>
+            <?php elseif ($isLeader && $project['status'] === 'draft'): ?>
                 <button class="btn btn-success btn-lg" disabled title="<?= !$allProfilesComplete ? __('profiles_incomplete') : ($memberCount < $minSize ? __('min_members') . ': ' . $minSize : '') ?>">
                     <i class="bi bi-send me-2"></i><?= __('submit_project') ?>
+                </button>
+                <small class="text-muted align-self-center">
+                    <?php if ($memberCount < $minSize): ?>
+                        <?= sprintf(__('team_min_size_msg'), $minSize) ?>
+                    <?php elseif (!$allProfilesComplete): ?>
+                        <?= __('profiles_incomplete') ?>
+                    <?php endif; ?>
+                </small>
+            <?php elseif ($isLeader && $project['status'] === 'rejected' && !empty($project['allow_resubmit'])): ?>
+                <button class="btn btn-success btn-lg" disabled title="<?= !$allProfilesComplete ? __('profiles_incomplete') : ($memberCount < $minSize ? __('min_members') . ': ' . $minSize : '') ?>">
+                    <i class="bi bi-send me-2"></i><?= __('edit_resubmit') ?>
                 </button>
                 <small class="text-muted align-self-center">
                     <?php if ($memberCount < $minSize): ?>
@@ -403,6 +427,42 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
             <?php endif; ?>
         </div>
     </div>
+
+    <!-- Review History -->
+    <?php if (!empty($reviews)): ?>
+        <div class="card shadow mb-4">
+            <div class="card-header bg-secondary bg-opacity-25">
+                <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i><?= __('review_history') ?></h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    <?php foreach ($reviews as $rev): ?>
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <span class="badge bg-<?= $rev['action'] === 'accepted' ? 'success' : 'danger' ?> me-2">
+                                        <?= $rev['action'] === 'accepted' ? __('status_accepted') : __('status_rejected') ?>
+                                    </span>
+                                    <?php if ($rev['action'] === 'rejected' && $rev['allow_resubmit'] !== null): ?>
+                                        <span class="badge bg-<?= $rev['allow_resubmit'] ? 'info' : 'dark' ?>">
+                                            <?= $rev['allow_resubmit'] ? __('rejected_resubmittable') : __('rejected_final') ?>
+                                        </span>
+                                    <?php endif; ?>
+                                    <?php if (!empty($settings['show_reviewer_name']) && !empty($rev['reviewer_name'])): ?>
+                                        <small class="text-muted ms-2"><i class="bi bi-person me-1"></i><?= sanitize($rev['reviewer_name']) ?></small>
+                                    <?php endif; ?>
+                                </div>
+                                <small class="text-muted"><?= date('Y-m-d H:i', strtotime($rev['created_at'])) ?></small>
+                            </div>
+                            <?php if (!empty($rev['note'])): ?>
+                                <p class="mb-0 mt-2 text-muted"><i class="bi bi-chat-left-text me-1"></i><?= sanitize($rev['note']) ?></p>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
 </div>
 
 <!-- Submit Confirmation Modal -->

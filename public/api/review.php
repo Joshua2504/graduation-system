@@ -18,6 +18,7 @@ $input = json_decode(file_get_contents('php://input'), true);
 $projectId  = (int)($input['project_id'] ?? 0);
 $action     = trim($input['action'] ?? '');
 $doctorNote = trim($input['doctor_note'] ?? '');
+$allowResubmit = isset($input['allow_resubmit']) ? (int)(bool)$input['allow_resubmit'] : 1;
 
 if ($projectId === 0) {
     jsonResponse(['error' => 'معرف المشروع مطلوب'], 400);
@@ -46,6 +47,10 @@ if ($action === 'accept') {
     $stmt = $pdo->prepare("UPDATE projects SET doctor_note = COALESCE(?, doctor_note), reviewed_by = ? WHERE id = ?");
     $stmt->execute([$doctorNote ?: null, current_user_id(), $projectId]);
     
+    // Log review action
+    $stmt = $pdo->prepare("INSERT INTO project_reviews (project_id, reviewer_id, action, note) VALUES (?, ?, 'accepted', ?)");
+    $stmt->execute([$projectId, current_user_id(), $doctorNote ?: null]);
+    
     jsonResponse([
         'success' => true,
         'action' => 'accepted',
@@ -54,8 +59,12 @@ if ($action === 'accept') {
     ]);
 } else {
     // Reject
-    $stmt = $pdo->prepare("UPDATE projects SET status = 'rejected', doctor_note = ?, reviewed_by = ? WHERE id = ?");
-    $stmt->execute([$doctorNote ?: null, current_user_id(), $projectId]);
+    $stmt = $pdo->prepare("UPDATE projects SET status = 'rejected', doctor_note = ?, reviewed_by = ?, allow_resubmit = ? WHERE id = ?");
+    $stmt->execute([$doctorNote ?: null, current_user_id(), $allowResubmit, $projectId]);
+    
+    // Log review action
+    $stmt = $pdo->prepare("INSERT INTO project_reviews (project_id, reviewer_id, action, note, allow_resubmit) VALUES (?, ?, 'rejected', ?, ?)");
+    $stmt->execute([$projectId, current_user_id(), $doctorNote ?: null, $allowResubmit]);
     
     jsonResponse([
         'success' => true,

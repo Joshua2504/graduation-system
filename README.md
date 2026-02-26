@@ -18,13 +18,14 @@
   - 👤 Direct invite (search by email or student code)
 - **Submit for review** — once team meets size requirements and all member profiles are complete
 - **Rich description editor** — bold, italic, underline, lists, links, and image uploads (click, paste, or drag & drop)
-- **Track status** — view doctor feedback, resubmit if rejected
+- **Track status** — view doctor feedback, review history timeline, resubmit if rejected (when allowed by professor)
 - **Transfer leadership** — team leaders can transfer leadership to another team member (when enabled by professor)
 
 ### Professor (Doctor) Flow
 - **Profile** — edit personal info (gender, phone, department) and upload a profile picture
 - **Dashboard** — projects organized by status tabs (Draft, Under Review, Accepted, Rejected) with sorting and member counts
-- **Review projects** — view all team members' profiles, documents, and images; accept or reject with notes
+- **Review projects** — view all team members' profiles, documents, and images; accept or reject with notes; optionally allow or deny resubmission on rejection
+- **Review history** — full audit trail of all accept/reject actions with timestamps, notes, and resubmission permissions
 - **Edit projects** — inline editing of project title, type, and rich-text description for any project
 - **Duplicate detection** — automatic warning when project titles match
 - **System settings** — toggle registration, email verification, min/max team size (2–10), student project creation, show reviewer name, leader transfer by team leader
@@ -213,6 +214,7 @@ graduation-system/
 | `status` | ENUM | `draft` → `under_review` → `accepted` / `rejected` |
 | `group_number` | INT | Auto-assigned on acceptance |
 | `doctor_note` | TEXT | Professor's feedback |
+| `allow_resubmit` | TINYINT(1) | Whether student can edit & resubmit after rejection |
 
 ### `project_members` — Team membership
 | Column | Type | Description |
@@ -230,7 +232,15 @@ graduation-system/
 | `token` | VARCHAR(64) | Unique invitation token |
 | `status` | ENUM | `pending`, `accepted`, `declined`, `expired` |
 | `expires_at` | DATETIME | Token expiration |
-
+### `project_reviews` — Review audit log
+| Column | Type | Description |
+|--------|------|-----------|
+| `project_id` | INT | FK → projects |
+| `reviewer_id` | INT | FK → users (professor) |
+| `action` | ENUM | `accepted` or `rejected` |
+| `note` | TEXT | Professor's note at time of review |
+| `allow_resubmit` | TINYINT(1) | Whether resubmission was allowed (rejections only) |
+| `created_at` | TIMESTAMP | When the review action occurred |
 ---
 
 ## 🔌 API Reference
@@ -274,7 +284,7 @@ graduation-system/
 ### Review — `/api/review`
 | Method | Params | Description |
 |--------|--------|-------------|
-| `POST` | `{project_id, action, doctor_note?}` | Accept or reject project (doctor only) |
+| `POST` | `{project_id, action, doctor_note?, allow_resubmit?}` | Accept or reject project (doctor only) |
 
 ### Settings — `/api/settings`
 | Method | Params | Description |

@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS `projects` (
   `group_number` INT DEFAULT NULL,
   `doctor_note` TEXT DEFAULT NULL,
   `reviewed_by` INT DEFAULT NULL,
+  `allow_resubmit` TINYINT(1) NOT NULL DEFAULT 1,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -93,6 +94,21 @@ CREATE TABLE IF NOT EXISTS `invitations` (
   CONSTRAINT `fk_inv_project` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_inv_by` FOREIGN KEY (`invited_by`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_inv_user` FOREIGN KEY (`invited_user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─── Project Reviews (audit log) ───
+CREATE TABLE IF NOT EXISTS `project_reviews` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `project_id` INT NOT NULL,
+  `reviewer_id` INT DEFAULT NULL,
+  `action` ENUM('accepted','rejected') NOT NULL,
+  `note` TEXT DEFAULT NULL,
+  `allow_resubmit` TINYINT(1) DEFAULT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_pr_project` (`project_id`),
+  CONSTRAINT `fk_pr_project` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_pr_reviewer` FOREIGN KEY (`reviewer_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ─── Seed: Doctor account (password: doctor123) ───
@@ -189,3 +205,25 @@ SET @sql = IF(@col_exists = 0, 'ALTER TABLE `settings` ADD COLUMN `leader_transf
 PREPARE stmt FROM @sql;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
+
+-- Add allow_resubmit column to projects (safe for existing databases)
+SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'projects' AND COLUMN_NAME = 'allow_resubmit');
+SET @sql = IF(@col_exists = 0, 'ALTER TABLE `projects` ADD COLUMN `allow_resubmit` TINYINT(1) NOT NULL DEFAULT 1 AFTER `reviewed_by`', 'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Create project_reviews table (safe for existing databases)
+CREATE TABLE IF NOT EXISTS `project_reviews` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `project_id` INT NOT NULL,
+  `reviewer_id` INT DEFAULT NULL,
+  `action` ENUM('accepted','rejected') NOT NULL,
+  `note` TEXT DEFAULT NULL,
+  `allow_resubmit` TINYINT(1) DEFAULT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_pr_project` (`project_id`),
+  CONSTRAINT `fk_pr_project` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_pr_reviewer` FOREIGN KEY (`reviewer_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

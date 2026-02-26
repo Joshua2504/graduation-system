@@ -19,6 +19,7 @@ if (!$project) {
 $members = getProjectMembers($projectId);
 $pendingInvites = getProjectPendingInvitations($projectId);
 $duplicates = findDuplicateProjects($projectId, $project['title']);
+$reviews = getProjectReviews($projectId);
 $isAr = getLang() === 'ar';
 
 $statusLabels = getStatusLabels();
@@ -378,6 +379,13 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                     <textarea class="form-control" id="doctor_note" rows="3" 
                               placeholder="<?= __('write_note_placeholder') ?>"></textarea>
                 </div>
+                <div class="form-check mb-3" id="allowResubmitGroup">
+                    <input class="form-check-input" type="checkbox" id="allow_resubmit" checked>
+                    <label class="form-check-label" for="allow_resubmit">
+                        <strong><?= __('allow_resubmit') ?></strong>
+                        <small class="text-muted d-block"><?= __('allow_resubmit_desc') ?></small>
+                    </label>
+                </div>
                 <div id="review-error" class="alert alert-danger d-none"></div>
                 <div id="review-success" class="alert alert-success d-none"></div>
                 <div class="d-flex gap-3">
@@ -387,6 +395,60 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                     <button type="button" class="btn btn-danger btn-lg flex-fill" id="btn-reject">
                         <i class="bi bi-x-circle me-2"></i><?= __('reject') ?>
                     </button>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <!-- Toggle Resubmission (only if rejected) -->
+    <?php if ($project['status'] === 'rejected'): ?>
+        <div class="card shadow mt-4">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="mb-1"><?= __('allow_resubmit') ?></h6>
+                    <small class="text-muted"><?= __('allow_resubmit_desc') ?></small>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" 
+                           id="toggleResubmit" <?= !empty($project['allow_resubmit']) ? 'checked' : '' ?>
+                           style="width: 3em; height: 1.5em;">
+                </div>
+            </div>
+            <div id="resubmit-alert" class="alert d-none mx-3 mb-3"></div>
+        </div>
+    <?php endif; ?>
+
+    <!-- Review History -->
+    <?php if (!empty($reviews)): ?>
+        <div class="card shadow mt-4">
+            <div class="card-header bg-secondary bg-opacity-25">
+                <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i><?= __('review_history') ?></h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    <?php foreach ($reviews as $rev): ?>
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <span class="badge bg-<?= $rev['action'] === 'accepted' ? 'success' : 'danger' ?> me-2">
+                                        <?= $rev['action'] === 'accepted' ? __('status_accepted') : __('status_rejected') ?>
+                                    </span>
+                                    <?php if ($rev['action'] === 'rejected' && $rev['allow_resubmit'] !== null): ?>
+                                        <span class="badge bg-<?= $rev['allow_resubmit'] ? 'info' : 'dark' ?>">
+                                            <?= $rev['allow_resubmit'] ? __('rejected_resubmittable') : __('rejected_final') ?>
+                                        </span>
+                                    <?php endif; ?>
+                                    <?php if (!empty($rev['reviewer_name'])): ?>
+                                        <small class="text-muted ms-2"><i class="bi bi-person me-1"></i><?= sanitize($rev['reviewer_name']) ?></small>
+                                    <?php endif; ?>
+                                </div>
+                                <small class="text-muted"><?= date('Y-m-d H:i', strtotime($rev['created_at'])) ?></small>
+                            </div>
+                            <?php if (!empty($rev['note'])): ?>
+                                <p class="mb-0 mt-2 text-muted"><i class="bi bi-chat-left-text me-1"></i><?= sanitize($rev['note']) ?></p>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
         </div>
@@ -435,6 +497,32 @@ async function resendInvitation(invitationId) {
 }
 
 const PROJECT_ID = <?= $projectId ?>;
+
+// Toggle resubmit for rejected projects
+document.getElementById('toggleResubmit')?.addEventListener('change', async function() {
+    const alertEl = document.getElementById('resubmit-alert');
+    try {
+        const res = await fetch('/api/project', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'toggle_resubmit', project_id: PROJECT_ID, allow_resubmit: this.checked })
+        });
+        const data = await res.json();
+        if (data.success) {
+            alertEl.className = 'alert alert-success mx-3 mb-3';
+            alertEl.textContent = data.message;
+            alertEl.classList.remove('d-none');
+            setTimeout(() => alertEl.classList.add('d-none'), 3000);
+        } else {
+            throw new Error(data.error);
+        }
+    } catch (err) {
+        this.checked = !this.checked;
+        alertEl.className = 'alert alert-danger mx-3 mb-3';
+        alertEl.textContent = err.message;
+        alertEl.classList.remove('d-none');
+    }
+});
 
 // Initialize shared editor with paste/drag-drop/resize
 initEditor('editDescription', PROJECT_ID, <?= json_encode(__('uploading_file')) ?>);
@@ -556,6 +644,7 @@ async function reviewProject(action) {
     const note = document.getElementById('doctor_note').value.trim();
     const errorEl = document.getElementById('review-error');
     const successEl = document.getElementById('review-success');
+    const allowResubmit = action === 'reject' ? document.getElementById('allow_resubmit').checked : true;
 
     // Confirm
     const confirmMsg = action === 'accept' 
@@ -575,7 +664,8 @@ async function reviewProject(action) {
             body: JSON.stringify({
                 project_id: <?= $projectId ?>,
                 action: action,
-                doctor_note: note
+                doctor_note: note,
+                allow_resubmit: allowResubmit
             })
         });
 

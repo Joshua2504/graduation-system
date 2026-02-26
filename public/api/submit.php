@@ -34,6 +34,11 @@ if (!$project || !in_array($project['status'], ['draft', 'rejected'])) {
     jsonResponse(['error' => 'لا يمكن تقديم المشروع في الحالة الحالية'], 400);
 }
 
+// Check if resubmission is allowed for rejected projects
+if ($project['status'] === 'rejected' && empty($project['allow_resubmit'])) {
+    jsonResponse(['error' => __('resubmit_not_allowed')], 403);
+}
+
 // Check member count against settings
 $settings = getSettings();
 $members = getProjectMembers($projectId);
@@ -75,9 +80,9 @@ if (!empty($incompleteMembers)) {
     ], 400);
 }
 
-// If rejected, reset
+// If rejected, reset status (keep doctor_note for history)
 if ($project['status'] === 'rejected') {
-    $stmt = $pdo->prepare("UPDATE projects SET status = 'under_review', submission_date = NOW(), doctor_note = NULL WHERE id = ?");
+    $stmt = $pdo->prepare("UPDATE projects SET status = 'under_review', submission_date = NOW(), allow_resubmit = 1 WHERE id = ?");
     $stmt->execute([$projectId]);
 } else {
     $stmt = $pdo->prepare("UPDATE projects SET status = 'under_review', submission_date = NOW() WHERE id = ?");
