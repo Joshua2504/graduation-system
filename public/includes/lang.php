@@ -253,6 +253,8 @@ $translations = [
     'write_note_placeholder' => ['ar' => 'اكتب ملاحظتك هنا...', 'en' => 'Write your note here...', 'de' => 'Schreiben Sie Ihre Notiz hier...'],
     'confirm_accept_project' => ['ar' => 'هل أنت متأكد من قبول هذا المشروع؟', 'en' => 'Are you sure you want to accept this project?', 'de' => 'Sind Sie sicher, dass Sie dieses Projekt annehmen möchten?'],
     'confirm_reject_project' => ['ar' => 'هل أنت متأكد من رفض هذا المشروع؟', 'en' => 'Are you sure you want to reject this project?', 'de' => 'Sind Sie sicher, dass Sie dieses Projekt ablehnen möchten?'],
+    'confirm_reject_accepted_project' => ['ar' => 'هل أنت متأكد من رفض هذا المشروع المقبول؟ سيتم إلغاء رقم المجموعة.', 'en' => 'Are you sure you want to reject this accepted project? The group number will be removed.', 'de' => 'Sind Sie sicher, dass Sie dieses angenommene Projekt ablehnen möchten? Die Gruppennummer wird entfernt.'],
+    'reject_accepted' => ['ar' => 'رفض المشروع المقبول', 'en' => 'Reject Accepted Project', 'de' => 'Angenommenes Projekt ablehnen'],
 
     // Professor — Settings Page
     'settings_saved' => ['ar' => 'تم حفظ الإعدادات بنجاح', 'en' => 'Settings saved successfully', 'de' => 'Einstellungen erfolgreich gespeichert'],

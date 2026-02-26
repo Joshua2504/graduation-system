@@ -35,8 +35,8 @@ if (!$project) {
     jsonResponse(['error' => 'المشروع غير موجود'], 404);
 }
 
-if ($project['status'] !== 'under_review') {
-    jsonResponse(['error' => 'المشروع ليس قيد المراجعة'], 400);
+if ($project['status'] !== 'under_review' && !($action === 'reject' && $project['status'] === 'accepted')) {
+    jsonResponse(['error' => 'لا يمكن تنفيذ هذا الإجراء على المشروع في حالته الحالية'], 400);
 }
 
 if ($action === 'accept') {
@@ -59,7 +59,7 @@ if ($action === 'accept') {
     ]);
 } else {
     // Reject
-    $stmt = $pdo->prepare("UPDATE projects SET status = 'rejected', doctor_note = ?, reviewed_by = ?, allow_resubmit = ? WHERE id = ?");
+    $stmt = $pdo->prepare("UPDATE projects SET status = 'rejected', doctor_note = ?, reviewed_by = ?, allow_resubmit = ?, group_number = NULL WHERE id = ?");
     $stmt->execute([$doctorNote ?: null, current_user_id(), $allowResubmit, $projectId]);
     
     // Log review action

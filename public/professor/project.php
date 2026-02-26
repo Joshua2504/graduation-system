@@ -400,6 +400,34 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
         </div>
     <?php endif; ?>
 
+    <!-- Reject Accepted Project (only if accepted) -->
+    <?php if ($project['status'] === 'accepted'): ?>
+        <div class="card shadow mt-4 border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i><?= __('reject_accepted') ?></h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="mb-3">
+                    <label for="reject_accepted_note" class="form-label fw-bold"><?= __('write_note') ?></label>
+                    <textarea class="form-control" id="reject_accepted_note" rows="3" 
+                              placeholder="<?= __('write_note_placeholder') ?>"></textarea>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="reject_accepted_allow_resubmit" checked>
+                    <label class="form-check-label" for="reject_accepted_allow_resubmit">
+                        <strong><?= __('allow_resubmit') ?></strong>
+                        <small class="text-muted d-block"><?= __('allow_resubmit_desc') ?></small>
+                    </label>
+                </div>
+                <div id="reject-accepted-error" class="alert alert-danger d-none"></div>
+                <div id="reject-accepted-success" class="alert alert-success d-none"></div>
+                <button type="button" class="btn btn-danger btn-lg w-100" id="btn-reject-accepted">
+                    <i class="bi bi-x-circle me-2"></i><?= __('reject') ?>
+                </button>
+            </div>
+        </div>
+    <?php endif; ?>
+
     <!-- Toggle Resubmission (only if rejected) -->
     <?php if ($project['status'] === 'rejected'): ?>
         <div class="card shadow mt-4">
@@ -689,6 +717,49 @@ async function reviewProject(action) {
         document.getElementById('btn-reject').disabled = false;
     }
 }
+<?php endif; ?>
+
+<?php if ($project['status'] === 'accepted'): ?>
+// Reject accepted project
+document.getElementById('btn-reject-accepted')?.addEventListener('click', async () => {
+    const note = document.getElementById('reject_accepted_note').value.trim();
+    const allowResubmit = document.getElementById('reject_accepted_allow_resubmit').checked;
+    const errorEl = document.getElementById('reject-accepted-error');
+    const successEl = document.getElementById('reject-accepted-success');
+    const btn = document.getElementById('btn-reject-accepted');
+
+    if (!confirm(<?= json_encode(__('confirm_reject_accepted_project')) ?>)) return;
+
+    btn.disabled = true;
+
+    try {
+        const res = await fetch('/api/review', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                project_id: <?= $projectId ?>,
+                action: 'reject',
+                doctor_note: note,
+                allow_resubmit: allowResubmit
+            })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            errorEl.classList.add('d-none');
+            successEl.textContent = data.message;
+            successEl.classList.remove('d-none');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            throw new Error(data.error || 'Operation failed');
+        }
+    } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.classList.remove('d-none');
+        btn.disabled = false;
+    }
+});
 <?php endif; ?>
 </script>
 
