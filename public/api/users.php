@@ -56,7 +56,7 @@ if ($method === 'PUT') {
         jsonResponse(['error' => 'المستخدم غير موجود'], 404);
     }
 
-    $allowedFields = ['name', 'email', 'student_code', 'gender', 'national_id', 'birth_date', 'governorate', 'address', 'phone', 'section'];
+    $allowedFields = ['name', 'email', 'student_code', 'gender', 'national_id', 'birth_date', 'governorate', 'address', 'phone', 'year', 'section'];
     $updates = [];
     $params = [];
 
@@ -82,6 +82,9 @@ if ($method === 'PUT') {
     }
     if (isset($input['gender']) && !empty($input['gender']) && !in_array($input['gender'], ['male', 'female'])) {
         jsonResponse(['error' => 'الجنس غير صالح'], 400);
+    }
+    if (isset($input['year']) && !empty($input['year']) && !in_array($input['year'], ['1st', '2nd', '3rd', '4th'])) {
+        jsonResponse(['error' => 'السنة الدراسية غير صالحة'], 400);
     }
     if (isset($input['email']) && !empty($input['email'])) {
         // Check uniqueness
@@ -154,9 +157,13 @@ if ($method === 'POST') {
             $email = trim($input['email'] ?? '');
             $password = $input['password'] ?? '';
             $studentCode = trim($input['student_code'] ?? '');
+            $year = trim($input['year'] ?? '4th');
 
             if (empty($name) || empty($email) || empty($password)) {
                 jsonResponse(['error' => 'الاسم والبريد وكلمة المرور مطلوبين'], 400);
+            }
+            if (!in_array($year, ['1st', '2nd', '3rd', '4th'])) {
+                jsonResponse(['error' => 'السنة الدراسية غير صالحة'], 400);
             }
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 jsonResponse(['error' => 'البريد الإلكتروني غير صالح'], 400);
@@ -185,8 +192,8 @@ if ($method === 'POST') {
             $sendInvite = !empty($input['send_invite']);
 
             // Create user — auto-verified and enabled
-            $stmt = $pdo->prepare("INSERT INTO users (name, email, password, student_code, role, email_verified, account_enabled) VALUES (?, ?, ?, ?, 'student', 1, 1)");
-            $stmt->execute([$name, $email, $hashedPassword, $studentCode ?: null]);
+            $stmt = $pdo->prepare("INSERT INTO users (name, email, password, student_code, year, role, email_verified, account_enabled) VALUES (?, ?, ?, ?, ?, 'student', 1, 1)");
+            $stmt->execute([$name, $email, $hashedPassword, $studentCode ?: null, $year]);
             $newUserId = (int)$pdo->lastInsertId();
 
             $emailSent = false;

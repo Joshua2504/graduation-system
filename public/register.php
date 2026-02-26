@@ -22,9 +22,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $regOpen) {
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
     $studentCode = trim($_POST['student_code'] ?? '');
+    $year = trim($_POST['year'] ?? '4th');
 
     // Validate
     if (empty($name) || empty($email) || empty($password) || empty($studentCode)) {
+        $error = __('required_field');
+    } elseif (!in_array($year, ['1st', '2nd', '3rd', '4th'])) {
         $error = __('required_field');
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = __('invalid_email');
@@ -49,8 +52,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $regOpen) {
             } else {
                 // Create user (unverified)
                 $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-                $stmt = $pdo->prepare("INSERT INTO users (name, email, password, student_code, role, email_verified) VALUES (?, ?, ?, ?, 'student', 0)");
-                $stmt->execute([$name, $email, $hashedPassword, $studentCode]);
+                $stmt = $pdo->prepare("INSERT INTO users (name, email, password, student_code, year, role, email_verified) VALUES (?, ?, ?, ?, ?, 'student', 0)");
+                $stmt->execute([$name, $email, $hashedPassword, $studentCode, $year]);
 
                 $userId = (int)$pdo->lastInsertId();
 
@@ -143,6 +146,15 @@ require_once __DIR__ . '/includes/header.php';
                                 <div class="form-text">
                                     <?= __('student_code_hint') ?>
                                 </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="year" class="form-label"><?= __('year') ?> <span class="text-danger">*</span></label>
+                                <select class="form-select" id="year" name="year" required>
+                                    <option value="1st" <?= ($year ?? '') === '1st' ? 'selected' : '' ?>><?= __('first_year') ?></option>
+                                    <option value="2nd" <?= ($year ?? '') === '2nd' ? 'selected' : '' ?>><?= __('second_year') ?></option>
+                                    <option value="3rd" <?= ($year ?? '') === '3rd' ? 'selected' : '' ?>><?= __('third_year') ?></option>
+                                    <option value="4th" <?= (($year ?? '4th') === '4th') ? 'selected' : '' ?>><?= __('fourth_year') ?></option>
+                                </select>
                             </div>
                             <button type="submit" class="btn btn-primary w-100">
                                 <i class="bi bi-person-plus me-1"></i><?= __('register') ?>

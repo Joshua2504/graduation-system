@@ -12,7 +12,7 @@ $settings = getSettings();
 $emailVerRequired = !empty($settings['email_verification_required']);
 
 // Fetch all student accounts
-$stmt = $pdo->query("SELECT id, name, email, student_code, gender, national_id, birth_date, governorate, address, phone, section, card_image, national_id_image, receipt_image, profile_picture, profile_completed, email_verified, account_enabled, created_at FROM users WHERE role = 'student' ORDER BY created_at DESC");
+$stmt = $pdo->query("SELECT id, name, email, student_code, gender, national_id, birth_date, governorate, address, phone, year, section, card_image, national_id_image, receipt_image, profile_picture, profile_completed, email_verified, account_enabled, created_at FROM users WHERE role = 'student' ORDER BY created_at DESC");
 $students = $stmt->fetchAll();
 $governorates = getGovernorates();
 
@@ -174,6 +174,16 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             <input type="text" class="form-control" id="edit_student_code">
                         </div>
                         <div class="col-md-4">
+                            <label class="form-label"><?= __('year') ?></label>
+                            <select class="form-select" id="edit_year">
+                                <option value=""><?= __('select_option') ?></option>
+                                <option value="1st"><?= __('first_year') ?></option>
+                                <option value="2nd"><?= __('second_year') ?></option>
+                                <option value="3rd"><?= __('third_year') ?></option>
+                                <option value="4th"><?= __('fourth_year') ?></option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
                             <label class="form-label"><?= __('gender') ?></label>
                             <select class="form-select" id="edit_gender">
                                 <option value=""><?= __('select_option') ?></option>
@@ -291,6 +301,15 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                         <input type="text" class="form-control" id="create_student_code">
                     </div>
                     <div class="mb-3">
+                        <label class="form-label"><?= __('year') ?></label>
+                        <select class="form-select" id="create_year">
+                            <option value="1st"><?= __('first_year') ?></option>
+                            <option value="2nd"><?= __('second_year') ?></option>
+                            <option value="3rd"><?= __('third_year') ?></option>
+                            <option value="4th" selected><?= __('fourth_year') ?></option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label"><?= __('password') ?> <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <input type="text" class="form-control" id="create_password" required minlength="6">
@@ -355,6 +374,7 @@ async function openEditModal(userId) {
         document.getElementById('edit_name').value = u.name || '';
         document.getElementById('edit_email').value = u.email || '';
         document.getElementById('edit_student_code').value = u.student_code || '';
+        document.getElementById('edit_year').value = u.year || '4th';
         document.getElementById('edit_gender').value = u.gender || '';
         document.getElementById('edit_birth_date').value = u.birth_date || '';
         document.getElementById('edit_national_id').value = u.national_id || '';
@@ -397,6 +417,7 @@ async function saveStudentProfile() {
         name: document.getElementById('edit_name').value.trim(),
         email: document.getElementById('edit_email').value.trim(),
         student_code: document.getElementById('edit_student_code').value.trim(),
+        year: document.getElementById('edit_year').value,
         gender: document.getElementById('edit_gender').value,
         birth_date: document.getElementById('edit_birth_date').value,
         national_id: document.getElementById('edit_national_id').value.trim(),
@@ -543,6 +564,7 @@ async function createStudent() {
         name: document.getElementById('create_name').value.trim(),
         email: document.getElementById('create_email').value.trim(),
         student_code: document.getElementById('create_student_code').value.trim(),
+        year: document.getElementById('create_year').value,
         password: document.getElementById('create_password').value,
         send_invite: document.getElementById('create_send_invite').checked,
     };

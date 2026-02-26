@@ -40,7 +40,7 @@ if ($method === 'PUT') {
     // Students can edit more fields; professors have a smaller set
     $allowedFields = $role === 'doctor'
         ? ['gender', 'phone', 'section']
-        : ['gender', 'national_id', 'birth_date', 'governorate', 'address', 'phone', 'section'];
+        : ['gender', 'national_id', 'birth_date', 'governorate', 'address', 'phone', 'year', 'section'];
     $updates = [];
     $params = [];
     
@@ -68,6 +68,10 @@ if ($method === 'PUT') {
     
     if (isset($input['gender']) && !in_array($input['gender'], ['male', 'female'])) {
         jsonResponse(['error' => 'الجنس غير صالح'], 400);
+    }
+    
+    if (isset($input['year']) && !in_array($input['year'], ['1st', '2nd', '3rd', '4th'])) {
+        jsonResponse(['error' => 'السنة الدراسية غير صالحة'], 400);
     }
     
     // Check profile completion after update (students only)

@@ -98,10 +98,16 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                 <label class="form-label fw-bold"><?= __('email') ?></label>
                                 <input type="email" class="form-control" value="<?= sanitize($user['email']) ?>" readonly disabled>
                             </div>
-                            <!-- Year (read-only) -->
+                            <!-- Year -->
                             <div class="col-md-6">
-                                <label class="form-label fw-bold"><?= __('year') ?></label>
-                                <input type="text" class="form-control" value="<?= __('fourth_year') ?>" readonly disabled>
+                                <label class="form-label fw-bold"><?= __('year') ?> <span class="text-danger">*</span></label>
+                                <select class="form-select" name="year" id="year" required>
+                                    <option value=""><?= __('select_option_full') ?></option>
+                                    <option value="1st" <?= ($user['year'] ?? '') === '1st' ? 'selected' : '' ?>><?= __('first_year') ?></option>
+                                    <option value="2nd" <?= ($user['year'] ?? '') === '2nd' ? 'selected' : '' ?>><?= __('second_year') ?></option>
+                                    <option value="3rd" <?= ($user['year'] ?? '') === '3rd' ? 'selected' : '' ?>><?= __('third_year') ?></option>
+                                    <option value="4th" <?= ($user['year'] ?? '') === '4th' ? 'selected' : '' ?>><?= __('fourth_year') ?></option>
+                                </select>
                             </div>
                             <hr>
                             <!-- Gender -->
@@ -225,7 +231,7 @@ document.getElementById('profileForm').addEventListener('submit', async (e) => {
     alertEl.classList.add('d-none');
 
     const data = {};
-    ['gender', 'national_id', 'birth_date', 'governorate', 'address', 'phone', 'section'].forEach(f => {
+    ['gender', 'national_id', 'birth_date', 'governorate', 'address', 'phone', 'year', 'section'].forEach(f => {
         data[f] = document.getElementById(f)?.value?.trim() || '';
     });
 

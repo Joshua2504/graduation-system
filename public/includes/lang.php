@@ -111,6 +111,9 @@ $translations = [
     'phone' => ['ar' => 'رقم الهاتف', 'en' => 'Phone Number', 'de' => 'Telefonnummer'],
     'year' => ['ar' => 'السنة الدراسية', 'en' => 'Year', 'de' => 'Studienjahr'],
     'section' => ['ar' => 'القسم', 'en' => 'Department', 'de' => 'Abteilung'],
+    'first_year' => ['ar' => 'الأولى', 'en' => '1st', 'de' => '1.'],
+    'second_year' => ['ar' => 'الثانية', 'en' => '2nd', 'de' => '2.'],
+    'third_year' => ['ar' => 'الثالثة', 'en' => '3rd', 'de' => '3.'],
     'fourth_year' => ['ar' => 'الرابعة', 'en' => '4th', 'de' => '4.'],
 
     // Images

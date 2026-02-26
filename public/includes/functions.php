@@ -213,7 +213,7 @@ function getUserProfile(int $userId): ?array {
  * Check if user profile is complete (all required fields + 3 images)
  */
 function isProfileComplete(array $user): bool {
-    $required = ['name', 'student_code', 'gender', 'national_id', 'birth_date', 'governorate', 'address', 'phone', 'section'];
+    $required = ['name', 'student_code', 'gender', 'national_id', 'birth_date', 'governorate', 'address', 'phone', 'year', 'section'];
     foreach ($required as $field) {
         if (empty($user[$field])) return false;
     }
