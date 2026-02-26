@@ -117,10 +117,11 @@ INSERT INTO `users` (`name`, `email`, `password`, `student_code`, `role`, `email
 ON DUPLICATE KEY UPDATE `id` = `id`;
 
 -- ─── Seed: Demo projects ───
-INSERT INTO `projects` (`title`, `type`, `description`, `join_code`, `status`, `group_number`, `submission_date`)
+INSERT INTO `projects` (`title`, `type`, `description`, `join_code`, `status`, `group_number`, `submission_date`, `reviewed_by`)
 SELECT 'Library Management System', 'Web Application',
        'A comprehensive library management system that allows registering books and members, handling borrowing and return operations, and generating periodic reports. The system includes a user-friendly interface for patrons and an advanced admin panel for librarians.',
-       'DEMO0001', 'accepted', 1, NOW()
+       'DEMO0001', 'accepted', 1, NOW(),
+       (SELECT `id` FROM `users` WHERE `email` = 'doctor@treudler.net' LIMIT 1)
 FROM dual WHERE NOT EXISTS (SELECT 1 FROM `projects` WHERE `join_code` = 'DEMO0001');
 
 INSERT INTO `projects` (`title`, `type`, `description`, `join_code`, `status`, `submission_date`)

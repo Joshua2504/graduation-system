@@ -148,11 +148,15 @@ function performDemoReset(): void {
             show_reviewer_name = 0
             WHERE id = 1");
 
+        // Get doctor ID for reviewed_by
+        $doctorId = $pdo->query("SELECT id FROM users WHERE email = 'doctor@treudler.net' LIMIT 1")->fetchColumn();
+
         // Re-seed demo projects
-        $pdo->exec("INSERT INTO projects (title, type, description, join_code, status, group_number, submission_date)
+        $stmt = $pdo->prepare("INSERT INTO projects (title, type, description, join_code, status, group_number, submission_date, reviewed_by)
             VALUES ('Library Management System', 'Web Application',
             'A comprehensive library management system that allows registering books and members, handling borrowing and return operations, and generating periodic reports. The system includes a user-friendly interface for patrons and an advanced admin panel for librarians.',
-            'DEMO0001', 'accepted', 1, NOW())");
+            'DEMO0001', 'accepted', 1, NOW(), ?)");
+        $stmt->execute([$doctorId ?: null]);
         $proj1 = $pdo->lastInsertId();
 
         $pdo->exec("INSERT INTO projects (title, type, description, join_code, status, submission_date)
