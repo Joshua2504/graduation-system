@@ -3,20 +3,45 @@
  * Language / i18n support — Arabic + English + German (Deutsch)
  */
 
-$supportedLangs = ['ar', 'en', 'de'];
+$allLangs = ['ar', 'en', 'de'];
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+// Load enabled languages from settings (DB)
+$enabledLangsStr = null;
+try {
+    if (function_exists('getDB')) {
+        $pdo = getDB();
+        $stmt = $pdo->query("SELECT enabled_languages FROM settings WHERE id = 1");
+        $row = $stmt->fetch();
+        if ($row && !empty($row['enabled_languages'])) {
+            $enabledLangsStr = $row['enabled_languages'];
+        }
+    }
+} catch (Exception $e) {
+    // DB not ready yet, use all languages
+}
+
+$supportedLangs = $enabledLangsStr
+    ? array_values(array_filter(explode(',', $enabledLangsStr), fn($l) => in_array($l, $allLangs)))
+    : $allLangs;
+if (empty($supportedLangs)) $supportedLangs = ['ar'];
 
 // Handle language switch
 if (isset($_GET['lang']) && in_array($_GET['lang'], $supportedLangs)) {
     $_SESSION['lang'] = $_GET['lang'];
 }
 
+// If current session language is no longer enabled, reset it
+if (isset($_SESSION['lang']) && !in_array($_SESSION['lang'], $supportedLangs)) {
+    unset($_SESSION['lang']);
+}
+
 // Detect browser language if no session language is set
 if (!isset($_SESSION['lang'])) {
-    $browserLang = 'ar'; // ultimate fallback
+    $browserLang = $supportedLangs[0]; // fallback to first enabled
     if (!empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
         $acceptLang = strtolower($_SERVER['HTTP_ACCEPT_LANGUAGE']);
         $bestPos = PHP_INT_MAX;
@@ -270,6 +295,10 @@ $translations = [
 
     'toggle_leader_transfer' => ['ar' => 'نقل القيادة بواسطة القائد', 'en' => 'Leader Transfer by Team Leader', 'de' => 'Leiterübertragung durch Teamleiter'],
     'leader_transfer_description' => ['ar' => 'السماح لقائد الفريق بنقل القيادة لعضو آخر في الفريق', 'en' => 'Allow team leaders to transfer leadership to another team member', 'de' => 'Teamleitern erlauben, die Leitung an ein anderes Teammitglied zu übertragen'],
+
+    'enabled_languages' => ['ar' => 'اللغات المتاحة', 'en' => 'Enabled Languages', 'de' => 'Aktivierte Sprachen'],
+    'enabled_languages_description' => ['ar' => 'اختر اللغات التي يمكن للمستخدمين التبديل بينها في الواجهة', 'en' => 'Choose which languages users can switch between in the interface', 'de' => 'Wählen Sie, zwischen welchen Sprachen die Benutzer in der Oberfläche wechseln können'],
+    'enabled_languages_hint' => ['ar' => 'يجب تفعيل لغة واحدة على الأقل. سيتم تحويل المستخدمين الذين يستخدمون لغة معطلة تلقائياً.', 'en' => 'At least one language must be enabled. Users on a disabled language will be switched automatically.', 'de' => 'Mindestens eine Sprache muss aktiviert sein. Benutzer mit einer deaktivierten Sprache werden automatisch umgeschaltet.'],
 
     'transfer_leadership' => ['ar' => 'نقل القيادة', 'en' => 'Transfer Leadership', 'de' => 'Leitung übertragen'],
     'confirm_transfer_leadership' => ['ar' => 'هل أنت متأكد من نقل قيادة الفريق إلى', 'en' => 'Are you sure you want to transfer leadership to', 'de' => 'Sind Sie sicher, dass Sie die Leitung übertragen möchten an'],

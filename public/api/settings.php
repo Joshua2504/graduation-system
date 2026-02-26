@@ -56,6 +56,15 @@ if ($method === 'POST') {
         $updates[] = "leader_transfer = ?";
         $params[] = (int)(bool)$input['leader_transfer'];
     }
+
+    if (isset($input['enabled_languages'])) {
+        $allLangs = ['ar', 'en', 'de'];
+        $requested = is_array($input['enabled_languages']) ? $input['enabled_languages'] : explode(',', $input['enabled_languages']);
+        $valid = array_filter($requested, fn($l) => in_array($l, $allLangs));
+        if (empty($valid)) $valid = ['ar'];
+        $updates[] = "enabled_languages = ?";
+        $params[] = implode(',', $valid);
+    }
     
     if (empty($updates)) {
         jsonResponse(['error' => 'قيمة مطلوبة'], 400);

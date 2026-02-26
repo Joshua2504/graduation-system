@@ -20,8 +20,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $studentCreation = isset($_POST['student_project_creation']) ? 1 : 0;
     $showReviewerName = isset($_POST['show_reviewer_name']) ? 1 : 0;
     $leaderTransfer = isset($_POST['leader_transfer']) ? 1 : 0;
-    $stmt = $pdo->prepare("UPDATE settings SET registration_open = ?, email_verification_required = ?, min_team_size = ?, max_team_size = ?, student_project_creation = ?, show_reviewer_name = ?, leader_transfer = ? WHERE id = 1");
-    $stmt->execute([$regOpen, $emailVerReq, $minTeam, $maxTeam, $studentCreation, $showReviewerName, $leaderTransfer]);
+
+    // Enabled languages — at least one must be selected
+    $allLangs = ['ar', 'en', 'de'];
+    $selectedLangs = array_filter($allLangs, fn($l) => isset($_POST['lang_' . $l]));
+    if (empty($selectedLangs)) $selectedLangs = ['ar']; // fallback
+    $enabledLanguages = implode(',', $selectedLangs);
+
+    $stmt = $pdo->prepare("UPDATE settings SET registration_open = ?, email_verification_required = ?, min_team_size = ?, max_team_size = ?, student_project_creation = ?, show_reviewer_name = ?, leader_transfer = ?, enabled_languages = ? WHERE id = 1");
+    $stmt->execute([$regOpen, $emailVerReq, $minTeam, $maxTeam, $studentCreation, $showReviewerName, $leaderTransfer, $enabledLanguages]);
     $settings['registration_open'] = $regOpen;
     $settings['email_verification_required'] = $emailVerReq;
     $settings['min_team_size'] = $minTeam;
@@ -29,6 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $settings['student_project_creation'] = $studentCreation;
     $settings['show_reviewer_name'] = $showReviewerName;
     $settings['leader_transfer'] = $leaderTransfer;
+    $settings['enabled_languages'] = $enabledLanguages;
     $message = __('settings_saved');
 }
 
@@ -123,6 +131,30 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                        <?= !empty($settings['leader_transfer']) ? 'checked' : '' ?>
                                        style="width: 3em; height: 1.5em;">
                             </div>
+                        </div>
+
+                        <!-- Enabled Languages -->
+                        <div class="p-3 bg-light rounded mb-3">
+                            <h6 class="mb-2"><i class="bi bi-translate me-1"></i><?= __('enabled_languages') ?></h6>
+                            <small class="text-muted d-block mb-3">
+                                <?= __('enabled_languages_description') ?>
+                            </small>
+                            <?php
+                            $enabledLangs = explode(',', $settings['enabled_languages'] ?? 'ar,en,de');
+                            $langOptions = [
+                                'ar' => 'العربية (Arabic)',
+                                'en' => 'English',
+                                'de' => 'Deutsch (German)',
+                            ];
+                            ?>
+                            <?php foreach ($langOptions as $code => $label): ?>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="lang_<?= $code ?>" name="lang_<?= $code ?>"
+                                       <?= in_array($code, $enabledLangs) ? 'checked' : '' ?>>
+                                <label class="form-check-label" for="lang_<?= $code ?>"><?= $label ?></label>
+                            </div>
+                            <?php endforeach; ?>
+                            <small class="text-muted"><i class="bi bi-info-circle me-1"></i><?= __('enabled_languages_hint') ?></small>
                         </div>
 
                         <!-- Team Size Settings -->
