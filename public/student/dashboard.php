@@ -81,10 +81,16 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                         <span class="badge bg-success fs-6">
                                             <?= __('group_number') ?>: <?= $p['group_number'] ?>
                                         </span>
+                                        <?php if (!empty($settings['show_reviewer_name']) && !empty($p['reviewer_name'])): ?>
+                                            <small class="text-muted d-block mt-1"><i class="bi bi-person me-1"></i><?= __('reviewed_by') ?>: <?= sanitize($p['reviewer_name']) ?></small>
+                                        <?php endif; ?>
                                     <?php endif; ?>
                                     <?php if ($p['status'] === 'rejected' && !empty($p['doctor_note'])): ?>
                                         <div class="alert alert-secondary py-1 px-2 mt-1 small mb-0">
                                             <i class="bi bi-chat-left-text me-1"></i><?= sanitize($p['doctor_note']) ?>
+                                            <?php if (!empty($settings['show_reviewer_name']) && !empty($p['reviewer_name'])): ?>
+                                                <br><i class="bi bi-person me-1"></i><?= __('reviewed_by') ?>: <?= sanitize($p['reviewer_name']) ?>
+                                            <?php endif; ?>
                                         </div>
                                     <?php endif; ?>
                                 </div>

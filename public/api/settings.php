@@ -47,6 +47,11 @@ if ($method === 'POST') {
         $params[] = $max;
     }
     
+    if (isset($input['show_reviewer_name'])) {
+        $updates[] = "show_reviewer_name = ?";
+        $params[] = (int)(bool)$input['show_reviewer_name'];
+    }
+    
     if (empty($updates)) {
         jsonResponse(['error' => 'قيمة مطلوبة'], 400);
     }

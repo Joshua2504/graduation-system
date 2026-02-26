@@ -108,12 +108,18 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                     <div class="alert alert-warning mt-3 mb-0">
                         <strong><i class="bi bi-chat-left-text me-2"></i><?= __('doctor_note') ?>:</strong>
                         <p class="mb-0 mt-1"><?= sanitize($project['doctor_note']) ?></p>
+                        <?php if (!empty($settings['show_reviewer_name']) && !empty($project['reviewer_name'])): ?>
+                            <small class="text-muted mt-1 d-block"><i class="bi bi-person me-1"></i><?= __('reviewed_by') ?>: <?= sanitize($project['reviewer_name']) ?></small>
+                        <?php endif; ?>
                     </div>
                 <?php endif; ?>
 
                 <?php if ($project['status'] === 'accepted'): ?>
                     <div class="alert alert-success mt-3 mb-0">
                         <i class="bi bi-check-circle me-2"></i><?= __('project_accepted_msg') ?>
+                        <?php if (!empty($settings['show_reviewer_name']) && !empty($project['reviewer_name'])): ?>
+                            <small class="text-muted mt-1 d-block"><i class="bi bi-person me-1"></i><?= __('reviewed_by') ?>: <?= sanitize($project['reviewer_name']) ?></small>
+                        <?php endif; ?>
                     </div>
                 <?php elseif ($project['status'] === 'under_review'): ?>
                     <div class="alert alert-info mt-3 mb-0">

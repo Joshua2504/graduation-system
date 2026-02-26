@@ -121,10 +121,12 @@ function assignGroupNumber(int $projectId): int {
 function getProject(int $id): ?array {
     $pdo = getDB();
     $stmt = $pdo->prepare("
-        SELECT p.*, u.name AS leader_name, u.email AS leader_email, u.student_code AS leader_code, u.id AS leader_id
+        SELECT p.*, u.name AS leader_name, u.email AS leader_email, u.student_code AS leader_code, u.id AS leader_id,
+               reviewer.name AS reviewer_name
         FROM projects p
         LEFT JOIN project_members pm ON pm.project_id = p.id AND pm.role = 'leader'
         LEFT JOIN users u ON u.id = pm.user_id
+        LEFT JOIN users reviewer ON reviewer.id = p.reviewed_by
         WHERE p.id = ?
     ");
     $stmt->execute([$id]);
@@ -166,9 +168,11 @@ function getUserProjects(int $userId): array {
         SELECT p.*, pm.role AS my_role,
             (SELECT COUNT(*) FROM project_members WHERE project_id = p.id) AS member_count,
             (SELECT u.name FROM project_members pm2 JOIN users u ON u.id = pm2.user_id 
-             WHERE pm2.project_id = p.id AND pm2.role = 'leader' LIMIT 1) AS leader_name
+             WHERE pm2.project_id = p.id AND pm2.role = 'leader' LIMIT 1) AS leader_name,
+            reviewer.name AS reviewer_name
         FROM projects p
         JOIN project_members pm ON pm.project_id = p.id AND pm.user_id = ?
+        LEFT JOIN users reviewer ON reviewer.id = p.reviewed_by
         ORDER BY p.updated_at DESC
     ");
     $stmt->execute([$userId]);

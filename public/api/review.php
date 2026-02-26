@@ -42,11 +42,9 @@ if ($action === 'accept') {
     // Assign group number and accept
     $groupNumber = assignGroupNumber($projectId);
     
-    // Update doctor note
-    if (!empty($doctorNote)) {
-        $stmt = $pdo->prepare("UPDATE projects SET doctor_note = ? WHERE id = ?");
-        $stmt->execute([$doctorNote, $projectId]);
-    }
+    // Update doctor note and reviewer
+    $stmt = $pdo->prepare("UPDATE projects SET doctor_note = COALESCE(?, doctor_note), reviewed_by = ? WHERE id = ?");
+    $stmt->execute([$doctorNote ?: null, current_user_id(), $projectId]);
     
     jsonResponse([
         'success' => true,
@@ -56,8 +54,8 @@ if ($action === 'accept') {
     ]);
 } else {
     // Reject
-    $stmt = $pdo->prepare("UPDATE projects SET status = 'rejected', doctor_note = ? WHERE id = ?");
-    $stmt->execute([$doctorNote ?: null, $projectId]);
+    $stmt = $pdo->prepare("UPDATE projects SET status = 'rejected', doctor_note = ?, reviewed_by = ? WHERE id = ?");
+    $stmt->execute([$doctorNote ?: null, current_user_id(), $projectId]);
     
     jsonResponse([
         'success' => true,

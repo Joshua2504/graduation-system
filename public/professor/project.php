@@ -85,6 +85,12 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             <p class="mt-1 p-2 bg-light rounded"><?= sanitize($project['doctor_note']) ?></p>
                         </div>
                     <?php endif; ?>
+                    <?php if (!empty($project['reviewer_name'])): ?>
+                        <div class="col-md-4 mb-2">
+                            <strong><?= __('reviewed_by') ?>:</strong>
+                            <span><?= sanitize($project['reviewer_name']) ?></span>
+                        </div>
+                    <?php endif; ?>
                 </div>
 
                 <?php if (!empty($project['description'])): ?>

@@ -18,13 +18,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $maxTeam = max(1, min(10, (int)($_POST['max_team_size'] ?? 7)));
     if ($maxTeam < $minTeam) $maxTeam = $minTeam;
     $studentCreation = isset($_POST['student_project_creation']) ? 1 : 0;
-    $stmt = $pdo->prepare("UPDATE settings SET registration_open = ?, email_verification_required = ?, min_team_size = ?, max_team_size = ?, student_project_creation = ? WHERE id = 1");
-    $stmt->execute([$regOpen, $emailVerReq, $minTeam, $maxTeam, $studentCreation]);
+    $showReviewerName = isset($_POST['show_reviewer_name']) ? 1 : 0;
+    $stmt = $pdo->prepare("UPDATE settings SET registration_open = ?, email_verification_required = ?, min_team_size = ?, max_team_size = ?, student_project_creation = ?, show_reviewer_name = ? WHERE id = 1");
+    $stmt->execute([$regOpen, $emailVerReq, $minTeam, $maxTeam, $studentCreation, $showReviewerName]);
     $settings['registration_open'] = $regOpen;
     $settings['email_verification_required'] = $emailVerReq;
     $settings['min_team_size'] = $minTeam;
     $settings['max_team_size'] = $maxTeam;
     $settings['student_project_creation'] = $studentCreation;
+    $settings['show_reviewer_name'] = $showReviewerName;
     $message = __('settings_saved');
 }
 
@@ -91,6 +93,21 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             </div>
                         </div>
 
+                        <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded mb-3">
+                            <div>
+                                <h6 class="mb-1"><?= __('toggle_show_reviewer_name') ?></h6>
+                                <small class="text-muted">
+                                    <?= __('show_reviewer_name_description') ?>
+                                </small>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" 
+                                       id="show_reviewer_name" name="show_reviewer_name" 
+                                       <?= !empty($settings['show_reviewer_name']) ? 'checked' : '' ?>
+                                       style="width: 3em; height: 1.5em;">
+                            </div>
+                        </div>
+
                         <!-- Team Size Settings -->
                         <div class="p-3 bg-light rounded mb-3">
                             <h6 class="mb-2"><i class="bi bi-people me-1"></i><?= __('team_size') ?></h6>
@@ -127,6 +144,12 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                 <?= !empty($settings['student_project_creation'])
                                     ? __('student_creation_on')
                                     : __('student_creation_off') ?>
+                            </span>
+                            <span class="badge fs-6 <?= !empty($settings['show_reviewer_name']) ? 'bg-success' : 'bg-secondary' ?>">
+                                <i class="bi bi-<?= !empty($settings['show_reviewer_name']) ? 'person-check' : 'person-x' ?> me-1"></i>
+                                <?= !empty($settings['show_reviewer_name'])
+                                    ? __('reviewer_name_on')
+                                    : __('reviewer_name_off') ?>
                             </span>
                         </div>
 

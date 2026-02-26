@@ -144,7 +144,8 @@ function performDemoReset(): void {
             email_verification_required = 1,
             min_team_size = 2,
             max_team_size = 7,
-            student_project_creation = 1
+            student_project_creation = 1,
+            show_reviewer_name = 0
             WHERE id = 1");
 
         // Re-seed demo projects

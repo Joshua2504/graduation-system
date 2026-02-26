@@ -6,11 +6,12 @@ CREATE TABLE IF NOT EXISTS `settings` (
   `min_team_size` TINYINT NOT NULL DEFAULT 2,
   `max_team_size` TINYINT NOT NULL DEFAULT 7,
   `student_project_creation` TINYINT(1) NOT NULL DEFAULT 1,
+  `show_reviewer_name` TINYINT(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `settings` (`id`, `registration_open`, `email_verification_required`, `min_team_size`, `max_team_size`, `student_project_creation`)
-VALUES (1, 1, 1, 2, 7, 1)
+INSERT INTO `settings` (`id`, `registration_open`, `email_verification_required`, `min_team_size`, `max_team_size`, `student_project_creation`, `show_reviewer_name`)
+VALUES (1, 1, 1, 2, 7, 1, 0)
 ON DUPLICATE KEY UPDATE `id` = `id`;
 
 -- ─── Users (with profile fields) ───
@@ -55,10 +56,12 @@ CREATE TABLE IF NOT EXISTS `projects` (
   `status` ENUM('draft','under_review','accepted','rejected') NOT NULL DEFAULT 'draft',
   `group_number` INT DEFAULT NULL,
   `doctor_note` TEXT DEFAULT NULL,
+  `reviewed_by` INT DEFAULT NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `join_code` (`join_code`)
+  UNIQUE KEY `join_code` (`join_code`),
+  CONSTRAINT `fk_reviewed_by` FOREIGN KEY (`reviewed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ─── Project Members ───
@@ -160,6 +163,20 @@ DEALLOCATE PREPARE stmt;
 -- Add profile_picture column to users (safe for existing databases)
 SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'profile_picture');
 SET @sql = IF(@col_exists = 0, 'ALTER TABLE `users` ADD COLUMN `profile_picture` VARCHAR(255) DEFAULT NULL AFTER `section`', 'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Add reviewed_by column to projects (safe for existing databases)
+SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'projects' AND COLUMN_NAME = 'reviewed_by');
+SET @sql = IF(@col_exists = 0, 'ALTER TABLE `projects` ADD COLUMN `reviewed_by` INT DEFAULT NULL AFTER `doctor_note`', 'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Add show_reviewer_name column to settings (safe for existing databases)
+SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'settings' AND COLUMN_NAME = 'show_reviewer_name');
+SET @sql = IF(@col_exists = 0, 'ALTER TABLE `settings` ADD COLUMN `show_reviewer_name` TINYINT(1) NOT NULL DEFAULT 0 AFTER `student_project_creation`', 'SELECT 1');
 PREPARE stmt FROM @sql;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;

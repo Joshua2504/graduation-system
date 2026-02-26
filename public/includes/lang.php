@@ -260,6 +260,11 @@ $translations = [
     'student_creation_on' => ['ar' => 'إنشاء المشاريع مفعل', 'en' => 'Student Creation On', 'de' => 'Studenten-Erstellung An'],
     'student_creation_off' => ['ar' => 'إنشاء المشاريع معطل', 'en' => 'Student Creation Off', 'de' => 'Studenten-Erstellung Aus'],
     'student_project_creation_disabled' => ['ar' => 'إنشاء المشاريع بواسطة الطلاب معطل حالياً', 'en' => 'Student project creation is currently disabled', 'de' => 'Die Projekterstellung durch Studenten ist derzeit deaktiviert'],
+    'toggle_show_reviewer_name' => ['ar' => 'إظهار اسم المراجع', 'en' => 'Show Reviewer Name', 'de' => 'Prüfername anzeigen'],
+    'show_reviewer_name_description' => ['ar' => 'عند التفعيل، سيظهر اسم الدكتور الذي قبل أو رفض المشروع للطلاب', 'en' => 'When enabled, the name of the professor who accepted or declined the project will be shown to students', 'de' => 'Wenn aktiviert, wird den Studenten der Name des Professors angezeigt, der das Projekt angenommen oder abgelehnt hat'],
+    'reviewer_name_on' => ['ar' => 'اسم المراجع ظاهر', 'en' => 'Reviewer Name Shown', 'de' => 'Prüfername sichtbar'],
+    'reviewer_name_off' => ['ar' => 'اسم المراجع مخفي', 'en' => 'Reviewer Name Hidden', 'de' => 'Prüfername verborgen'],
+    'reviewed_by' => ['ar' => 'تمت المراجعة بواسطة', 'en' => 'Reviewed by', 'de' => 'Geprüft von'],
     'email_verification_on' => ['ar' => 'تأكيد البريد مطلوب', 'en' => 'Email Verification On', 'de' => 'E-Mail-Bestätigung An'],
     'email_verification_off' => ['ar' => 'تأكيد البريد معطل', 'en' => 'Email Verification Off', 'de' => 'E-Mail-Bestätigung Aus'],
 
