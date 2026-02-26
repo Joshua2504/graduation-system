@@ -39,6 +39,7 @@ foreach ($members as $m) {
 
 $canSubmit = $isLeader && $project['status'] === 'draft' && $memberCount >= $minSize && $allProfilesComplete;
 $canResubmit = $isLeader && $project['status'] === 'rejected' && $memberCount >= $minSize && $allProfilesComplete;
+$canTransferLeadership = $isLeader && !empty($settings['leader_transfer']) && $memberCount > 1;
 
 $statusLabels = getStatusLabels();
 $statusColors = getStatusColors();
@@ -203,7 +204,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                     <th><?= __('student_code') ?></th>
                                     <th><?= __('role') ?></th>
                                     <th><?= __('profile') ?></th>
-                                    <?php if ($isLeader && $project['status'] === 'draft'): ?>
+                                    <?php if (($isLeader && $project['status'] === 'draft') || $canTransferLeadership): ?>
                                         <th></th>
                                     <?php endif; ?>
                                 </tr>
@@ -239,12 +240,21 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                                 <span class="text-warning"><i class="bi bi-exclamation-circle-fill"></i></span>
                                             <?php endif; ?>
                                         </td>
-                                        <?php if ($isLeader && $project['status'] === 'draft'): ?>
+                                        <?php if (($isLeader && $project['status'] === 'draft') || $canTransferLeadership): ?>
                                             <td>
                                                 <?php if ($m['member_role'] !== 'leader'): ?>
-                                                    <button class="btn btn-sm btn-outline-danger" onclick="removeMember(<?= $m['id'] ?>, '<?= sanitize($m['name']) ?>')">
-                                                        <i class="bi bi-x-lg"></i>
-                                                    </button>
+                                                    <div class="d-flex align-items-center gap-1">
+                                                        <?php if ($canTransferLeadership): ?>
+                                                            <button class="btn btn-sm btn-outline-primary" onclick="transferLeadership(<?= $m['id'] ?>, '<?= sanitize($m['name']) ?>')" title="<?= __('transfer_leadership') ?>">
+                                                                <i class="bi bi-star"></i>
+                                                            </button>
+                                                        <?php endif; ?>
+                                                        <?php if ($isLeader && $project['status'] === 'draft'): ?>
+                                                            <button class="btn btn-sm btn-outline-danger" onclick="removeMember(<?= $m['id'] ?>, '<?= sanitize($m['name']) ?>')">
+                                                                <i class="bi bi-x-lg"></i>
+                                                            </button>
+                                                        <?php endif; ?>
+                                                    </div>
                                                 <?php endif; ?>
                                             </td>
                                         <?php endif; ?>
@@ -266,8 +276,9 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                             <span class="badge bg-warning text-dark"><?= __('invited') ?></span>
                                         </td>
                                         <td>—</td>
-                                        <?php if ($isLeader && $project['status'] === 'draft'): ?>
+                                        <?php if (($isLeader && $project['status'] === 'draft') || $canTransferLeadership): ?>
                                             <td>
+                                                <?php if ($isLeader && $project['status'] === 'draft'): ?>
                                                 <div class="btn-group btn-group-sm">
                                                     <button class="btn btn-outline-primary" onclick="resendInvitation(<?= $inv['id'] ?>)" title="<?= __('resend_invitation') ?>">
                                                         <i class="bi bi-arrow-repeat"></i>
@@ -276,6 +287,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                                         <i class="bi bi-x-lg"></i>
                                                     </button>
                                                 </div>
+                                                <?php endif; ?>
                                             </td>
                                         <?php endif; ?>
                                     </tr>
@@ -393,6 +405,39 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
     </div>
 </div>
 
+<!-- Submit Confirmation Modal -->
+<?php if ($canSubmit || $canResubmit): ?>
+<div class="modal fade" id="submitConfirmModal" tabindex="-1" aria-labelledby="submitConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="submitConfirmModalLabel"><i class="bi bi-exclamation-triangle me-2"></i><?= __('submit_warning_title') ?></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?= __('cancel') ?>"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning mb-3">
+                    <i class="bi bi-lock me-2"></i><?= __('submit_warning_message') ?>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="submitConfirmCheckbox">
+                    <label class="form-check-label" for="submitConfirmCheckbox">
+                        <?= __('submit_confirm_checkbox') ?>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i><?= __('cancel') ?>
+                </button>
+                <button type="button" class="btn btn-success" id="submitConfirmBtn" disabled>
+                    <i class="bi bi-send me-1"></i><?= $canResubmit ? __('edit_resubmit') : __('submit_project') ?>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 <!-- QR Code library (lightweight) -->
 <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
 <script src="/assets/js/editor.js"></script>
@@ -483,6 +528,22 @@ function copyText(text, btn) {
     });
 }
 
+// Transfer leadership
+async function transferLeadership(memberId, name) {
+    const msg = <?= json_encode(__('confirm_transfer_leadership')) ?> + ' ' + name + '?';
+    if (!confirm(msg)) return;
+    try {
+        const res = await fetch('/api/project', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'set_leader', project_id: PROJECT_ID, student_id: memberId })
+        });
+        const data = await res.json();
+        if (data.success) location.reload();
+        else alert(data.error);
+    } catch (err) { alert(err.message); }
+}
+
 // Remove member
 async function removeMember(memberId, name) {
     const msg = <?= json_encode(__('confirm_remove_member')) ?> + ' ' + name + '?';
@@ -531,10 +592,26 @@ async function deleteProject() {
     } catch (err) { alert(err.message); }
 }
 
-// Submit project
-async function submitProject() {
-    const msg = <?= json_encode(__('confirm_submit_project')) ?>;
-    if (!confirm(msg)) return;
+// Submit project — show modal with confirmation checkbox
+function submitProject() {
+    const modal = new bootstrap.Modal(document.getElementById('submitConfirmModal'));
+    const checkbox = document.getElementById('submitConfirmCheckbox');
+    const btn = document.getElementById('submitConfirmBtn');
+    // Reset state each time
+    checkbox.checked = false;
+    btn.disabled = true;
+    modal.show();
+}
+
+// Enable/disable confirm button based on checkbox
+document.getElementById('submitConfirmCheckbox')?.addEventListener('change', function() {
+    document.getElementById('submitConfirmBtn').disabled = !this.checked;
+});
+
+// Actual submit when confirmed
+document.getElementById('submitConfirmBtn')?.addEventListener('click', async function() {
+    const btn = this;
+    btn.disabled = true;
     try {
         const res = await fetch('/api/submit', {
             method: 'POST',
@@ -543,9 +620,15 @@ async function submitProject() {
         });
         const data = await res.json();
         if (data.success) location.reload();
-        else alert(data.error || JSON.stringify(data));
-    } catch (err) { alert(err.message); }
-}
+        else {
+            alert(data.error || JSON.stringify(data));
+            btn.disabled = false;
+        }
+    } catch (err) {
+        alert(err.message);
+        btn.disabled = false;
+    }
+});
 
 // Cancel invitation
 async function cancelInvitation(invitationId) {

@@ -7,11 +7,12 @@ CREATE TABLE IF NOT EXISTS `settings` (
   `max_team_size` TINYINT NOT NULL DEFAULT 7,
   `student_project_creation` TINYINT(1) NOT NULL DEFAULT 1,
   `show_reviewer_name` TINYINT(1) NOT NULL DEFAULT 0,
+  `leader_transfer` TINYINT(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `settings` (`id`, `registration_open`, `email_verification_required`, `min_team_size`, `max_team_size`, `student_project_creation`, `show_reviewer_name`)
-VALUES (1, 1, 1, 2, 7, 1, 0)
+INSERT INTO `settings` (`id`, `registration_open`, `email_verification_required`, `min_team_size`, `max_team_size`, `student_project_creation`, `show_reviewer_name`, `leader_transfer`)
+VALUES (1, 1, 1, 2, 7, 1, 0, 1)
 ON DUPLICATE KEY UPDATE `id` = `id`;
 
 -- ─── Users (with profile fields) ───
@@ -178,6 +179,13 @@ DEALLOCATE PREPARE stmt;
 -- Add show_reviewer_name column to settings (safe for existing databases)
 SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'settings' AND COLUMN_NAME = 'show_reviewer_name');
 SET @sql = IF(@col_exists = 0, 'ALTER TABLE `settings` ADD COLUMN `show_reviewer_name` TINYINT(1) NOT NULL DEFAULT 0 AFTER `student_project_creation`', 'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Add leader_transfer column to settings (safe for existing databases)
+SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'settings' AND COLUMN_NAME = 'leader_transfer');
+SET @sql = IF(@col_exists = 0, 'ALTER TABLE `settings` ADD COLUMN `leader_transfer` TINYINT(1) NOT NULL DEFAULT 1 AFTER `show_reviewer_name`', 'SELECT 1');
 PREPARE stmt FROM @sql;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;

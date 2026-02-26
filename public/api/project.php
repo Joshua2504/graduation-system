@@ -214,9 +214,9 @@ if ($method === 'DELETE') {
     }
 }
 
-// ─── PATCH: Doctor assigns/removes/changes role of students ───
+// ─── PATCH: Doctor or team leader manages project members ───
 if ($method === 'PATCH') {
-    require_role('doctor', true);
+    require_login(true);
     
     $input = json_decode(file_get_contents('php://input'), true);
     $action = $input['action'] ?? '';
@@ -233,6 +233,21 @@ if ($method === 'PATCH') {
     
     $settings = getSettings();
     $maxSize = (int)$settings['max_team_size'];
+    $isDoctor = current_role() === 'doctor';
+    $isLeaderOfProject = !$isDoctor && isProjectLeader($projectId, current_user_id());
+    
+    // Team leader can only use set_leader action (when setting is enabled)
+    if (!$isDoctor) {
+        if ($action !== 'set_leader') {
+            jsonResponse(['error' => 'غير مصرح'], 403);
+        }
+        if (!$isLeaderOfProject) {
+            jsonResponse(['error' => 'فقط قائد الفريق يمكنه نقل القيادة'], 403);
+        }
+        if (empty($settings['leader_transfer'])) {
+            jsonResponse(['error' => __('leader_transfer_disabled')], 403);
+        }
+    }
     
     // Search students
     if ($action === 'search_students') {

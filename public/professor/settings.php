@@ -19,14 +19,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($maxTeam < $minTeam) $maxTeam = $minTeam;
     $studentCreation = isset($_POST['student_project_creation']) ? 1 : 0;
     $showReviewerName = isset($_POST['show_reviewer_name']) ? 1 : 0;
-    $stmt = $pdo->prepare("UPDATE settings SET registration_open = ?, email_verification_required = ?, min_team_size = ?, max_team_size = ?, student_project_creation = ?, show_reviewer_name = ? WHERE id = 1");
-    $stmt->execute([$regOpen, $emailVerReq, $minTeam, $maxTeam, $studentCreation, $showReviewerName]);
+    $leaderTransfer = isset($_POST['leader_transfer']) ? 1 : 0;
+    $stmt = $pdo->prepare("UPDATE settings SET registration_open = ?, email_verification_required = ?, min_team_size = ?, max_team_size = ?, student_project_creation = ?, show_reviewer_name = ?, leader_transfer = ? WHERE id = 1");
+    $stmt->execute([$regOpen, $emailVerReq, $minTeam, $maxTeam, $studentCreation, $showReviewerName, $leaderTransfer]);
     $settings['registration_open'] = $regOpen;
     $settings['email_verification_required'] = $emailVerReq;
     $settings['min_team_size'] = $minTeam;
     $settings['max_team_size'] = $maxTeam;
     $settings['student_project_creation'] = $studentCreation;
     $settings['show_reviewer_name'] = $showReviewerName;
+    $settings['leader_transfer'] = $leaderTransfer;
     $message = __('settings_saved');
 }
 
@@ -104,6 +106,21 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                 <input class="form-check-input" type="checkbox" role="switch" 
                                        id="show_reviewer_name" name="show_reviewer_name" 
                                        <?= !empty($settings['show_reviewer_name']) ? 'checked' : '' ?>
+                                       style="width: 3em; height: 1.5em;">
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded mb-3">
+                            <div>
+                                <h6 class="mb-1"><?= __('toggle_leader_transfer') ?></h6>
+                                <small class="text-muted">
+                                    <?= __('leader_transfer_description') ?>
+                                </small>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" 
+                                       id="leader_transfer" name="leader_transfer" 
+                                       <?= !empty($settings['leader_transfer']) ? 'checked' : '' ?>
                                        style="width: 3em; height: 1.5em;">
                             </div>
                         </div>

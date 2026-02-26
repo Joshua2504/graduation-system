@@ -269,6 +269,13 @@ $translations = [
     'show_reviewer_name_description' => ['ar' => 'عند التفعيل، سيظهر اسم الدكتور الذي قبل أو رفض المشروع للطلاب', 'en' => 'When enabled, the name of the professor who accepted or declined the project will be shown to students', 'de' => 'Wenn aktiviert, wird den Studenten der Name des Professors angezeigt, der das Projekt angenommen oder abgelehnt hat'],
     'reviewer_name_on' => ['ar' => 'اسم المراجع ظاهر', 'en' => 'Reviewer Name Shown', 'de' => 'Prüfername sichtbar'],
     'reviewer_name_off' => ['ar' => 'اسم المراجع مخفي', 'en' => 'Reviewer Name Hidden', 'de' => 'Prüfername verborgen'],
+    'toggle_leader_transfer' => ['ar' => 'نقل القيادة بواسطة القائد', 'en' => 'Leader Transfer by Team Leader', 'de' => 'Leiterübertragung durch Teamleiter'],
+    'leader_transfer_description' => ['ar' => 'السماح لقائد الفريق بنقل القيادة لعضو آخر في الفريق', 'en' => 'Allow team leaders to transfer leadership to another team member', 'de' => 'Teamleitern erlauben, die Leitung an ein anderes Teammitglied zu übertragen'],
+    'leader_transfer_on' => ['ar' => 'نقل القيادة مفعل', 'en' => 'Leader Transfer On', 'de' => 'Leiterübertragung An'],
+    'leader_transfer_off' => ['ar' => 'نقل القيادة معطل', 'en' => 'Leader Transfer Off', 'de' => 'Leiterübertragung Aus'],
+    'transfer_leadership' => ['ar' => 'نقل القيادة', 'en' => 'Transfer Leadership', 'de' => 'Leitung übertragen'],
+    'confirm_transfer_leadership' => ['ar' => 'هل أنت متأكد من نقل قيادة الفريق إلى', 'en' => 'Are you sure you want to transfer leadership to', 'de' => 'Sind Sie sicher, dass Sie die Leitung übertragen möchten an'],
+    'leader_transfer_disabled' => ['ar' => 'نقل القيادة معطل حالياً من قبل المشرف', 'en' => 'Leadership transfer is currently disabled by the administrator', 'de' => 'Die Leiterübertragung ist derzeit vom Administrator deaktiviert'],
     'reviewed_by' => ['ar' => 'تمت المراجعة بواسطة', 'en' => 'Reviewed by', 'de' => 'Geprüft von'],
     'email_verification_on' => ['ar' => 'تأكيد البريد مطلوب', 'en' => 'Email Verification On', 'de' => 'E-Mail-Bestätigung An'],
     'email_verification_off' => ['ar' => 'تأكيد البريد معطل', 'en' => 'Email Verification Off', 'de' => 'E-Mail-Bestätigung Aus'],
@@ -300,6 +307,9 @@ $translations = [
     'confirm_leave_project' => ['ar' => 'هل تريد مغادرة هذا المشروع؟', 'en' => 'Leave this project?', 'de' => 'Dieses Projekt verlassen?'],
     'confirm_delete_project' => ['ar' => 'هل أنت متأكد من حذف هذا المشروع؟ سيتم حذفه نهائياً.', 'en' => 'Are you sure you want to delete this project? This is permanent.', 'de' => 'Sind Sie sicher, dass Sie dieses Projekt löschen möchten? Dies ist endgültig.'],
     'confirm_submit_project' => ['ar' => 'تأكيد: سيتم تقديم المشروع للمراجعة. هل أنت متأكد؟', 'en' => 'Confirm: The project will be submitted for review. Are you sure?', 'de' => 'Bestätigung: Das Projekt wird zur Prüfung eingereicht. Sind Sie sicher?'],
+    'submit_warning_title' => ['ar' => 'تأكيد تقديم المشروع', 'en' => 'Confirm Project Submission', 'de' => 'Projekteinreichung bestätigen'],
+    'submit_warning_message' => ['ar' => 'بمجرد تقديم المشروع، لن تتمكن من إجراء أي تعديلات على بيانات المشروع أو أعضاء الفريق.', 'en' => 'Once the project is submitted, you will not be able to make any edits to the project details or team members.', 'de' => 'Sobald das Projekt eingereicht wurde, können Sie keine Änderungen mehr an den Projektdaten oder Teammitgliedern vornehmen.'],
+    'submit_confirm_checkbox' => ['ar' => 'أفهم أنه لا يمكن التعديل بعد التقديم، وأنا متأكد من رغبتي في التقديم.', 'en' => 'I understand that no more edits can be made once the project is submitted, and I am sure I want to submit.', 'de' => 'Ich verstehe, dass nach der Einreichung keine Änderungen mehr möglich sind, und ich bin sicher, dass ich einreichen möchte.'],
     'confirm_cancel_invitation' => ['ar' => 'هل تريد إلغاء هذه الدعوة؟', 'en' => 'Cancel this invitation?', 'de' => 'Diese Einladung abbrechen?'],
 
     // Student — Dashboard

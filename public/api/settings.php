@@ -52,6 +52,11 @@ if ($method === 'POST') {
         $params[] = (int)(bool)$input['show_reviewer_name'];
     }
     
+    if (isset($input['leader_transfer'])) {
+        $updates[] = "leader_transfer = ?";
+        $params[] = (int)(bool)$input['leader_transfer'];
+    }
+    
     if (empty($updates)) {
         jsonResponse(['error' => 'قيمة مطلوبة'], 400);
     }

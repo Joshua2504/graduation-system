@@ -19,6 +19,7 @@
 - **Submit for review** — once team meets size requirements and all member profiles are complete
 - **Rich description editor** — bold, italic, underline, lists, links, and image uploads (click, paste, or drag & drop)
 - **Track status** — view doctor feedback, resubmit if rejected
+- **Transfer leadership** — team leaders can transfer leadership to another team member (when enabled by professor)
 
 ### Professor (Doctor) Flow
 - **Profile** — edit personal info (gender, phone, department) and upload a profile picture
@@ -26,7 +27,7 @@
 - **Review projects** — view all team members' profiles, documents, and images; accept or reject with notes
 - **Edit projects** — inline editing of project title, type, and rich-text description for any project
 - **Duplicate detection** — automatic warning when project titles match
-- **System settings** — toggle registration, email verification, min/max team size (2–10)
+- **System settings** — toggle registration, email verification, min/max team size (2–10), student project creation, show reviewer name, leader transfer by team leader
 - **Manage students** — list all student accounts, verify emails manually, enable/disable accounts
 
 ### Demo Mode
@@ -184,6 +185,9 @@ graduation-system/
 | `email_verification_required` | TINYINT(1) | Require email verification before login |
 | `min_team_size` | TINYINT | Minimum members to submit (default: 2) |
 | `max_team_size` | TINYINT | Maximum members allowed (default: 7) |
+| `student_project_creation` | TINYINT(1) | Allow students to create projects |
+| `show_reviewer_name` | TINYINT(1) | Show reviewer name to students |
+| `leader_transfer` | TINYINT(1) | Allow team leaders to transfer leadership |
 
 ### `users` — Student & doctor accounts
 | Column | Type | Description |
