@@ -186,8 +186,7 @@ $translations = [
     'view_project' => ['ar' => 'عرض المشروع', 'en' => 'View Project', 'de' => 'Projekt anzeigen'],
     'duplicate_warning' => ['ar' => '⚠ تنبيه: يوجد مشروع آخر بنفس الاسم', 'en' => '⚠ Warning: Another project with the same name exists', 'de' => '⚠ Warnung: Ein anderes Projekt mit demselben Namen existiert bereits'],
     'view_similar' => ['ar' => 'عرض المشروع المشابه', 'en' => 'View Similar Project', 'de' => 'Ähnliches Projekt anzeigen'],
-    'registration_open' => ['ar' => 'التسجيل مفتوح', 'en' => 'Registration Open', 'de' => 'Registrierung offen'],
-    'registration_locked' => ['ar' => 'التسجيل مغلق', 'en' => 'Registration Locked', 'de' => 'Registrierung gesperrt'],
+
     'toggle_registration' => ['ar' => 'تبديل حالة التسجيل', 'en' => 'Toggle Registration', 'de' => 'Registrierung umschalten'],
     'toggle_email_verification' => ['ar' => 'تأكيد البريد الإلكتروني', 'en' => 'Email Verification', 'de' => 'E-Mail-Bestätigung'],
     'student_accounts' => ['ar' => 'حسابات الطلاب', 'en' => 'Student Accounts', 'de' => 'Studentenkonten'],
@@ -262,23 +261,19 @@ $translations = [
     'team_size_description' => ['ar' => 'تحديد الحد الأدنى والأقصى لعدد أعضاء الفريق', 'en' => 'Set the minimum and maximum number of team members', 'de' => 'Minimale und maximale Anzahl der Teammitglieder festlegen'],
     'toggle_student_project_creation' => ['ar' => 'إنشاء المشاريع بواسطة الطلاب', 'en' => 'Student Project Creation', 'de' => 'Projekterstellung durch Studenten'],
     'student_project_creation_description' => ['ar' => 'السماح للطلاب بإنشاء مشاريع جديدة بأنفسهم', 'en' => 'Allow students to create new projects on their own', 'de' => 'Studenten erlauben, eigene Projekte zu erstellen'],
-    'student_creation_on' => ['ar' => 'إنشاء المشاريع مفعل', 'en' => 'Student Creation On', 'de' => 'Studenten-Erstellung An'],
-    'student_creation_off' => ['ar' => 'إنشاء المشاريع معطل', 'en' => 'Student Creation Off', 'de' => 'Studenten-Erstellung Aus'],
+
     'student_project_creation_disabled' => ['ar' => 'إنشاء المشاريع بواسطة الطلاب معطل حالياً', 'en' => 'Student project creation is currently disabled', 'de' => 'Die Projekterstellung durch Studenten ist derzeit deaktiviert'],
     'toggle_show_reviewer_name' => ['ar' => 'إظهار اسم المراجع', 'en' => 'Show Reviewer Name', 'de' => 'Prüfername anzeigen'],
     'show_reviewer_name_description' => ['ar' => 'عند التفعيل، سيظهر اسم الدكتور الذي قبل أو رفض المشروع للطلاب', 'en' => 'When enabled, the name of the professor who accepted or declined the project will be shown to students', 'de' => 'Wenn aktiviert, wird den Studenten der Name des Professors angezeigt, der das Projekt angenommen oder abgelehnt hat'],
-    'reviewer_name_on' => ['ar' => 'اسم المراجع ظاهر', 'en' => 'Reviewer Name Shown', 'de' => 'Prüfername sichtbar'],
-    'reviewer_name_off' => ['ar' => 'اسم المراجع مخفي', 'en' => 'Reviewer Name Hidden', 'de' => 'Prüfername verborgen'],
+
     'toggle_leader_transfer' => ['ar' => 'نقل القيادة بواسطة القائد', 'en' => 'Leader Transfer by Team Leader', 'de' => 'Leiterübertragung durch Teamleiter'],
     'leader_transfer_description' => ['ar' => 'السماح لقائد الفريق بنقل القيادة لعضو آخر في الفريق', 'en' => 'Allow team leaders to transfer leadership to another team member', 'de' => 'Teamleitern erlauben, die Leitung an ein anderes Teammitglied zu übertragen'],
-    'leader_transfer_on' => ['ar' => 'نقل القيادة مفعل', 'en' => 'Leader Transfer On', 'de' => 'Leiterübertragung An'],
-    'leader_transfer_off' => ['ar' => 'نقل القيادة معطل', 'en' => 'Leader Transfer Off', 'de' => 'Leiterübertragung Aus'],
+
     'transfer_leadership' => ['ar' => 'نقل القيادة', 'en' => 'Transfer Leadership', 'de' => 'Leitung übertragen'],
     'confirm_transfer_leadership' => ['ar' => 'هل أنت متأكد من نقل قيادة الفريق إلى', 'en' => 'Are you sure you want to transfer leadership to', 'de' => 'Sind Sie sicher, dass Sie die Leitung übertragen möchten an'],
     'leader_transfer_disabled' => ['ar' => 'نقل القيادة معطل حالياً من قبل المشرف', 'en' => 'Leadership transfer is currently disabled by the administrator', 'de' => 'Die Leiterübertragung ist derzeit vom Administrator deaktiviert'],
     'reviewed_by' => ['ar' => 'تمت المراجعة بواسطة', 'en' => 'Reviewed by', 'de' => 'Geprüft von'],
-    'email_verification_on' => ['ar' => 'تأكيد البريد مطلوب', 'en' => 'Email Verification On', 'de' => 'E-Mail-Bestätigung An'],
-    'email_verification_off' => ['ar' => 'تأكيد البريد معطل', 'en' => 'Email Verification Off', 'de' => 'E-Mail-Bestätigung Aus'],
+
 
     // Student — Project Page
     'role' => ['ar' => 'الدور', 'en' => 'Role', 'de' => 'Rolle'],

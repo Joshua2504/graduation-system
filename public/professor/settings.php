@@ -145,31 +145,6 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             </div>
                         </div>
 
-                        <div class="d-flex gap-2 justify-content-center mb-3">
-                            <span class="badge fs-6 <?= $settings['registration_open'] ? 'bg-success' : 'bg-danger' ?>">
-                                <i class="bi bi-<?= $settings['registration_open'] ? 'unlock' : 'lock' ?> me-1"></i>
-                                <?= $settings['registration_open'] ? __('registration_open') : __('registration_locked') ?>
-                            </span>
-                            <span class="badge fs-6 <?= !empty($settings['email_verification_required']) ? 'bg-info' : 'bg-secondary' ?>">
-                                <i class="bi bi-<?= !empty($settings['email_verification_required']) ? 'envelope-check' : 'envelope-x' ?> me-1"></i>
-                                <?= !empty($settings['email_verification_required']) 
-                                    ? __('email_verification_on')
-                                    : __('email_verification_off') ?>
-                            </span>
-                            <span class="badge fs-6 <?= !empty($settings['student_project_creation']) ? 'bg-success' : 'bg-secondary' ?>">
-                                <i class="bi bi-<?= !empty($settings['student_project_creation']) ? 'folder-plus' : 'folder-x' ?> me-1"></i>
-                                <?= !empty($settings['student_project_creation'])
-                                    ? __('student_creation_on')
-                                    : __('student_creation_off') ?>
-                            </span>
-                            <span class="badge fs-6 <?= !empty($settings['show_reviewer_name']) ? 'bg-success' : 'bg-secondary' ?>">
-                                <i class="bi bi-<?= !empty($settings['show_reviewer_name']) ? 'person-check' : 'person-x' ?> me-1"></i>
-                                <?= !empty($settings['show_reviewer_name'])
-                                    ? __('reviewer_name_on')
-                                    : __('reviewer_name_off') ?>
-                            </span>
-                        </div>
-
                         <button type="submit" class="btn btn-primary w-100 mt-4">
                             <i class="bi bi-check-lg me-2"></i><?= __('save') ?>
                         </button>
