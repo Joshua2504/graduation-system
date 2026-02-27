@@ -61,12 +61,15 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             <td><?= $i + 1 ?></td>
                             <td class="fw-bold">
                                 <div class="d-flex align-items-center gap-2">
-                                    <?php
+                                    <?php if (!empty($settings['profile_pictures_enabled'])):
                                         $sPic = $s['profile_picture'] ?? '';
                                         $sPicUrl = $sPic ? secureFileUrl($s['id'], $sPic) : '';
                                     ?>
                                     <?php if ($sPicUrl): ?>
                                         <img src="<?= $sPicUrl ?>" class="profile-picture-sm rounded-circle" alt="">
+                                    <?php else: ?>
+                                        <i class="bi bi-person-circle fs-5 text-secondary"></i>
+                                    <?php endif; ?>
                                     <?php else: ?>
                                         <i class="bi bi-person-circle fs-5 text-secondary"></i>
                                     <?php endif; ?>

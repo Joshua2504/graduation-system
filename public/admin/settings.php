@@ -20,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $studentCreation = isset($_POST['student_project_creation']) ? 1 : 0;
     $showReviewerName = isset($_POST['show_reviewer_name']) ? 1 : 0;
     $leaderTransfer = isset($_POST['leader_transfer']) ? 1 : 0;
+    $profilePicturesEnabled = isset($_POST['profile_pictures_enabled']) ? 1 : 0;
 
     // Enabled languages — at least one must be selected
     $allLangs = ['ar', 'en', 'de'];
@@ -35,8 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $loginMethods = $_POST['login_methods'] ?? 'both';
     if (!in_array($loginMethods, ['both', 'email_only', 'student_code_only'])) $loginMethods = 'both';
 
-    $stmt = $pdo->prepare("UPDATE settings SET registration_open = ?, email_verification_required = ?, min_team_size = ?, max_team_size = ?, student_project_creation = ?, show_reviewer_name = ?, leader_transfer = ?, enabled_languages = ?, default_language = ?, login_methods = ? WHERE id = 1");
-    $stmt->execute([$regOpen, $emailVerReq, $minTeam, $maxTeam, $studentCreation, $showReviewerName, $leaderTransfer, $enabledLanguages, $defaultLanguage, $loginMethods]);
+    $stmt = $pdo->prepare("UPDATE settings SET registration_open = ?, email_verification_required = ?, min_team_size = ?, max_team_size = ?, student_project_creation = ?, show_reviewer_name = ?, leader_transfer = ?, enabled_languages = ?, default_language = ?, login_methods = ?, profile_pictures_enabled = ? WHERE id = 1");
+    $stmt->execute([$regOpen, $emailVerReq, $minTeam, $maxTeam, $studentCreation, $showReviewerName, $leaderTransfer, $enabledLanguages, $defaultLanguage, $loginMethods, $profilePicturesEnabled]);
     $settings = array_merge($settings, [
         'registration_open' => $regOpen,
         'email_verification_required' => $emailVerReq,
@@ -48,6 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'enabled_languages' => $enabledLanguages,
         'default_language' => $defaultLanguage,
         'login_methods' => $loginMethods,
+        'profile_pictures_enabled' => $profilePicturesEnabled,
     ]);
     $message = __('settings_saved');
 }
@@ -131,6 +133,19 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                 <input class="form-check-input" type="checkbox" role="switch" 
                                        id="leader_transfer" name="leader_transfer" 
                                        <?= !empty($settings['leader_transfer']) ? 'checked' : '' ?>
+                                       style="width: 3em; height: 1.5em;">
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded mb-3">
+                            <div>
+                                <h6 class="mb-1"><?= __('toggle_profile_pictures') ?></h6>
+                                <small class="text-muted"><?= __('profile_pictures_description') ?></small>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" 
+                                       id="profile_pictures_enabled" name="profile_pictures_enabled" 
+                                       <?= !empty($settings['profile_pictures_enabled']) ? 'checked' : '' ?>
                                        style="width: 3em; height: 1.5em;">
                             </div>
                         </div>

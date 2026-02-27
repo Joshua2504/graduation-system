@@ -8,6 +8,7 @@ require_admin();
 
 $pdo = getDB();
 $isAr = getLang() === 'ar';
+$settings = getSettings();
 
 // Fetch all professor accounts
 $stmt = $pdo->query("SELECT id, name, email, gender, phone, section, profile_picture, account_enabled, created_at FROM users WHERE role = 'doctor' ORDER BY created_at DESC");
@@ -56,12 +57,15 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             <td><?= $i + 1 ?></td>
                             <td class="fw-bold">
                                 <div class="d-flex align-items-center gap-2">
-                                    <?php
+                                    <?php if (!empty($settings['profile_pictures_enabled'])):
                                         $pPic = $p['profile_picture'] ?? '';
                                         $pPicUrl = $pPic ? secureFileUrl($p['id'], $pPic) : '';
                                     ?>
                                     <?php if ($pPicUrl): ?>
                                         <img src="<?= $pPicUrl ?>" class="profile-picture-sm rounded-circle" alt="">
+                                    <?php else: ?>
+                                        <i class="bi bi-person-circle fs-5 text-secondary"></i>
+                                    <?php endif; ?>
                                     <?php else: ?>
                                         <i class="bi bi-person-circle fs-5 text-secondary"></i>
                                     <?php endif; ?>

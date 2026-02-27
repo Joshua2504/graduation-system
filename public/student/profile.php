@@ -38,9 +38,11 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
 
             <!-- Profile Picture Card -->
             <?php
+                $profilePicsEnabled = !empty($settings['profile_pictures_enabled'] ?? getSettings()['profile_pictures_enabled'] ?? 1);
                 $profilePic = $user['profile_picture'] ?? '';
                 $profilePicUrl = $profilePic ? secureFileUrl($userId, $profilePic) : '';
             ?>
+            <?php if ($profilePicsEnabled): ?>
             <div class="card shadow mb-4">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0"><i class="bi bi-camera me-2"></i><?= __('profile_picture') ?></h5>
@@ -74,6 +76,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
 
             <!-- Personal Info Card -->
             <div class="card shadow mb-4">

@@ -176,9 +176,13 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                         </tr>
                     </thead>
                     <tbody>
+                        <?php $ppSettings = getSettings(); ?>
                         <?php foreach ($members as $i => $member):
-                            $memberPic = $member['profile_picture'] ?? '';
-                            $memberPicUrl = $memberPic ? secureFileUrl($member['id'], $memberPic) : '';
+                            $memberPicUrl = '';
+                            if (!empty($ppSettings['profile_pictures_enabled'])) {
+                                $memberPic = $member['profile_picture'] ?? '';
+                                $memberPicUrl = $memberPic ? secureFileUrl($member['id'], $memberPic) : '';
+                            }
                             $complete = isProfileComplete($member);
                             $docsCount = 0;
                             $docsTotal = 3;

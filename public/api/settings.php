@@ -83,6 +83,11 @@ if ($method === 'POST') {
         $updates[] = "login_methods = ?";
         $params[] = $val;
     }
+
+    if (isset($input['profile_pictures_enabled'])) {
+        $updates[] = "profile_pictures_enabled = ?";
+        $params[] = (int)(bool)$input['profile_pictures_enabled'];
+    }
     
     if (empty($updates)) {
         jsonResponse(['error' => 'قيمة مطلوبة'], 400);

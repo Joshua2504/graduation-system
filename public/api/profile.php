@@ -103,6 +103,15 @@ if ($method === 'POST') {
     
     $type = trim($_POST['type'] ?? '');
     $role = $_SESSION['role'] ?? 'student';
+
+    // Block profile_picture uploads when profile pictures are disabled
+    if ($type === 'profile_picture') {
+        $settings = getSettings();
+        if (empty($settings['profile_pictures_enabled'])) {
+            jsonResponse(['error' => 'Profile pictures are currently disabled'], 403);
+        }
+    }
+
     // Professors/admins can only upload profile pictures; students can upload documents too
     $allowedTypes = ($role === 'doctor' || $role === 'admin')
         ? ['profile_picture']

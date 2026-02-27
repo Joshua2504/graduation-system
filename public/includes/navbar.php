@@ -17,7 +17,8 @@ $navProfilePic = '';
 if ($isLoggedIn) {
     require_once __DIR__ . '/functions.php';
     $navUser = getUserProfile(current_user_id());
-    if (!empty($navUser['profile_picture'])) {
+    $navSettings = getSettings();
+    if (!empty($navSettings['profile_pictures_enabled']) && !empty($navUser['profile_picture'])) {
         $navProfilePic = secureFileUrl(current_user_id(), $navUser['profile_picture']);
     }
 }

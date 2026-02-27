@@ -317,6 +317,9 @@ $translations = [
     'toggle_leader_transfer' => ['ar' => 'نقل القيادة بواسطة القائد', 'en' => 'Leader Transfer by Team Leader', 'de' => 'Leiterübertragung durch Teamleiter'],
     'leader_transfer_description' => ['ar' => 'السماح لقائد الفريق بنقل القيادة لعضو آخر في الفريق', 'en' => 'Allow team leaders to transfer leadership to another team member', 'de' => 'Teamleitern erlauben, die Leitung an ein anderes Teammitglied zu übertragen'],
 
+    'toggle_profile_pictures' => ['ar' => 'الصور الشخصية', 'en' => 'Profile Pictures', 'de' => 'Profilbilder'],
+    'profile_pictures_description' => ['ar' => 'السماح للمستخدمين برفع وعرض الصور الشخصية', 'en' => 'Allow users to upload and display profile pictures', 'de' => 'Benutzern erlauben, Profilbilder hochzuladen und anzuzeigen'],
+
     'enabled_languages' => ['ar' => 'اللغات المتاحة', 'en' => 'Enabled Languages', 'de' => 'Aktivierte Sprachen'],
     'enabled_languages_description' => ['ar' => 'اختر اللغات التي يمكن للمستخدمين التبديل بينها في الواجهة', 'en' => 'Choose which languages users can switch between in the interface', 'de' => 'Wählen Sie, zwischen welchen Sprachen die Benutzer in der Oberfläche wechseln können'],
     'enabled_languages_hint' => ['ar' => 'يجب تفعيل لغة واحدة على الأقل. سيتم تحويل المستخدمين الذين يستخدمون لغة معطلة تلقائياً.', 'en' => 'At least one language must be enabled. Users on a disabled language will be switched automatically.', 'de' => 'Mindestens eine Sprache muss aktiviert sein. Benutzer mit einer deaktivierten Sprache werden automatisch umgeschaltet.'],

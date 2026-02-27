@@ -225,8 +225,11 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             <tbody>
                                 <?php foreach ($members as $i => $m): 
                                     $complete = isProfileComplete($m);
-                                    $mPic = $m['profile_picture'] ?? '';
-                                    $mPicUrl = $mPic ? secureFileUrl($m['id'], $mPic) : '';
+                                    $mPicUrl = '';
+                                    if (!empty($settings['profile_pictures_enabled'])) {
+                                        $mPic = $m['profile_picture'] ?? '';
+                                        $mPicUrl = $mPic ? secureFileUrl($m['id'], $mPic) : '';
+                                    }
                                 ?>
                                     <tr>
                                         <td><?= $i + 1 ?></td>

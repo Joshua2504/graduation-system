@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS `settings` (
   `enabled_languages` VARCHAR(50) NOT NULL DEFAULT 'ar',
   `default_language` VARCHAR(5) NOT NULL DEFAULT 'ar',
   `login_methods` VARCHAR(20) NOT NULL DEFAULT 'both',
+  `profile_pictures_enabled` TINYINT(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
