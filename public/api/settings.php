@@ -17,7 +17,11 @@ if ($method === 'GET') {
 }
 
 if ($method === 'POST') {
-    require_role('doctor', true);
+    // Admin and doctor can both update settings
+    require_login(true);
+    if (!is_admin_or_doctor()) {
+        jsonResponse(['error' => 'غير مصرح بالوصول', 'error_en' => 'Forbidden'], 403);
+    }
     
     $input = json_decode(file_get_contents('php://input'), true);
     $pdo = getDB();

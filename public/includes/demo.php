@@ -22,6 +22,7 @@ define('DEMO_RESET_INTERVAL', 30 * 60);
 
 /** Demo seed accounts — email => [name, role, student_code] */
 define('DEMO_SEED_ACCOUNTS', [
+    'admin@treudler.net'    => ['name' => 'Admin',       'role' => 'admin',   'student_code' => null],
     'doctor@treudler.net'   => ['name' => 'Doctor',      'role' => 'doctor',  'student_code' => null],
     'student1@treudler.net' => ['name' => 'Student 1',   'role' => 'student', 'student_code' => '001'],
     'student2@treudler.net' => ['name' => 'Student 2',   'role' => 'student', 'student_code' => '002'],
@@ -107,9 +108,9 @@ function ensureDemoSeeded(): void {
     if (!isDemoMode()) return;
     $pdo = getDB();
 
-    // Check if the doctor seed account already exists
+    // Check if the admin seed account already exists
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE email = ?");
-    $stmt->execute(['doctor@treudler.net']);
+    $stmt->execute(['admin@treudler.net']);
     if ((int)$stmt->fetchColumn() > 0) return; // already seeded
 
     // Seed demo user accounts with random passwords

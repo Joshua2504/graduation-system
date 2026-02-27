@@ -98,11 +98,11 @@ $translations = [
     'no_account' => ['ar' => 'ليس لديك حساب؟', 'en' => "Don't have an account?", 'de' => 'Noch kein Konto?'],
     'has_account' => ['ar' => 'لديك حساب بالفعل؟', 'en' => 'Already have an account?', 'de' => 'Bereits ein Konto?'],
 
-    // Initial setup (first user becomes doctor)
+    // Initial setup (first user becomes admin)
     'initial_setup_title' => ['ar' => 'إعداد النظام', 'en' => 'System Setup', 'de' => 'Systemeinrichtung'],
-    'initial_setup_description' => ['ar' => 'أنشئ حساب المشرف الأول لبدء استخدام النظام', 'en' => 'Create the first professor account to start using the system', 'de' => 'Erstellen Sie das erste Professorenkonto, um das System zu nutzen'],
-    'initial_setup_submit' => ['ar' => 'إنشاء حساب المشرف', 'en' => 'Create Professor Account', 'de' => 'Professorenkonto erstellen'],
-    'initial_setup_redirect' => ['ar' => 'يرجى إنشاء حساب المشرف أولاً', 'en' => 'Please create the professor account first', 'de' => 'Bitte erstellen Sie zuerst das Professorenkonto'],
+    'initial_setup_description' => ['ar' => 'أنشئ حساب مدير النظام الأول لبدء استخدام النظام', 'en' => 'Create the first admin account to start using the system', 'de' => 'Erstellen Sie das erste Administratorkonto, um das System zu nutzen'],
+    'initial_setup_submit' => ['ar' => 'إنشاء حساب المدير', 'en' => 'Create Admin Account', 'de' => 'Administratorkonto erstellen'],
+    'initial_setup_redirect' => ['ar' => 'يرجى إنشاء حساب المدير أولاً', 'en' => 'Please create the admin account first', 'de' => 'Bitte erstellen Sie zuerst das Administratorkonto'],
 
     'registration_closed' => ['ar' => 'تسجيل مشاريع التخرج مغلق حالياً', 'en' => 'Graduation project registration is currently closed', 'de' => 'Die Registrierung für Abschlussprojekte ist derzeit geschlossen'],
     'invalid_credentials' => ['ar' => 'بيانات الدخول غير صحيحة', 'en' => 'Invalid email/student code or password', 'de' => 'Ungültige E-Mail/Matrikelnummer oder Passwort'],
@@ -463,6 +463,39 @@ $translations = [
 
     // Misc
     'details' => ['ar' => 'التفاصيل', 'en' => 'Details', 'de' => 'Details'],
+
+    // Admin
+    'admin_dashboard' => ['ar' => 'لوحة تحكم المدير', 'en' => 'Admin Dashboard', 'de' => 'Admin-Dashboard'],
+    'admin_profile_info' => ['ar' => 'يمكنك تعديل بياناتك الشخصية وصورتك من هنا', 'en' => 'You can edit your personal information and photo here', 'de' => 'Hier können Sie Ihre persönlichen Daten und Ihr Foto bearbeiten'],
+    'professor_accounts' => ['ar' => 'حسابات الأساتذة', 'en' => 'Professor Accounts', 'de' => 'Professorenkonten'],
+    'professors' => ['ar' => 'الأساتذة', 'en' => 'Professors', 'de' => 'Professoren'],
+    'professors_count' => ['ar' => 'أستاذ', 'en' => 'professors', 'de' => 'Professoren'],
+    'students' => ['ar' => 'الطلاب', 'en' => 'Students', 'de' => 'Studenten'],
+    'total_projects' => ['ar' => 'إجمالي المشاريع', 'en' => 'Total Projects', 'de' => 'Gesamtprojekte'],
+    'all_projects' => ['ar' => 'جميع المشاريع', 'en' => 'All Projects', 'de' => 'Alle Projekte'],
+    'all' => ['ar' => 'الكل', 'en' => 'All', 'de' => 'Alle'],
+    'recent_professors' => ['ar' => 'آخر الأساتذة', 'en' => 'Recent Professors', 'de' => 'Neueste Professoren'],
+    'recent_projects' => ['ar' => 'آخر المشاريع', 'en' => 'Recent Projects', 'de' => 'Neueste Projekte'],
+    'view_all' => ['ar' => 'عرض الكل', 'en' => 'View All', 'de' => 'Alle anzeigen'],
+    'no_professors' => ['ar' => 'لا يوجد أساتذة مسجلين', 'en' => 'No professors registered', 'de' => 'Keine Professoren registriert'],
+    'add_professor' => ['ar' => 'إضافة أستاذ', 'en' => 'Add Professor', 'de' => 'Professor hinzufügen'],
+    'add_new_professor' => ['ar' => 'إضافة أستاذ جديد', 'en' => 'Add New Professor', 'de' => 'Neuen Professor hinzufügen'],
+    'professor_created' => ['ar' => 'تم إنشاء حساب الأستاذ بنجاح', 'en' => 'Professor account created successfully', 'de' => 'Professorenkonto erfolgreich erstellt'],
+    'professor_deleted' => ['ar' => 'تم حذف حساب الأستاذ', 'en' => 'Professor account deleted', 'de' => 'Professorenkonto gelöscht'],
+    'account_enabled_msg' => ['ar' => 'تم تفعيل الحساب', 'en' => 'Account enabled', 'de' => 'Konto aktiviert'],
+    'account_disabled_msg' => ['ar' => 'تم تعطيل الحساب', 'en' => 'Account disabled', 'de' => 'Konto deaktiviert'],
+    'login_as_professor' => ['ar' => 'الدخول كأستاذ', 'en' => 'Login as Professor', 'de' => 'Als Professor anmelden'],
+    'impersonating_professor' => ['ar' => 'تم الدخول كأستاذ', 'en' => 'Now viewing as professor', 'de' => 'Jetzt als Professor angemeldet'],
+    'back_to_admin' => ['ar' => 'العودة للمدير', 'en' => 'Back to Admin', 'de' => 'Zurück zum Admin'],
+    'confirm_disable_professor' => ['ar' => 'تعطيل حساب هذا الأستاذ؟', 'en' => "Disable this professor's account?", 'de' => 'Konto dieses Professors deaktivieren?'],
+    'confirm_enable_professor' => ['ar' => 'تفعيل حساب هذا الأستاذ؟', 'en' => "Enable this professor's account?", 'de' => 'Konto dieses Professors aktivieren?'],
+    'confirm_delete_professor' => ['ar' => 'حذف هذا الحساب نهائياً؟ سيتم حذف جميع بياناته.', 'en' => 'Permanently delete this account? All data will be removed.', 'de' => 'Dieses Konto endgültig löschen? Alle Daten werden entfernt.'],
+    'confirm_impersonate_professor' => ['ar' => 'الدخول كهذا الأستاذ؟', 'en' => 'Login as this professor?', 'de' => 'Als dieser Professor anmelden?'],
+    'reset_password' => ['ar' => 'إعادة تعيين كلمة المرور', 'en' => 'Reset Password', 'de' => 'Passwort zurücksetzen'],
+    'new_password' => ['ar' => 'كلمة المرور الجديدة', 'en' => 'New Password', 'de' => 'Neues Passwort'],
+    'password_reset_success' => ['ar' => 'تم إعادة تعيين كلمة المرور بنجاح', 'en' => 'Password reset successfully', 'de' => 'Passwort erfolgreich zurückgesetzt'],
+    'send_new_password_email' => ['ar' => 'إرسال كلمة المرور الجديدة بالبريد', 'en' => 'Send new password via email', 'de' => 'Neues Passwort per E-Mail senden'],
+    'demo_admin' => ['ar' => 'مدير النظام', 'en' => 'Admin', 'de' => 'Administrator'],
 
     // Landing — Stats
     'landing_stat_easy' => ['ar' => 'سهل الاستخدام', 'en' => 'Easy to Use', 'de' => 'Einfach zu bedienen'],

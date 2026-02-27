@@ -347,3 +347,81 @@ HTML;
 
     return sendMail($email, $subject, $body);
 }
+
+/**
+ * Send welcome email to a professor with login credentials
+ *
+ * @param string $email    Professor email
+ * @param string $name     Professor name
+ * @param string $password Plain-text password (sent once)
+ * @param string $lang     Language code (ar/en/de)
+ * @return bool
+ */
+function sendProfessorWelcomeEmail(string $email, string $name, string $password, string $lang = 'ar'): bool {
+    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost:8642';
+    $loginUrl = "$protocol://$host/login";
+
+    if ($lang === 'de') {
+        $subject = 'Neues Professorenkonto - Abschlussprojekt-System';
+        $heading = 'Willkommen im Abschlussprojekt-System';
+        $greeting = "Hallo $name,";
+        $message = 'Ein Professorenkonto wurde für Sie im Abschlussprojekt-Verwaltungssystem erstellt. Sie können sich mit den folgenden Zugangsdaten anmelden:';
+        $emailLabel = 'E-Mail';
+        $passLabel = 'Passwort';
+        $btnText = 'Anmelden';
+        $changePass = 'Bitte ändern Sie Ihr Passwort nach der ersten Anmeldung.';
+        $dir = 'ltr';
+    } elseif ($lang === 'en') {
+        $subject = 'New Professor Account - Graduation Project System';
+        $heading = 'Welcome to the Graduation Project System';
+        $greeting = "Hello $name,";
+        $message = 'A professor account has been created for you in the Graduation Project Management System. You can log in using the following credentials:';
+        $emailLabel = 'Email';
+        $passLabel = 'Password';
+        $btnText = 'Log In';
+        $changePass = 'Please change your password after your first login.';
+        $dir = 'ltr';
+    } else {
+        $subject = 'حساب أستاذ جديد - نظام مشاريع التخرج';
+        $heading = 'مرحباً بك في نظام مشاريع التخرج';
+        $greeting = "مرحباً $name،";
+        $message = 'تم إنشاء حساب أستاذ لك في نظام إدارة مشاريع التخرج. يمكنك تسجيل الدخول باستخدام البيانات التالية:';
+        $emailLabel = 'البريد الإلكتروني';
+        $passLabel = 'كلمة المرور';
+        $btnText = 'تسجيل الدخول';
+        $changePass = 'يرجى تغيير كلمة المرور بعد تسجيل الدخول الأول.';
+        $dir = 'rtl';
+    }
+
+    $safeEmail = htmlspecialchars($email, ENT_QUOTES, 'UTF-8');
+    $safePass = htmlspecialchars($password, ENT_QUOTES, 'UTF-8');
+
+    $body = <<<HTML
+<!DOCTYPE html>
+<html dir="$dir" lang="$lang">
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background:#f4f6f9;">
+    <div style="max-width:520px;margin:40px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);">
+        <div style="background:#6f42c1;padding:24px;text-align:center;">
+            <h1 style="margin:0;color:#fff;font-size:22px;">🎓 $heading</h1>
+        </div>
+        <div style="padding:28px 32px;">
+            <p style="font-size:16px;color:#333;">$greeting</p>
+            <p style="font-size:15px;color:#555;line-height:1.6;">$message</p>
+            <div style="background:#f8f9fa;border-radius:8px;padding:16px;margin:20px 0;">
+                <p style="margin:4px 0;font-size:14px;"><strong>$emailLabel:</strong> $safeEmail</p>
+                <p style="margin:4px 0;font-size:14px;"><strong>$passLabel:</strong> <code style="background:#e9ecef;padding:2px 6px;border-radius:4px;">$safePass</code></p>
+            </div>
+            <div style="text-align:center;margin:32px 0;">
+                <a href="$loginUrl" style="display:inline-block;background:#6f42c1;color:#fff;padding:14px 36px;border-radius:8px;text-decoration:none;font-size:16px;font-weight:bold;">$btnText</a>
+            </div>
+            <p style="font-size:13px;color:#888;text-align:center;">$changePass</p>
+        </div>
+    </div>
+</body>
+</html>
+HTML;
+
+    return sendMail($email, $subject, $body);
+}

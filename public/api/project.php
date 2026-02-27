@@ -71,8 +71,8 @@ if ($method === 'POST') {
     
     $joinCode = generateJoinCode();
     
-    if ($role === 'doctor') {
-        // Doctor creates project — optionally with assigned students
+    if ($role === 'doctor' || $role === 'admin') {
+        // Doctor/admin creates project — optionally with assigned students
         $stmt = $pdo->prepare("INSERT INTO projects (title, type, description, join_code, status) VALUES (?, ?, ?, ?, 'draft')");
         $stmt->execute([$title, $type, $description ?: null, $joinCode]);
         $projectId = (int)$pdo->lastInsertId();
@@ -237,7 +237,7 @@ if ($method === 'PATCH') {
     
     $settings = getSettings();
     $maxSize = (int)$settings['max_team_size'];
-    $isDoctor = current_role() === 'doctor';
+    $isDoctor = current_role() === 'doctor' || current_role() === 'admin';
     $isLeaderOfProject = !$isDoctor && isProjectLeader($projectId, current_user_id());
     
     // Team leader can only use set_leader action (when setting is enabled)

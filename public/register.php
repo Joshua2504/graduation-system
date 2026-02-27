@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($regOpen || $isInitialSetup)) {
     $password = $_POST['password'] ?? '';
 
     if ($isInitialSetup) {
-        // Initial setup: create doctor account (no student code/year needed)
+        // Initial setup: create admin account (no student code/year needed)
         if (empty($name) || empty($email) || empty($password)) {
             $error = __('required_field');
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -42,15 +42,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($regOpen || $isInitialSetup)) {
         } else {
             $pdo = getDB();
             $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-            $stmt = $pdo->prepare("INSERT INTO users (name, email, password, role, email_verified) VALUES (?, ?, ?, 'doctor', 1)");
+            $stmt = $pdo->prepare("INSERT INTO users (name, email, password, role, email_verified) VALUES (?, ?, ?, 'admin', 1)");
             $stmt->execute([$name, $email, $hashedPassword]);
 
             $userId = (int)$pdo->lastInsertId();
             $_SESSION['user_id'] = $userId;
             $_SESSION['name'] = $name;
             $_SESSION['email'] = $email;
-            $_SESSION['role'] = 'doctor';
-            redirect('/professor/dashboard');
+            $_SESSION['role'] = 'admin';
+            redirect('/admin/dashboard');
         }
     } else {
         // Normal student registration

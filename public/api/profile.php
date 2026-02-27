@@ -37,8 +37,8 @@ if ($method === 'PUT') {
     $pdo = getDB();
     $role = $_SESSION['role'] ?? 'student';
     
-    // Students can edit more fields; professors have a smaller set
-    $allowedFields = $role === 'doctor'
+    // Students can edit more fields; professors/admins have a smaller set
+    $allowedFields = ($role === 'doctor' || $role === 'admin')
         ? ['gender', 'phone', 'section']
         : ['gender', 'national_id', 'birth_date', 'governorate', 'address', 'phone', 'year', 'section'];
     $updates = [];
@@ -103,8 +103,8 @@ if ($method === 'POST') {
     
     $type = trim($_POST['type'] ?? '');
     $role = $_SESSION['role'] ?? 'student';
-    // Professors can only upload profile pictures; students can upload documents too
-    $allowedTypes = $role === 'doctor'
+    // Professors/admins can only upload profile pictures; students can upload documents too
+    $allowedTypes = ($role === 'doctor' || $role === 'admin')
         ? ['profile_picture']
         : ['card', 'national_id', 'receipt', 'profile_picture'];
     

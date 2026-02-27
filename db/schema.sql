@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `email` VARCHAR(255) NOT NULL,
   `password` VARCHAR(255) NOT NULL,
   `student_code` VARCHAR(50) DEFAULT NULL,
-  `role` ENUM('student','doctor') NOT NULL DEFAULT 'student',
+  `role` ENUM('student','doctor','admin') NOT NULL DEFAULT 'student',
   `gender` ENUM('male','female') DEFAULT NULL,
   `national_id` VARCHAR(20) DEFAULT NULL,
   `birth_date` DATE DEFAULT NULL,
@@ -180,3 +180,18 @@ CREATE TABLE IF NOT EXISTS `project_reviews` (
 
 -- ─── Migrations ───
 ALTER TABLE `settings` ADD COLUMN IF NOT EXISTS `enabled_languages` VARCHAR(50) NOT NULL DEFAULT 'ar' AFTER `leader_transfer`;
+
+-- Add 'admin' to users role ENUM (safe for existing databases)
+SET @has_admin = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'role' AND COLUMN_TYPE LIKE '%admin%');
+SET @sql = IF(@has_admin = 0, "ALTER TABLE `users` MODIFY COLUMN `role` ENUM('student','doctor','admin') NOT NULL DEFAULT 'student'", 'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Upgrade first doctor to admin if no admin exists yet (for existing installations)
+SET @admin_count = (SELECT COUNT(*) FROM `users` WHERE `role` = 'admin');
+SET @first_doctor = (SELECT MIN(id) FROM `users` WHERE `role` = 'doctor');
+SET @sql = IF(@admin_count = 0 AND @first_doctor IS NOT NULL, CONCAT('UPDATE `users` SET `role` = ''admin'' WHERE id = ', @first_doctor), 'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;

@@ -285,8 +285,8 @@ if ($method === 'PATCH') {
         jsonResponse(['error' => 'معرف الدعوة مطلوب'], 400);
     }
 
-    // Doctors can resend any invitation, students can only resend their own
-    if ($role === 'doctor') {
+    // Doctors/admins can resend any invitation, students can only resend their own
+    if ($role === 'doctor' || $role === 'admin') {
         $stmt = $pdo->prepare("SELECT i.*, p.status AS project_status FROM invitations i JOIN projects p ON p.id = i.project_id WHERE i.id = ? AND i.status = 'pending'");
         $stmt->execute([$invitationId]);
     } else {

@@ -29,7 +29,14 @@ function require_login(bool $isApi = false): void {
  */
 function require_role(string $role, bool $isApi = false): void {
     require_login($isApi);
-    if (($_SESSION['role'] ?? '') !== $role) {
+    $currentRole = $_SESSION['role'] ?? '';
+    
+    // Admin can access doctor/professor pages too
+    if ($role === 'doctor' && $currentRole === 'admin') {
+        return;
+    }
+    
+    if ($currentRole !== $role) {
         if ($isApi) {
             http_response_code(403);
             header('Content-Type: application/json');
@@ -37,10 +44,53 @@ function require_role(string $role, bool $isApi = false): void {
             exit;
         }
         // Redirect to appropriate dashboard
-        $r = $_SESSION['role'] ?? 'student';
-        header('Location: /' . ($r === 'doctor' ? 'professor' : 'student') . '/dashboard');
+        $r = $currentRole;
+        if ($r === 'admin') {
+            header('Location: /admin/dashboard');
+        } elseif ($r === 'doctor') {
+            header('Location: /professor/dashboard');
+        } else {
+            header('Location: /student/dashboard');
+        }
         exit;
     }
+}
+
+/**
+ * Require admin role specifically (no fallback)
+ */
+function require_admin(bool $isApi = false): void {
+    require_login($isApi);
+    if (($_SESSION['role'] ?? '') !== 'admin') {
+        if ($isApi) {
+            http_response_code(403);
+            header('Content-Type: application/json');
+            echo json_encode(['error' => 'غير مصرح بالوصول - مدير النظام فقط', 'error_en' => 'Forbidden - Admin only']);
+            exit;
+        }
+        $r = $_SESSION['role'] ?? 'student';
+        if ($r === 'doctor') {
+            header('Location: /professor/dashboard');
+        } else {
+            header('Location: /student/dashboard');
+        }
+        exit;
+    }
+}
+
+/**
+ * Check if current user is admin
+ */
+function is_admin(): bool {
+    return ($_SESSION['role'] ?? '') === 'admin';
+}
+
+/**
+ * Check if current user is admin or doctor
+ */
+function is_admin_or_doctor(): bool {
+    $role = $_SESSION['role'] ?? '';
+    return $role === 'admin' || $role === 'doctor';
 }
 
 /**
