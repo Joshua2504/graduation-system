@@ -5,9 +5,13 @@
 require_once __DIR__ . '/includes/bootstrap.php';
 
 if (is_impersonating()) {
+    // Determine return URL before restoring session
+    $returnTo = $_SESSION['impersonator_return_to'] ?? null;
     stop_impersonation();
     $role = $_SESSION['role'] ?? 'doctor';
-    if ($role === 'admin') {
+    if ($returnTo) {
+        header('Location: ' . $returnTo);
+    } elseif ($role === 'admin') {
         header('Location: /admin/professors');
     } else {
         header('Location: /professor/students');

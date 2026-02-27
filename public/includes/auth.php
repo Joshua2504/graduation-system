@@ -134,6 +134,7 @@ function stop_impersonation(): void {
         $_SESSION['impersonator_id'],
         $_SESSION['impersonator_name'],
         $_SESSION['impersonator_email'],
-        $_SESSION['impersonator_role']
+        $_SESSION['impersonator_role'],
+        $_SESSION['impersonator_return_to']
     );
 }

@@ -267,11 +267,12 @@ if ($method === 'POST') {
             if (!$student) {
                 jsonResponse(['error' => 'الطالب غير موجود'], 404);
             }
-            // Store original doctor session
+            // Store original doctor/admin session
             $_SESSION['impersonator_id'] = $_SESSION['user_id'];
             $_SESSION['impersonator_name'] = $_SESSION['name'];
             $_SESSION['impersonator_email'] = $_SESSION['email'];
             $_SESSION['impersonator_role'] = $_SESSION['role'];
+            $_SESSION['impersonator_return_to'] = $_SESSION['role'] === 'admin' ? '/admin/students' : '/professor/students';
             // Switch to student session
             $_SESSION['user_id'] = $student['id'];
             $_SESSION['name'] = $student['name'];

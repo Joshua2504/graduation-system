@@ -148,6 +148,7 @@ if ($method === 'POST') {
             $_SESSION['impersonator_name'] = $_SESSION['name'];
             $_SESSION['impersonator_email'] = $_SESSION['email'];
             $_SESSION['impersonator_role'] = $_SESSION['role'];
+            $_SESSION['impersonator_return_to'] = '/admin/professors';
             // Switch to professor session
             $_SESSION['user_id'] = $professor['id'];
             $_SESSION['name'] = $professor['name'];

@@ -24,6 +24,7 @@
 ### Admin (Super Admin) Flow
 - **Dashboard** — overview with professor/student counts, project stats by status, recent professors and projects
 - **Manage professors** — create, enable/disable, delete professor accounts; reset passwords; send welcome emails with credentials; impersonate professors
+- **Manage students** — same student management interface as professors (list, edit profiles, verify emails, enable/disable, create accounts, impersonate)
 - **All projects** — read-only overview of all projects with tab filtering (All, Draft, Under Review, Accepted, Rejected)
 - **System settings** — toggle registration, email verification, min/max team size (2–10), student project creation, show reviewer name, leader transfer by team leader, login methods (email & student code / email only / student code only), language selection
 - **Profile** — edit personal info (gender, phone, department) and upload a profile picture
@@ -146,6 +147,7 @@ graduation-system/
     ├── admin/
     │   ├── dashboard.php         # Admin overview with stats
     │   ├── professors.php        # Professor account management
+    │   ├── students.php          # Student account management (admin)
     │   ├── projects.php          # Read-only all-projects overview
     │   ├── settings.php          # System configuration (admin)
     │   └── profile.php           # Admin profile editor
