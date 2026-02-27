@@ -78,7 +78,7 @@ function redirect(string $url): void {
 function getSettings(): array {
     $pdo = getDB();
     $stmt = $pdo->query("SELECT * FROM settings WHERE id = 1");
-    return $stmt->fetch() ?: ['registration_open' => 1, 'min_team_size' => 2, 'max_team_size' => 7];
+    return $stmt->fetch() ?: ['registration_open' => 1, 'min_team_size' => 2, 'max_team_size' => 7, 'login_methods' => 'both'];
 }
 
 /**

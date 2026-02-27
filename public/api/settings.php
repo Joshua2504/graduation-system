@@ -69,6 +69,13 @@ if ($method === 'POST') {
         $updates[] = "enabled_languages = ?";
         $params[] = implode(',', $valid);
     }
+
+    if (isset($input['login_methods'])) {
+        $allowed = ['both', 'email_only', 'student_code_only'];
+        $val = in_array($input['login_methods'], $allowed) ? $input['login_methods'] : 'both';
+        $updates[] = "login_methods = ?";
+        $params[] = $val;
+    }
     
     if (empty($updates)) {
         jsonResponse(['error' => 'قيمة مطلوبة'], 400);

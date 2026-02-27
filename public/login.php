@@ -22,6 +22,8 @@ if (!isDemoMode()) {
 $error = '';
 $showResend = false;
 $resendEmail = '';
+$settings = getSettings();
+$loginMethods = $settings['login_methods'] ?? 'both';
 
 // Handle resend verification
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['resend_verification'])) {
@@ -47,8 +49,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['resend_verification'
         $error = __('required_field');
     } else {
         $pdo = getDB();
+        // Determine login method based on setting
+        $isEmail = strpos($login_input, '@') !== false;
+
+        // Enforce login method restriction (only for students; admins/professors always use email)
+        if ($loginMethods === 'email_only' && !$isEmail) {
+            $error = __('login_method_not_allowed');
+        } elseif ($loginMethods === 'student_code_only' && $isEmail) {
+            // Allow email login for non-student roles (admin/professor)
+            $pdo2 = getDB();
+            $stmtCheck = $pdo2->prepare("SELECT role FROM users WHERE email = ?");
+            $stmtCheck->execute([$login_input]);
+            $roleCheck = $stmtCheck->fetchColumn();
+            if ($roleCheck && $roleCheck !== 'student') {
+                // Allow — admin/professor can always use email
+            } else {
+                $error = __('login_method_not_allowed');
+            }
+        }
+
+        if (empty($error)) {
         // Allow login with email or student code
-        if (strpos($login_input, '@') !== false) {
+        if ($isEmail) {
             $stmt = $pdo->prepare("SELECT id, name, email, password, role, email_verified, account_enabled FROM users WHERE email = ?");
         } else {
             $stmt = $pdo->prepare("SELECT id, name, email, password, role, email_verified, account_enabled FROM users WHERE student_code = ?");
@@ -91,6 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['resend_verification'
         } else {
             $error = __('invalid_credentials');
         }
+        } // end if (empty($error))
     }
 }
 
@@ -283,12 +306,31 @@ require_once __DIR__ . '/includes/header.php';
 
                             <form method="POST" novalidate>
                                 <div class="mb-3">
-                                    <label for="email" class="form-label"><?= __('email_or_code') ?></label>
+                                    <?php
+                                    // Dynamic label and placeholder based on login_methods setting
+                                    if ($loginMethods === 'email_only') {
+                                        $loginLabel = __('email');
+                                        $loginPlaceholder = __('email_placeholder');
+                                        $loginIcon = 'bi-envelope';
+                                        $inputType = 'email';
+                                    } elseif ($loginMethods === 'student_code_only') {
+                                        $loginLabel = __('student_code');
+                                        $loginPlaceholder = __('student_code_placeholder');
+                                        $loginIcon = 'bi-person-badge';
+                                        $inputType = 'text';
+                                    } else {
+                                        $loginLabel = __('email_or_code');
+                                        $loginPlaceholder = __('email_or_code_placeholder');
+                                        $loginIcon = 'bi-person';
+                                        $inputType = 'text';
+                                    }
+                                    ?>
+                                    <label for="email" class="form-label"><?= $loginLabel ?></label>
                                     <div class="input-group">
-                                        <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                        <input type="text" class="form-control" id="email" name="email"
+                                        <span class="input-group-text"><i class="bi <?= $loginIcon ?>"></i></span>
+                                        <input type="<?= $inputType ?>" class="form-control" id="email" name="email"
                                                value="<?= sanitize($login_input ?? '') ?>" required autofocus
-                                               placeholder="<?= __('email_or_code_placeholder') ?>">
+                                               placeholder="<?= $loginPlaceholder ?>">
                                     </div>
                                 </div>
                                 <div class="mb-3">

@@ -25,7 +25,7 @@
 - **Dashboard** — overview with professor/student counts, project stats by status, recent professors and projects
 - **Manage professors** — create, enable/disable, delete professor accounts; reset passwords; send welcome emails with credentials; impersonate professors
 - **All projects** — read-only overview of all projects with tab filtering (All, Draft, Under Review, Accepted, Rejected)
-- **System settings** — toggle registration, email verification, min/max team size (2–10), student project creation, show reviewer name, leader transfer by team leader, language selection
+- **System settings** — toggle registration, email verification, min/max team size (2–10), student project creation, show reviewer name, leader transfer by team leader, login methods (email & student code / email only / student code only), language selection
 - **Profile** — edit personal info (gender, phone, department) and upload a profile picture
 
 ### Professor (Doctor) Flow
@@ -35,7 +35,7 @@
 - **Review history** — full audit trail of all accept/reject actions with timestamps, notes, and resubmission permissions
 - **Edit projects** — inline editing of project title, type, and rich-text description for any project
 - **Duplicate detection** — automatic warning when project titles match
-- **System settings** — toggle registration, email verification, min/max team size (2–10), student project creation, show reviewer name, leader transfer by team leader
+- **System settings** — toggle registration, email verification, min/max team size (2–10), student project creation, show reviewer name, leader transfer by team leader, login methods (email & student code / email only / student code only)
 - **Manage students** — list all student accounts, verify emails manually, enable/disable accounts
 
 ### Demo Mode

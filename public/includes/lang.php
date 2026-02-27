@@ -312,6 +312,15 @@ $translations = [
     'enabled_languages_description' => ['ar' => 'اختر اللغات التي يمكن للمستخدمين التبديل بينها في الواجهة', 'en' => 'Choose which languages users can switch between in the interface', 'de' => 'Wählen Sie, zwischen welchen Sprachen die Benutzer in der Oberfläche wechseln können'],
     'enabled_languages_hint' => ['ar' => 'يجب تفعيل لغة واحدة على الأقل. سيتم تحويل المستخدمين الذين يستخدمون لغة معطلة تلقائياً.', 'en' => 'At least one language must be enabled. Users on a disabled language will be switched automatically.', 'de' => 'Mindestens eine Sprache muss aktiviert sein. Benutzer mit einer deaktivierten Sprache werden automatisch umgeschaltet.'],
 
+    'login_methods' => ['ar' => 'طرق تسجيل الدخول', 'en' => 'Login Methods', 'de' => 'Anmeldemethoden'],
+    'login_methods_description' => ['ar' => 'اختر الطرق المتاحة لتسجيل دخول الطلاب', 'en' => 'Choose which methods students can use to log in', 'de' => 'Wählen Sie, welche Methoden Studenten zur Anmeldung verwenden können'],
+    'login_method_both' => ['ar' => 'البريد الإلكتروني وكود الطالب', 'en' => 'Email and Student Code', 'de' => 'E-Mail und Matrikelnummer'],
+    'login_method_email_only' => ['ar' => 'البريد الإلكتروني فقط', 'en' => 'Email Only', 'de' => 'Nur E-Mail'],
+    'login_method_student_code_only' => ['ar' => 'كود الطالب فقط', 'en' => 'Student Code Only', 'de' => 'Nur Matrikelnummer'],
+    'email_placeholder' => ['ar' => 'أدخل بريدك الإلكتروني', 'en' => 'Enter your email', 'de' => 'E-Mail eingeben'],
+    'student_code_placeholder' => ['ar' => 'أدخل كود الطالب', 'en' => 'Enter your student code', 'de' => 'Matrikelnummer eingeben'],
+    'login_method_not_allowed' => ['ar' => 'طريقة تسجيل الدخول هذه غير متاحة', 'en' => 'This login method is not available', 'de' => 'Diese Anmeldemethode ist nicht verfügbar'],
+
     'transfer_leadership' => ['ar' => 'نقل القيادة', 'en' => 'Transfer Leadership', 'de' => 'Leitung übertragen'],
     'confirm_transfer_leadership' => ['ar' => 'هل أنت متأكد من نقل قيادة الفريق إلى', 'en' => 'Are you sure you want to transfer leadership to', 'de' => 'Sind Sie sicher, dass Sie die Leitung übertragen möchten an'],
     'leader_transfer_disabled' => ['ar' => 'نقل القيادة معطل حالياً من قبل المشرف', 'en' => 'Leadership transfer is currently disabled by the administrator', 'de' => 'Die Leiterübertragung ist derzeit vom Administrator deaktiviert'],

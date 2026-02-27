@@ -27,8 +27,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($selectedLangs)) $selectedLangs = ['ar']; // fallback
     $enabledLanguages = implode(',', $selectedLangs);
 
-    $stmt = $pdo->prepare("UPDATE settings SET registration_open = ?, email_verification_required = ?, min_team_size = ?, max_team_size = ?, student_project_creation = ?, show_reviewer_name = ?, leader_transfer = ?, enabled_languages = ? WHERE id = 1");
-    $stmt->execute([$regOpen, $emailVerReq, $minTeam, $maxTeam, $studentCreation, $showReviewerName, $leaderTransfer, $enabledLanguages]);
+    // Login methods
+    $loginMethods = $_POST['login_methods'] ?? 'both';
+    if (!in_array($loginMethods, ['both', 'email_only', 'student_code_only'])) $loginMethods = 'both';
+
+    $stmt = $pdo->prepare("UPDATE settings SET registration_open = ?, email_verification_required = ?, min_team_size = ?, max_team_size = ?, student_project_creation = ?, show_reviewer_name = ?, leader_transfer = ?, enabled_languages = ?, login_methods = ? WHERE id = 1");
+    $stmt->execute([$regOpen, $emailVerReq, $minTeam, $maxTeam, $studentCreation, $showReviewerName, $leaderTransfer, $enabledLanguages, $loginMethods]);
     $settings['registration_open'] = $regOpen;
     $settings['email_verification_required'] = $emailVerReq;
     $settings['min_team_size'] = $minTeam;
@@ -37,6 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $settings['show_reviewer_name'] = $showReviewerName;
     $settings['leader_transfer'] = $leaderTransfer;
     $settings['enabled_languages'] = $enabledLanguages;
+    $settings['login_methods'] = $loginMethods;
     $message = __('settings_saved');
 }
 
@@ -155,6 +160,30 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             </div>
                             <?php endforeach; ?>
                             <small class="text-muted"><i class="bi bi-info-circle me-1"></i><?= __('enabled_languages_hint') ?></small>
+                        </div>
+
+                        <!-- Login Methods -->
+                        <div class="p-3 bg-light rounded mb-3">
+                            <h6 class="mb-2"><i class="bi bi-box-arrow-in-right me-1"></i><?= __('login_methods') ?></h6>
+                            <small class="text-muted d-block mb-3">
+                                <?= __('login_methods_description') ?>
+                            </small>
+                            <?php $currentLoginMethod = $settings['login_methods'] ?? 'both'; ?>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="login_methods" id="login_both" value="both"
+                                       <?= $currentLoginMethod === 'both' ? 'checked' : '' ?>>
+                                <label class="form-check-label" for="login_both"><?= __('login_method_both') ?></label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="login_methods" id="login_email_only" value="email_only"
+                                       <?= $currentLoginMethod === 'email_only' ? 'checked' : '' ?>>
+                                <label class="form-check-label" for="login_email_only"><?= __('login_method_email_only') ?></label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="login_methods" id="login_student_code_only" value="student_code_only"
+                                       <?= $currentLoginMethod === 'student_code_only' ? 'checked' : '' ?>>
+                                <label class="form-check-label" for="login_student_code_only"><?= __('login_method_student_code_only') ?></label>
+                            </div>
                         </div>
 
                         <!-- Team Size Settings -->

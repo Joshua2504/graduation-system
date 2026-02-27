@@ -9,12 +9,20 @@ CREATE TABLE IF NOT EXISTS `settings` (
   `show_reviewer_name` TINYINT(1) NOT NULL DEFAULT 0,
   `leader_transfer` TINYINT(1) NOT NULL DEFAULT 1,
   `enabled_languages` VARCHAR(50) NOT NULL DEFAULT 'ar',
+  `login_methods` VARCHAR(20) NOT NULL DEFAULT 'both',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `settings` (`id`, `registration_open`, `email_verification_required`, `min_team_size`, `max_team_size`, `student_project_creation`, `show_reviewer_name`, `leader_transfer`, `enabled_languages`)
-VALUES (1, 1, 1, 2, 7, 1, 0, 1, 'ar')
+INSERT INTO `settings` (`id`, `registration_open`, `email_verification_required`, `min_team_size`, `max_team_size`, `student_project_creation`, `show_reviewer_name`, `leader_transfer`, `enabled_languages`, `login_methods`)
+VALUES (1, 1, 1, 2, 7, 1, 0, 1, 'ar', 'both')
 ON DUPLICATE KEY UPDATE `id` = `id`;
+
+-- Migration: add login_methods column if missing
+SET @col_exists = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'settings' AND COLUMN_NAME = 'login_methods');
+SET @sql = IF(@col_exists = 0, 'ALTER TABLE `settings` ADD COLUMN `login_methods` VARCHAR(20) NOT NULL DEFAULT \'both\' AFTER `enabled_languages`', 'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 -- ─── Users (with profile fields) ───
 CREATE TABLE IF NOT EXISTS `users` (
