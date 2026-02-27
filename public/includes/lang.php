@@ -14,13 +14,17 @@ $_isDemoMode = filter_var($_ENV['DEMO_MODE'] ?? getenv('DEMO_MODE') ?: 'false', 
 
 // Load enabled languages from settings (DB)
 $enabledLangsStr = null;
+$defaultLangFromDB = null;
 try {
     if (function_exists('getDB')) {
         $pdo = getDB();
-        $stmt = $pdo->query("SELECT enabled_languages FROM settings WHERE id = 1");
+        $stmt = $pdo->query("SELECT enabled_languages, default_language FROM settings WHERE id = 1");
         $row = $stmt->fetch();
         if ($row && !empty($row['enabled_languages'])) {
             $enabledLangsStr = $row['enabled_languages'];
+        }
+        if ($row && !empty($row['default_language'])) {
+            $defaultLangFromDB = $row['default_language'];
         }
     }
 } catch (Exception $e) {
@@ -34,6 +38,11 @@ $supportedLangs = $enabledLangsStr
     : $defaultLangs;
 if (empty($supportedLangs)) $supportedLangs = ['ar'];
 
+// Determine default language: use DB setting if enabled, otherwise first enabled language
+$defaultLang = ($defaultLangFromDB && in_array($defaultLangFromDB, $supportedLangs))
+    ? $defaultLangFromDB
+    : $supportedLangs[0];
+
 // Handle language switch
 if (isset($_GET['lang']) && in_array($_GET['lang'], $supportedLangs)) {
     $_SESSION['lang'] = $_GET['lang'];
@@ -46,7 +55,7 @@ if (isset($_SESSION['lang']) && !in_array($_SESSION['lang'], $supportedLangs)) {
 
 // Detect browser language if no session language is set
 if (!isset($_SESSION['lang'])) {
-    $browserLang = $supportedLangs[0]; // fallback to first enabled
+    $browserLang = $defaultLang; // fallback to default language from settings
     if (!empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
         $acceptLang = strtolower($_SERVER['HTTP_ACCEPT_LANGUAGE']);
         $bestPos = PHP_INT_MAX;
@@ -311,6 +320,9 @@ $translations = [
     'enabled_languages' => ['ar' => 'اللغات المتاحة', 'en' => 'Enabled Languages', 'de' => 'Aktivierte Sprachen'],
     'enabled_languages_description' => ['ar' => 'اختر اللغات التي يمكن للمستخدمين التبديل بينها في الواجهة', 'en' => 'Choose which languages users can switch between in the interface', 'de' => 'Wählen Sie, zwischen welchen Sprachen die Benutzer in der Oberfläche wechseln können'],
     'enabled_languages_hint' => ['ar' => 'يجب تفعيل لغة واحدة على الأقل. سيتم تحويل المستخدمين الذين يستخدمون لغة معطلة تلقائياً.', 'en' => 'At least one language must be enabled. Users on a disabled language will be switched automatically.', 'de' => 'Mindestens eine Sprache muss aktiviert sein. Benutzer mit einer deaktivierten Sprache werden automatisch umgeschaltet.'],
+
+    'default_language' => ['ar' => 'اللغة الافتراضية', 'en' => 'Default Language', 'de' => 'Standardsprache'],
+    'default_language_description' => ['ar' => 'اللغة التي تُعرض للمستخدمين الجدد عند زيارتهم الأولى', 'en' => 'The language shown to new users on their first visit', 'de' => 'Die Sprache, die neuen Benutzern beim ersten Besuch angezeigt wird'],
 
     'login_methods' => ['ar' => 'طرق تسجيل الدخول', 'en' => 'Login Methods', 'de' => 'Anmeldemethoden'],
     'login_methods_description' => ['ar' => 'اختر الطرق المتاحة لتسجيل دخول الطلاب', 'en' => 'Choose which methods students can use to log in', 'de' => 'Wählen Sie, welche Methoden Studenten zur Anmeldung verwenden können'],

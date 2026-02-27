@@ -70,6 +70,13 @@ if ($method === 'POST') {
         $params[] = implode(',', $valid);
     }
 
+    if (isset($input['default_language'])) {
+        $allLangs = ['ar', 'en', 'de'];
+        $val = in_array($input['default_language'], $allLangs) ? $input['default_language'] : 'ar';
+        $updates[] = "default_language = ?";
+        $params[] = $val;
+    }
+
     if (isset($input['login_methods'])) {
         $allowed = ['both', 'email_only', 'student_code_only'];
         $val = in_array($input['login_methods'], $allowed) ? $input['login_methods'] : 'both';
