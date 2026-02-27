@@ -348,4 +348,16 @@ async function resetPassword() {
 }
 </script>
 
+<script>
+// Fix dropdown clipping inside .table-responsive
+document.querySelectorAll('.table-responsive .dropdown').forEach(function(dd) {
+    dd.addEventListener('show.bs.dropdown', function() {
+        this.closest('.table-responsive').style.overflow = 'visible';
+    });
+    dd.addEventListener('hide.bs.dropdown', function() {
+        this.closest('.table-responsive').style.overflow = '';
+    });
+});
+</script>
+
 <?php require_once dirname(__DIR__) . '/includes/footer.php'; ?>
