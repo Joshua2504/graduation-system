@@ -19,9 +19,15 @@ function sanitizeHtml(?string $html): string {
     if (empty($html)) return '';
     $allowed = '<b><i><u><strong><em><ul><ol><li><a><br><p><div><span><img>';
     $clean = strip_tags(trim($html), $allowed);
-    // Remove event handlers and javascript: URLs
+    // Remove event handlers (both quoted and unquoted values)
     $clean = preg_replace('/\bon\w+\s*=\s*["\'][^"\']*["\']\s*/i', '', $clean);
-    $clean = preg_replace('/href\s*=\s*["\']javascript:[^"\']*["\']\s*/i', 'href="#"', $clean);
+    $clean = preg_replace('/\bon\w+\s*=\s*[^\s>]+/i', '', $clean);
+    // Block dangerous URI schemes in href (javascript:, data:, vbscript:)
+    $clean = preg_replace('/href\s*=\s*["\']\s*(javascript|data|vbscript):[^"\']*["\']\s*/i', 'href="#"', $clean);
+    $clean = preg_replace('/href\s*=\s*(javascript|data|vbscript):[^\s>]*/i', 'href="#"', $clean);
+    // Remove style attributes to prevent CSS injection/UI redressing
+    $clean = preg_replace('/\bstyle\s*=\s*["\'][^"\']*["\']\s*/i', '', $clean);
+    $clean = preg_replace('/\bstyle\s*=\s*[^\s>]+/i', '', $clean);
     // Only allow img src from our file API
     $clean = preg_replace_callback('/<img\s[^>]*>/i', function($match) {
         $tag = $match[0];
@@ -388,6 +394,17 @@ function validateNationalId(string $nationalId): ?string {
  * @return array Response array with success/error
  */
 function handleFileUpload(int $userId, string $type, array $file, bool $checkProfile = true): array {
+    // Whitelist allowed type values to prevent SQL injection via dynamic column name
+    $allowedTypes = [
+        'card'            => 'card_image',
+        'national_id'     => 'national_id_image',
+        'receipt'         => 'receipt_image',
+        'profile_picture' => 'profile_picture',
+    ];
+    if (!isset($allowedTypes[$type])) {
+        return ['error' => 'نوع الملف غير صالح', 'code' => 400];
+    }
+
     $validationError = validateUploadedFile($file);
     if ($validationError) {
         return ['error' => $validationError, 'code' => 400];
@@ -402,7 +419,7 @@ function handleFileUpload(int $userId, string $type, array $file, bool $checkPro
     $mime = $finfo->file($file['tmp_name']);
     $ext = $mime === 'image/png' ? 'png' : 'jpg';
 
-    $dbField = $type === 'profile_picture' ? 'profile_picture' : $type . '_image';
+    $dbField = $allowedTypes[$type];
     $filename = $userId . '_' . $type . '.' . $ext;
     $destPath = $uploadDir . '/' . $filename;
 

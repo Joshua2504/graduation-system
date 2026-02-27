@@ -281,6 +281,17 @@ if ($method === 'PATCH') {
             jsonResponse(['error' => 'معرف الطالب مطلوب'], 400);
         }
         
+        // Verify the user exists, is a student, and is enabled
+        $stmtCheck = $pdo->prepare("SELECT id, role, account_enabled FROM users WHERE id = ?");
+        $stmtCheck->execute([$studentId]);
+        $targetUser = $stmtCheck->fetch();
+        if (!$targetUser || $targetUser['role'] !== 'student') {
+            jsonResponse(['error' => 'الطالب غير موجود'], 404);
+        }
+        if (!$targetUser['account_enabled']) {
+            jsonResponse(['error' => 'حساب الطالب معطل'], 400);
+        }
+        
         // Check if already a member
         if (isProjectMember($projectId, $studentId)) {
             jsonResponse(['error' => 'الطالب عضو بالفعل في هذا المشروع'], 400);
@@ -313,6 +324,11 @@ if ($method === 'PATCH') {
             jsonResponse(['error' => 'معرف الطالب مطلوب'], 400);
         }
         
+        // Prevent removing the project leader
+        if (isProjectLeader($projectId, $studentId)) {
+            jsonResponse(['error' => 'لا يمكن إزالة قائد الفريق — قم بتغيير القائد أولاً'], 400);
+        }
+        
         $stmt = $pdo->prepare("DELETE FROM project_members WHERE project_id = ? AND user_id = ?");
         $stmt->execute([$projectId, $studentId]);
         
@@ -327,10 +343,28 @@ if ($method === 'PATCH') {
             jsonResponse(['error' => 'معرف الطالب مطلوب'], 400);
         }
         
-        // Demote current leader
-        $pdo->prepare("UPDATE project_members SET role = 'member' WHERE project_id = ? AND role = 'leader'")->execute([$projectId]);
-        // Promote new leader
-        $pdo->prepare("UPDATE project_members SET role = 'leader' WHERE project_id = ? AND user_id = ?")->execute([$projectId, $studentId]);
+        // Verify the target is actually a member of this project
+        if (!isProjectMember($projectId, $studentId)) {
+            jsonResponse(['error' => 'الطالب ليس عضواً في هذا المشروع'], 400);
+        }
+        
+        // Use a transaction to prevent leaving the project without a leader
+        $pdo->beginTransaction();
+        try {
+            // Demote current leader
+            $pdo->prepare("UPDATE project_members SET role = 'member' WHERE project_id = ? AND role = 'leader'")->execute([$projectId]);
+            // Promote new leader
+            $stmt = $pdo->prepare("UPDATE project_members SET role = 'leader' WHERE project_id = ? AND user_id = ?");
+            $stmt->execute([$projectId, $studentId]);
+            if ($stmt->rowCount() === 0) {
+                $pdo->rollBack();
+                jsonResponse(['error' => 'فشل في تغيير القائد'], 500);
+            }
+            $pdo->commit();
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
         
         jsonResponse(['success' => true, 'message' => 'تم تغيير قائد الفريق']);
     }

@@ -30,7 +30,7 @@ if (!$project) {
     jsonResponse(['error' => 'المشروع غير موجود'], 404);
 }
 
-// Authorization: doctor can upload to any project; student must be leader + draft/rejected
+// Authorization: doctor/admin can upload to any project; student must be leader + draft/rejected
 $role = current_role();
 if ($role === 'student') {
     $userId = current_user_id();
@@ -40,6 +40,8 @@ if ($role === 'student') {
     if (!in_array($project['status'], ['draft', 'rejected'])) {
         jsonResponse(['error' => 'لا يمكن رفع الملفات في الحالة الحالية'], 400);
     }
+} elseif ($role !== 'doctor' && $role !== 'admin') {
+    jsonResponse(['error' => 'غير مصرح بالوصول'], 403);
 }
 
 if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {

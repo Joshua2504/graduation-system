@@ -12,8 +12,22 @@ header('Content-Type: application/json; charset=utf-8');
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
+    // Public settings needed by login/register pages (safe subset only)
     $settings = getSettings();
-    jsonResponse($settings);
+    $publicSettings = [
+        'registration_open' => $settings['registration_open'] ?? 1,
+        'min_team_size' => $settings['min_team_size'] ?? 2,
+        'max_team_size' => $settings['max_team_size'] ?? 7,
+        'login_methods' => $settings['login_methods'] ?? 'both',
+        'enabled_languages' => $settings['enabled_languages'] ?? 'ar',
+        'default_language' => $settings['default_language'] ?? 'ar',
+        'profile_pictures_enabled' => $settings['profile_pictures_enabled'] ?? 0,
+    ];
+    // Authenticated users with admin/doctor role get full settings
+    if (is_logged_in() && is_admin_or_doctor()) {
+        jsonResponse($settings);
+    }
+    jsonResponse($publicSettings);
 }
 
 if ($method === 'POST') {
