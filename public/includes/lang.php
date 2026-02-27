@@ -97,6 +97,13 @@ $translations = [
     'register_title' => ['ar' => 'تسجيل حساب جديد', 'en' => 'Create Account', 'de' => 'Konto erstellen'],
     'no_account' => ['ar' => 'ليس لديك حساب؟', 'en' => "Don't have an account?", 'de' => 'Noch kein Konto?'],
     'has_account' => ['ar' => 'لديك حساب بالفعل؟', 'en' => 'Already have an account?', 'de' => 'Bereits ein Konto?'],
+
+    // Initial setup (first user becomes doctor)
+    'initial_setup_title' => ['ar' => 'إعداد النظام', 'en' => 'System Setup', 'de' => 'Systemeinrichtung'],
+    'initial_setup_description' => ['ar' => 'أنشئ حساب المشرف الأول لبدء استخدام النظام', 'en' => 'Create the first professor account to start using the system', 'de' => 'Erstellen Sie das erste Professorenkonto, um das System zu nutzen'],
+    'initial_setup_submit' => ['ar' => 'إنشاء حساب المشرف', 'en' => 'Create Professor Account', 'de' => 'Professorenkonto erstellen'],
+    'initial_setup_redirect' => ['ar' => 'يرجى إنشاء حساب المشرف أولاً', 'en' => 'Please create the professor account first', 'de' => 'Bitte erstellen Sie zuerst das Professorenkonto'],
+
     'registration_closed' => ['ar' => 'تسجيل مشاريع التخرج مغلق حالياً', 'en' => 'Graduation project registration is currently closed', 'de' => 'Die Registrierung für Abschlussprojekte ist derzeit geschlossen'],
     'invalid_credentials' => ['ar' => 'بيانات الدخول غير صحيحة', 'en' => 'Invalid email/student code or password', 'de' => 'Ungültige E-Mail/Matrikelnummer oder Passwort'],
     'email_or_code' => ['ar' => 'البريد الإلكتروني أو كود الطالب', 'en' => 'Email or Student Code', 'de' => 'E-Mail oder Matrikelnummer'],

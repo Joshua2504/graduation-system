@@ -4,11 +4,19 @@
  */
 require_once __DIR__ . '/includes/bootstrap.php';
 require_once __DIR__ . '/includes/mailer.php';
-require_once __DIR__ . '/includes/demo.php';
 
 // If already logged in, redirect
 if (is_logged_in()) {
     redirect('/');
+}
+
+// If no users exist and not in demo mode, redirect to initial setup
+if (!isDemoMode()) {
+    $pdo = getDB();
+    $userCount = (int)$pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
+    if ($userCount === 0) {
+        redirect('/register');
+    }
 }
 
 $error = '';
@@ -207,17 +215,21 @@ require_once __DIR__ . '/includes/header.php';
                         </button>
                         <?php
                         $langLabels = ['ar' => 'العربية', 'en' => 'English', 'de' => 'Deutsch'];
+                        global $supportedLangs;
+                        $activeLangLabels = array_intersect_key($langLabels, array_flip($supportedLangs ?? ['ar']));
                         ?>
+                        <?php if (count($activeLangLabels) > 1): ?>
                         <div class="btn-group">
                             <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-translate me-1"></i><?= $langLabels[getLang()] ?>
+                                <i class="bi bi-translate me-1"></i><?= $activeLangLabels[getLang()] ?? reset($activeLangLabels) ?>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <?php foreach ($langLabels as $code => $label): ?>
+                                <?php foreach ($activeLangLabels as $code => $label): ?>
                                     <li><a class="dropdown-item <?= getLang() === $code ? 'active' : '' ?>" href="?lang=<?= $code ?>"><?= $label ?></a></li>
                                 <?php endforeach; ?>
                             </ul>
                         </div>
+                        <?php endif; ?>
                     </div>
 
                     <!-- Mobile-only intro -->

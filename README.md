@@ -36,11 +36,13 @@
 - **Random passwords** — generated on first boot and regenerated on each reset; displayed on the login page
 - **Auto-reset** — 30-minute countdown timer starts after any login; resets all data to seed state
 - **Countdown banner** — live timer above the navbar shows remaining time before reset
-- **Seed users** — 7 pre-created accounts (1 doctor + 1 test student + 5 demo students) survive every reset
-- **Seed projects** — 2 pre-created projects survive every reset:
+- **Seed users** — 6 pre-created accounts (1 doctor + 5 demo students) created automatically on first request
+- **Seed projects** — 2 pre-created projects:
   - 📚 *نظام إدارة المكتبات* (Library Management System) — accepted, 3 members (students 1-3)
   - 🏋️ *تطبيق تتبع اللياقة البدنية* (Fitness Tracking App) — under review, 2 members (students 4-5)
+- **All languages enabled** — Arabic, English, and German are all available in demo mode
 - Enable with `DEMO_MODE=true` in `.env`
+- No demo accounts or content exist when demo mode is disabled
 
 ### General
 - 🌍 Multilingual: Arabic (RTL), English (LTR) & German (LTR) — default language auto-detected from browser; switch via navbar dropdown- 🌙 Dark mode — toggle available on login/register pages and in the navbar; preference saved in browser- � User dropdown menu — click username in navbar for profile & logout
@@ -87,15 +89,15 @@ docker compose up --build -d
 open http://localhost:8642
 ```
 
-The database schema and seed data are applied automatically on first run.
+The database schema is applied automatically on first run.
 
-### Default Credentials
+### Initial Setup (Production)
 
-| Role | Email | Password |
-|------|-------|----------|
-| Professor | `doctor@treudler.net` | `doctor123` |
-| Student | `student@treudler.net` | `student123` |
-| Demo Student 1–5 | `student1@treudler.net` … `student5@treudler.net` | *random — shown on login page* |
+When `DEMO_MODE=false` (default), the first user to register becomes a **professor** (doctor). Navigate to the app after starting it and you will be guided through the initial setup wizard to create the professor account.
+
+### Demo Mode
+
+With `DEMO_MODE=true`, demo accounts and sample projects are seeded automatically on first request. See the **Demo Mode** section above for details.
 
 ---
 
@@ -322,6 +324,7 @@ Container names are derived from `COMPOSE_PROJECT_NAME` (e.g. `graduation-system
 - Upload limit: 50MB per file / 55MB POST
 - Apache `mod_rewrite` enabled for clean URLs (no `.php` extension in browser)
 - Schema auto-applied on first database initialization
+- Demo seed data created automatically via PHP when `DEMO_MODE=true` (no seed data in SQL for non-demo mode)
 - Health check on MariaDB before app container starts
 
 ### Common Commands

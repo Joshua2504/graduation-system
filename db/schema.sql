@@ -112,57 +112,6 @@ CREATE TABLE IF NOT EXISTS `project_reviews` (
   CONSTRAINT `fk_pr_reviewer` FOREIGN KEY (`reviewer_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ─── Seed: Doctor account (password: doctor123) ───
-INSERT INTO `users` (`name`, `email`, `password`, `role`, `email_verified`) VALUES
-('Doctor', 'doctor@treudler.net', '$2y$10$1hH9/Y0Noq//YW5rA9Xwbu5K9yPtX8VlbYXKqiwlZa77.LxsmGHHy', 'doctor', 1)
-ON DUPLICATE KEY UPDATE `id` = `id`;
-
--- ─── Seed: Demo student accounts (password: student123) ───
-INSERT INTO `users` (`name`, `email`, `password`, `student_code`, `role`, `email_verified`) VALUES
-('Student 1', 'student1@treudler.net', '$2y$10$yqqDmhPnvBeLXswbIx3dfepMRnibuYMv/UuUb8hp8T3NAWn0yNepO', '001', 'student', 1)
-ON DUPLICATE KEY UPDATE `id` = `id`;
-INSERT INTO `users` (`name`, `email`, `password`, `student_code`, `role`, `email_verified`) VALUES
-('Student 2', 'student2@treudler.net', '$2y$10$yqqDmhPnvBeLXswbIx3dfepMRnibuYMv/UuUb8hp8T3NAWn0yNepO', '002', 'student', 1)
-ON DUPLICATE KEY UPDATE `id` = `id`;
-INSERT INTO `users` (`name`, `email`, `password`, `student_code`, `role`, `email_verified`) VALUES
-('Student 3', 'student3@treudler.net', '$2y$10$yqqDmhPnvBeLXswbIx3dfepMRnibuYMv/UuUb8hp8T3NAWn0yNepO', '003', 'student', 1)
-ON DUPLICATE KEY UPDATE `id` = `id`;
-INSERT INTO `users` (`name`, `email`, `password`, `student_code`, `role`, `email_verified`) VALUES
-('Student 4', 'student4@treudler.net', '$2y$10$yqqDmhPnvBeLXswbIx3dfepMRnibuYMv/UuUb8hp8T3NAWn0yNepO', '004', 'student', 1)
-ON DUPLICATE KEY UPDATE `id` = `id`;
-INSERT INTO `users` (`name`, `email`, `password`, `student_code`, `role`, `email_verified`) VALUES
-('Student 5', 'student5@treudler.net', '$2y$10$yqqDmhPnvBeLXswbIx3dfepMRnibuYMv/UuUb8hp8T3NAWn0yNepO', '005', 'student', 1)
-ON DUPLICATE KEY UPDATE `id` = `id`;
-
--- ─── Seed: Demo projects ───
-INSERT INTO `projects` (`title`, `type`, `description`, `join_code`, `status`, `group_number`, `submission_date`, `reviewed_by`)
-SELECT 'Library Management System', 'Web Application',
-       'A comprehensive library management system that allows registering books and members, handling borrowing and return operations, and generating periodic reports. The system includes a user-friendly interface for patrons and an advanced admin panel for librarians.',
-       'DEMO0001', 'accepted', 1, NOW(),
-       (SELECT `id` FROM `users` WHERE `email` = 'doctor@treudler.net' LIMIT 1)
-FROM dual WHERE NOT EXISTS (SELECT 1 FROM `projects` WHERE `join_code` = 'DEMO0001');
-
-INSERT INTO `projects` (`title`, `type`, `description`, `join_code`, `status`, `submission_date`)
-SELECT 'Fitness Tracking App', 'Mobile Application',
-       'A smartphone application that helps users track their physical activity, log workouts, count calories, and monitor progress toward their health goals.',
-       'DEMO0002', 'under_review', NOW()
-FROM dual WHERE NOT EXISTS (SELECT 1 FROM `projects` WHERE `join_code` = 'DEMO0002');
-
--- ─── Seed: Demo project members ───
--- Project 1 (Library System): student1 = leader, student2 & student3 = members
-INSERT IGNORE INTO `project_members` (`project_id`, `user_id`, `role`)
-SELECT p.id, u.id, 'leader' FROM `projects` p, `users` u WHERE p.join_code = 'DEMO0001' AND u.email = 'student1@treudler.net';
-INSERT IGNORE INTO `project_members` (`project_id`, `user_id`, `role`)
-SELECT p.id, u.id, 'member' FROM `projects` p, `users` u WHERE p.join_code = 'DEMO0001' AND u.email = 'student2@treudler.net';
-INSERT IGNORE INTO `project_members` (`project_id`, `user_id`, `role`)
-SELECT p.id, u.id, 'member' FROM `projects` p, `users` u WHERE p.join_code = 'DEMO0001' AND u.email = 'student3@treudler.net';
-
--- Project 2 (Fitness App): student4 = leader, student5 = member
-INSERT IGNORE INTO `project_members` (`project_id`, `user_id`, `role`)
-SELECT p.id, u.id, 'leader' FROM `projects` p, `users` u WHERE p.join_code = 'DEMO0002' AND u.email = 'student4@treudler.net';
-INSERT IGNORE INTO `project_members` (`project_id`, `user_id`, `role`)
-SELECT p.id, u.id, 'member' FROM `projects` p, `users` u WHERE p.join_code = 'DEMO0002' AND u.email = 'student5@treudler.net';
-
 -- ─── Migrations ───
 
 -- Add description column to projects (safe for existing databases)
@@ -230,4 +179,4 @@ CREATE TABLE IF NOT EXISTS `project_reviews` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ─── Migrations ───
-ALTER TABLE `settings` ADD COLUMN IF NOT EXISTS `enabled_languages` VARCHAR(50) NOT NULL DEFAULT 'ar,en,de' AFTER `leader_transfer`;
+ALTER TABLE `settings` ADD COLUMN IF NOT EXISTS `enabled_languages` VARCHAR(50) NOT NULL DEFAULT 'ar' AFTER `leader_transfer`;

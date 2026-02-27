@@ -100,6 +100,64 @@ function regenerateDemoPasswords(): array {
 }
 
 /**
+ * Ensure demo seed accounts and content exist in the database.
+ * Called on every page load when demo mode is active (idempotent).
+ */
+function ensureDemoSeeded(): void {
+    if (!isDemoMode()) return;
+    $pdo = getDB();
+
+    // Check if the doctor seed account already exists
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE email = ?");
+    $stmt->execute(['doctor@treudler.net']);
+    if ((int)$stmt->fetchColumn() > 0) return; // already seeded
+
+    // Seed demo user accounts with random passwords
+    foreach (DEMO_SEED_ACCOUNTS as $email => $meta) {
+        $plain = generateDemoPassword();
+        $hash = password_hash($plain, PASSWORD_BCRYPT);
+        $stmt = $pdo->prepare("INSERT IGNORE INTO users (name, email, password, student_code, role, email_verified) VALUES (?, ?, ?, ?, ?, 1)");
+        $stmt->execute([$meta['name'], $email, $hash, $meta['student_code'], $meta['role']]);
+    }
+
+    // Save generated credentials
+    regenerateDemoPasswords();
+
+    // Seed demo projects
+    $doctorId = $pdo->query("SELECT id FROM users WHERE email = 'doctor@treudler.net' LIMIT 1")->fetchColumn();
+
+    $stmt = $pdo->prepare("INSERT INTO projects (title, type, description, join_code, status, group_number, submission_date, reviewed_by)
+        SELECT 'Library Management System', 'Web Application',
+        'A comprehensive library management system that allows registering books and members, handling borrowing and return operations, and generating periodic reports. The system includes a user-friendly interface for patrons and an advanced admin panel for librarians.',
+        'DEMO0001', 'accepted', 1, NOW(), ?
+        FROM dual WHERE NOT EXISTS (SELECT 1 FROM projects WHERE join_code = 'DEMO0001')");
+    $stmt->execute([$doctorId ?: null]);
+
+    $pdo->exec("INSERT INTO projects (title, type, description, join_code, status, submission_date)
+        SELECT 'Fitness Tracking App', 'Mobile Application',
+        'A smartphone application that helps users track their physical activity, log workouts, count calories, and monitor progress toward their health goals.',
+        'DEMO0002', 'under_review', NOW()
+        FROM dual WHERE NOT EXISTS (SELECT 1 FROM projects WHERE join_code = 'DEMO0002')");
+
+    // Seed demo project members
+    $memberInserts = [
+        ['DEMO0001', 'student1@treudler.net', 'leader'],
+        ['DEMO0001', 'student2@treudler.net', 'member'],
+        ['DEMO0001', 'student3@treudler.net', 'member'],
+        ['DEMO0002', 'student4@treudler.net', 'leader'],
+        ['DEMO0002', 'student5@treudler.net', 'member'],
+    ];
+    $memberStmt = $pdo->prepare("INSERT IGNORE INTO project_members (project_id, user_id, role)
+        SELECT p.id, u.id, ? FROM projects p, users u WHERE p.join_code = ? AND u.email = ?");
+    foreach ($memberInserts as [$code, $email, $role]) {
+        $memberStmt->execute([$role, $code, $email]);
+    }
+
+    // Set enabled_languages to all for demo mode
+    $pdo->exec("UPDATE settings SET enabled_languages = 'ar,en,de' WHERE id = 1");
+}
+
+/**
  * Reset all demo data back to the seed state.
  * - Deletes all non-seed users, projects, invitations, members
  * - Resets settings to defaults
