@@ -9,7 +9,8 @@ if (is_impersonating()) {
     $returnTo = $_SESSION['impersonator_return_to'] ?? null;
     stop_impersonation();
     $role = $_SESSION['role'] ?? 'doctor';
-    if ($returnTo) {
+    $allowedReturnPaths = ['/admin/professors', '/admin/students', '/professor/students'];
+    if ($returnTo && in_array($returnTo, $allowedReturnPaths)) {
         header('Location: ' . $returnTo);
     } elseif ($role === 'admin') {
         header('Location: /admin/professors');

@@ -46,6 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($regOpen || $isInitialSetup)) {
             $stmt->execute([$name, $email, $hashedPassword]);
 
             $userId = (int)$pdo->lastInsertId();
+            session_regenerate_id(true);
             $_SESSION['user_id'] = $userId;
             $_SESSION['name'] = $name;
             $_SESSION['email'] = $email;
@@ -105,6 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($regOpen || $isInitialSetup)) {
                     } else {
                         // Email verification disabled — auto-verify and login
                         $pdo->prepare("UPDATE users SET email_verified = 1 WHERE id = ?")->execute([$userId]);
+                        session_regenerate_id(true);
                         $_SESSION['user_id'] = $userId;
                         $_SESSION['name'] = $name;
                         $_SESSION['email'] = $email;

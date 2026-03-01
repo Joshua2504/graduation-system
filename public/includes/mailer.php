@@ -17,6 +17,12 @@ require_once __DIR__ . '/db.php'; // ensures .env is loaded
  * @return bool           True if sent successfully
  */
 function sendMail(string $to, string $subject, string $body): bool {
+    // Reject email addresses containing CRLF to prevent SMTP header injection
+    if (preg_match('/[\r\n]/', $to)) {
+        error_log('[Mailer] Rejected email with CRLF characters: ' . addcslashes($to, "\r\n"));
+        return false;
+    }
+
     $host = $_ENV['MAIL_HOST'] ?? getenv('MAIL_HOST') ?: '';
     $port = (int)($_ENV['MAIL_PORT'] ?? getenv('MAIL_PORT') ?: 587);
     $user = $_ENV['MAIL_USER'] ?? getenv('MAIL_USER') ?: '';

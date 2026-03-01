@@ -261,12 +261,12 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                                 <?php if ($m['member_role'] !== 'leader'): ?>
                                                     <div class="d-flex align-items-center gap-1">
                                                         <?php if ($canTransferLeadership): ?>
-                                                            <button class="btn btn-sm btn-outline-primary" onclick="transferLeadership(<?= $m['id'] ?>, '<?= sanitize($m['name']) ?>')" title="<?= __('transfer_leadership') ?>">
+                                                            <button class="btn btn-sm btn-outline-primary" onclick="transferLeadership(<?= $m['id'] ?>, <?= htmlspecialchars(json_encode($m['name']), ENT_QUOTES, 'UTF-8') ?>)" title="<?= __('transfer_leadership') ?>">
                                                                 <i class="bi bi-star"></i>
                                                             </button>
                                                         <?php endif; ?>
                                                         <?php if ($isLeader && $project['status'] === 'draft'): ?>
-                                                            <button class="btn btn-sm btn-outline-danger" onclick="removeMember(<?= $m['id'] ?>, '<?= sanitize($m['name']) ?>')">
+                                                            <button class="btn btn-sm btn-outline-danger" onclick="removeMember(<?= $m['id'] ?>, <?= htmlspecialchars(json_encode($m['name']), ENT_QUOTES, 'UTF-8') ?>)">
                                                                 <i class="bi bi-x-lg"></i>
                                                             </button>
                                                         <?php endif; ?>

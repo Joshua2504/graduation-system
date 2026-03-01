@@ -230,7 +230,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                                 <i class="bi bi-star"></i>
                                             </button>
                                         <?php endif; ?>
-                                        <button class="btn btn-sm btn-outline-danger" onclick="removeMember(<?= $member['id'] ?>, '<?= sanitize($member['name']) ?>')" title="<?= __('remove_from_project') ?>">
+                                        <button class="btn btn-sm btn-outline-danger" onclick="removeMember(<?= $member['id'] ?>, <?= htmlspecialchars(json_encode($member['name']), ENT_QUOTES, 'UTF-8') ?>)" title="<?= __('remove_from_project') ?>">
                                             <i class="bi bi-person-x"></i>
                                         </button>
                                     </div>

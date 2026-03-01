@@ -91,6 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['resend_verification'
                     $resendEmail = $user['email'];
                 } else {
                     // Verification not required — allow login
+                    session_regenerate_id(true);
                     $_SESSION['user_id'] = $user['id'];
                     $_SESSION['name'] = $user['name'];
                     $_SESSION['email'] = $user['email'];
@@ -98,9 +99,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['resend_verification'
                     scheduleDemoReset();
                     $redir = $_SESSION['redirect_after_login'] ?? '/';
                     unset($_SESSION['redirect_after_login']);
+                    if (!str_starts_with($redir, '/') || str_starts_with($redir, '//')) $redir = '/';
                     redirect($redir);
                 }
             } else {
+                session_regenerate_id(true);
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['name'] = $user['name'];
                 $_SESSION['email'] = $user['email'];
@@ -108,6 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['resend_verification'
                 scheduleDemoReset();
                 $redir = $_SESSION['redirect_after_login'] ?? '/';
                 unset($_SESSION['redirect_after_login']);
+                if (!str_starts_with($redir, '/') || str_starts_with($redir, '//')) $redir = '/';
                 redirect($redir);
             }
         } else {

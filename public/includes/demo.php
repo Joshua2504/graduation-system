@@ -97,6 +97,7 @@ function regenerateDemoPasswords(): array {
     }
 
     file_put_contents(DEMO_CREDENTIALS_FILE, json_encode($credentials, JSON_UNESCAPED_UNICODE));
+    chmod(DEMO_CREDENTIALS_FILE, 0600);
     return $credentials;
 }
 
