@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS `projects` (
   `join_code` VARCHAR(8) NOT NULL,
   `submission_date` DATETIME DEFAULT NULL,
   `status` ENUM('draft','under_review','accepted','rejected') NOT NULL DEFAULT 'draft',
-  `group_number` INT DEFAULT NULL,
+  `group_number` VARCHAR(10) DEFAULT NULL,
   `doctor_note` TEXT DEFAULT NULL,
   `reviewed_by` INT DEFAULT NULL,
   `allow_resubmit` TINYINT(1) NOT NULL DEFAULT 1,
@@ -212,3 +212,22 @@ SET @sql = IF(@col_exists = 0, 'ALTER TABLE `settings` ADD COLUMN `default_langu
 PREPARE stmt FROM @sql;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
+
+-- Migrate group_number from INT to VARCHAR(10) if it's still INT (safe for existing databases)
+SET @is_int = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'projects' AND COLUMN_NAME = 'group_number' AND DATA_TYPE = 'int');
+SET @sql = IF(@is_int > 0, 'ALTER TABLE `projects` MODIFY COLUMN `group_number` VARCHAR(10) DEFAULT NULL', 'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Convert existing numeric group_numbers to WG-prefixed format
+UPDATE `projects` SET `group_number` = CONCAT('WG', LPAD(`group_number`, 2, '0')) WHERE `group_number` IS NOT NULL AND `group_number` REGEXP '^[0-9]+$';
+
+-- ─── Departments table ───
+CREATE TABLE IF NOT EXISTS `departments` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_dept_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

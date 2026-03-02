@@ -343,6 +343,11 @@ if ($method === 'PATCH') {
             jsonResponse(['error' => 'معرف الطالب مطلوب'], 400);
         }
         
+        // Block leadership transfer once project is submitted (not in draft)
+        if ($project['status'] !== 'draft') {
+            jsonResponse(['error' => __('leader_transfer_after_submit')], 400);
+        }
+        
         // Verify the target is actually a member of this project
         if (!isProjectMember($projectId, $studentId)) {
             jsonResponse(['error' => 'الطالب ليس عضواً في هذا المشروع'], 400);

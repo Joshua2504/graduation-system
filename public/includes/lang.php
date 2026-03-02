@@ -488,6 +488,23 @@ $translations = [
     // Misc
     'details' => ['ar' => 'التفاصيل', 'en' => 'Details', 'de' => 'Details'],
 
+    // Department management
+    'departments' => ['ar' => 'الأقسام', 'en' => 'Departments', 'de' => 'Abteilungen'],
+    'department_name' => ['ar' => 'اسم القسم', 'en' => 'Department Name', 'de' => 'Abteilungsname'],
+    'add_department' => ['ar' => 'إضافة قسم', 'en' => 'Add Department', 'de' => 'Abteilung hinzufügen'],
+    'edit_department' => ['ar' => 'تعديل القسم', 'en' => 'Edit Department', 'de' => 'Abteilung bearbeiten'],
+    'delete_department' => ['ar' => 'حذف القسم', 'en' => 'Delete Department', 'de' => 'Abteilung löschen'],
+    'select_department' => ['ar' => '-- اختر القسم --', 'en' => '-- Select Department --', 'de' => '-- Abteilung auswählen --'],
+    'department_exists' => ['ar' => 'هذا القسم موجود بالفعل', 'en' => 'This department already exists', 'de' => 'Diese Abteilung existiert bereits'],
+    'department_created' => ['ar' => 'تم إضافة القسم بنجاح', 'en' => 'Department created successfully', 'de' => 'Abteilung erfolgreich erstellt'],
+    'department_updated' => ['ar' => 'تم تعديل القسم بنجاح', 'en' => 'Department updated successfully', 'de' => 'Abteilung erfolgreich aktualisiert'],
+    'department_deleted' => ['ar' => 'تم حذف القسم بنجاح', 'en' => 'Department deleted successfully', 'de' => 'Abteilung erfolgreich gelöscht'],
+    'department_name_required' => ['ar' => 'اسم القسم مطلوب', 'en' => 'Department name is required', 'de' => 'Abteilungsname ist erforderlich'],
+    'confirm_delete_department' => ['ar' => 'هل أنت متأكد من حذف هذا القسم؟ سيتم إزالته من جميع المستخدمين.', 'en' => 'Are you sure you want to delete this department? It will be removed from all users.', 'de' => 'Sind Sie sicher, dass Sie diese Abteilung löschen möchten? Sie wird von allen Benutzern entfernt.'],
+    'departments_description' => ['ar' => 'إدارة الأقسام المتاحة للاختيار في الملف الشخصي', 'en' => 'Manage departments available for selection in profiles', 'de' => 'Abteilungen verwalten, die in Profilen zur Auswahl stehen'],
+    'no_departments' => ['ar' => 'لا توجد أقسام مضافة', 'en' => 'No departments added', 'de' => 'Keine Abteilungen hinzugefügt'],
+    'leader_transfer_after_submit' => ['ar' => 'لا يمكن نقل القيادة بعد تقديم المشروع', 'en' => 'Cannot transfer leadership after project submission', 'de' => 'Leiterübertragung nach Projekteinreichung nicht möglich'],
+
     // Admin
     'admin_dashboard' => ['ar' => 'لوحة تحكم المدير', 'en' => 'Admin Dashboard', 'de' => 'Admin-Dashboard'],
     'admin_profile_info' => ['ar' => 'يمكنك تعديل بياناتك الشخصية وصورتك من هنا', 'en' => 'You can edit your personal information and photo here', 'de' => 'Hier können Sie Ihre persönlichen Daten und Ihr Foto bearbeiten'],

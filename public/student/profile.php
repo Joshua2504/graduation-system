@@ -10,6 +10,7 @@ $userId = current_user_id();
 $user = getUserProfile($userId);
 $isAr = getLang() === 'ar';
 $governorates = getGovernorates();
+$departments = getDepartments();
 $profileComplete = isProfileComplete($user);
 
 $pageTitle = __('my_profile');
@@ -161,8 +162,12 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             <!-- Section/Department -->
                             <div class="col-md-6">
                                 <label class="form-label fw-bold"><?= __('section') ?> <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" name="section" id="section" 
-                                       value="<?= sanitize($user['section'] ?? '') ?>" required>
+                                <select class="form-select" name="section" id="section" required>
+                                    <option value=""><?= __('select_department') ?></option>
+                                    <?php foreach ($departments as $dept): ?>
+                                        <option value="<?= sanitize($dept['name']) ?>" <?= ($user['section'] ?? '') === $dept['name'] ? 'selected' : '' ?>><?= sanitize($dept['name']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
                             </div>
                         </div>
 

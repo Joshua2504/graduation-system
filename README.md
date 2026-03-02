@@ -19,7 +19,7 @@
 - **Submit for review** — once team meets size requirements and all member profiles are complete
 - **Rich description editor** — bold, italic, underline, lists, links, and image uploads (click, paste, or drag & drop)
 - **Track status** — view doctor feedback, review history timeline, resubmit if rejected (when allowed by professor)
-- **Transfer leadership** — team leaders can transfer leadership to another team member (when enabled by professor)
+- **Transfer leadership** — team leaders can transfer leadership to another team member (when enabled by professor, only while project is in draft status)
 
 ### Admin (Super Admin) Flow
 - **Dashboard** — overview with professor/student counts, project stats by status, recent professors and projects
@@ -27,6 +27,7 @@
 - **Manage students** — same student management interface as professors (list, edit profiles, verify emails, enable/disable, create accounts, impersonate)
 - **All projects** — read-only overview of all projects with tab filtering (All, Draft, Under Review, Accepted, Rejected)
 - **System settings** — toggle registration, email verification, min/max team size (2–10), student project creation, show reviewer name, leader transfer by team leader, login methods (email & student code / email only / student code only), language selection
+- **Department management** — add, edit, and delete departments; departments appear as selectable dropdowns in all profile forms
 - **Profile** — edit personal info (gender, phone, department) and upload a profile picture
 
 ### Professor (Doctor) Flow
@@ -233,7 +234,7 @@ graduation-system/
 | `type` | VARCHAR(255) | Project type/category |
 | `join_code` | VARCHAR(8) | Unique 6-char alphanumeric join code |
 | `status` | ENUM | `draft` → `under_review` → `accepted` / `rejected` |
-| `group_number` | INT | Auto-assigned on acceptance |
+| `group_number` | VARCHAR(10) | Auto-assigned alphanumeric code on acceptance (e.g. WG01) |
 | `doctor_note` | TEXT | Professor's feedback |
 | `allow_resubmit` | TINYINT(1) | Whether student can edit & resubmit after rejection |
 

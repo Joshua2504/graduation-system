@@ -39,7 +39,7 @@ foreach ($members as $m) {
 
 $canSubmit = $isLeader && $project['status'] === 'draft' && $memberCount >= $minSize && $allProfilesComplete;
 $canResubmit = $isLeader && $project['status'] === 'rejected' && !empty($project['allow_resubmit']) && $memberCount >= $minSize && $allProfilesComplete;
-$canTransferLeadership = $isLeader && !empty($settings['leader_transfer']) && $memberCount > 1;
+$canTransferLeadership = $isLeader && !empty($settings['leader_transfer']) && $memberCount > 1 && $project['status'] === 'draft';
 $reviews = getProjectReviews($projectId);
 
 $statusLabels = getStatusLabels();

@@ -15,6 +15,7 @@ $emailVerRequired = !empty($settings['email_verification_required']);
 $stmt = $pdo->query("SELECT id, name, email, student_code, gender, national_id, birth_date, governorate, address, phone, year, section, card_image, national_id_image, receipt_image, profile_picture, profile_completed, email_verified, account_enabled, created_at FROM users WHERE role = 'student' ORDER BY created_at DESC");
 $students = $stmt->fetchAll();
 $governorates = getGovernorates();
+$departments = getDepartments();
 
 $pageTitle = __('student_accounts');
 require_once dirname(__DIR__) . '/includes/header.php';
@@ -222,7 +223,12 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                         </div>
                         <div class="col-md-6">
                             <label class="form-label"><?= __('section') ?></label>
-                            <input type="text" class="form-control" id="edit_section">
+                            <select class="form-select" id="edit_section">
+                                <option value=""><?= __('select_department') ?></option>
+                                <?php foreach ($departments as $dept): ?>
+                                    <option value="<?= sanitize($dept['name']) ?>"><?= sanitize($dept['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                         <div class="col-12">
                             <label class="form-label"><?= __('address') ?></label>

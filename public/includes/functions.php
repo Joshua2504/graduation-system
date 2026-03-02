@@ -79,6 +79,15 @@ function redirect(string $url): void {
 }
 
 /**
+ * Get all departments from the database (for dropdown lists)
+ */
+function getDepartments(): array {
+    $pdo = getDB();
+    $stmt = $pdo->query("SELECT id, name FROM departments ORDER BY name ASC");
+    return $stmt->fetchAll();
+}
+
+/**
  * Get system settings
  */
 function getSettings(): array {
@@ -102,19 +111,27 @@ function generateJoinCode(): string {
 
 /**
  * Assign the next group number to an accepted project (transaction-safe)
+ * Generates a 4-char alphanumeric code like WG01, WG02, ..., WG99, then WG100, etc.
  */
-function assignGroupNumber(int $projectId): int {
+function assignGroupNumber(int $projectId): string {
     $pdo = getDB();
+    $prefix = 'WG';
     $pdo->beginTransaction();
     try {
-        $stmt = $pdo->query("SELECT COALESCE(MAX(group_number), 0) + 1 AS next_num FROM projects FOR UPDATE");
-        $nextNum = (int)$stmt->fetch()['next_num'];
+        $stmt = $pdo->query("SELECT group_number FROM projects WHERE group_number IS NOT NULL ORDER BY CAST(SUBSTRING(group_number, 3) AS UNSIGNED) DESC LIMIT 1 FOR UPDATE");
+        $lastCode = $stmt->fetchColumn();
+        if ($lastCode && preg_match('/^[A-Z]{2}(\d+)$/', $lastCode, $m)) {
+            $nextSeq = (int)$m[1] + 1;
+        } else {
+            $nextSeq = 1;
+        }
+        $groupNumber = $prefix . str_pad($nextSeq, 2, '0', STR_PAD_LEFT);
 
         $stmt = $pdo->prepare("UPDATE projects SET group_number = ?, status = 'accepted' WHERE id = ?");
-        $stmt->execute([$nextNum, $projectId]);
+        $stmt->execute([$groupNumber, $projectId]);
 
         $pdo->commit();
-        return $nextNum;
+        return $groupNumber;
     } catch (Exception $e) {
         $pdo->rollBack();
         throw $e;

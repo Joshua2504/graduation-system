@@ -131,7 +131,7 @@ function ensureDemoSeeded(): void {
     $stmt = $pdo->prepare("INSERT INTO projects (title, type, description, join_code, status, group_number, submission_date, reviewed_by)
         SELECT 'Library Management System', 'Web Application',
         'A comprehensive library management system that allows registering books and members, handling borrowing and return operations, and generating periodic reports. The system includes a user-friendly interface for patrons and an advanced admin panel for librarians.',
-        'DEMO0001', 'accepted', 1, NOW(), ?
+        'DEMO0001', 'accepted', 'WG01', NOW(), ?
         FROM dual WHERE NOT EXISTS (SELECT 1 FROM projects WHERE join_code = 'DEMO0001')");
     $stmt->execute([$doctorId ?: null]);
 
@@ -216,7 +216,7 @@ function performDemoReset(): void {
         $stmt = $pdo->prepare("INSERT INTO projects (title, type, description, join_code, status, group_number, submission_date, reviewed_by)
             VALUES ('Library Management System', 'Web Application',
             'A comprehensive library management system that allows registering books and members, handling borrowing and return operations, and generating periodic reports. The system includes a user-friendly interface for patrons and an advanced admin panel for librarians.',
-            'DEMO0001', 'accepted', 1, NOW(), ?)");
+            'DEMO0001', 'accepted', 'WG01', NOW(), ?)");
         $stmt->execute([$doctorId ?: null]);
         $proj1 = $pdo->lastInsertId();
 
