@@ -97,7 +97,7 @@ if (!empty($papersNotSubmitted)) {
 
 // If rejected, reset status (keep doctor_note for history)
 if ($project['status'] === 'rejected') {
-    $stmt = $pdo->prepare("UPDATE projects SET status = 'under_review', submission_date = NOW(), allow_resubmit = 1 WHERE id = ?");
+    $stmt = $pdo->prepare("UPDATE projects SET status = 'under_review', submission_date = NOW(), allow_resubmit = 0 WHERE id = ?");
     $stmt->execute([$projectId]);
 } else {
     $stmt = $pdo->prepare("UPDATE projects SET status = 'under_review', submission_date = NOW() WHERE id = ?");

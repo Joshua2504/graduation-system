@@ -84,6 +84,7 @@ if ($method === 'POST') {
         foreach ($students as $sid) {
             $sid = (int)$sid;
             if ($sid === 0) continue;
+            if (countUserProjects($sid) >= 1 || isStudentProjectLocked($sid)) continue;
             $memberRole = ($sid === $leaderId) ? 'leader' : 'member';
             $stmt = $pdo->prepare("INSERT IGNORE INTO project_members (project_id, user_id, role) VALUES (?, ?, ?)");
             $stmt->execute([$projectId, $sid, $memberRole]);
@@ -311,7 +312,15 @@ if ($method === 'PATCH') {
         if ($memberCount >= $maxSize) {
             jsonResponse(['error' => 'الفريق مكتمل العدد'], 400);
         }
-        
+
+        // Enforce 1-project limit
+        if (countUserProjects($studentId) >= 1) {
+            jsonResponse(['error' => 'الطالب مسجل بالفعل في مشروع آخر'], 403);
+        }
+        if (isStudentProjectLocked($studentId)) {
+            jsonResponse(['error' => 'تم قبول مشروع الطالب ولا يمكن إضافته لمشروع آخر'], 403);
+        }
+
         $role = 'member';
         if ($asLeader) {
             // Demote current leader if exists
