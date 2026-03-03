@@ -73,7 +73,16 @@ if ($method === 'PUT') {
     if (isset($input['year']) && !in_array($input['year'], ['1st', '2nd', '3rd', '4th'])) {
         jsonResponse(['error' => 'السنة الدراسية غير صالحة'], 400);
     }
-    
+
+    // Validate section is one of the existing departments
+    if (isset($input['section']) && !empty($input['section'])) {
+        $departments = getDepartments();
+        $deptNames = array_column($departments, 'name');
+        if (!in_array($input['section'], $deptNames)) {
+            jsonResponse(['error' => 'القسم المحدد غير صالح'], 400);
+        }
+    }
+
     // Check profile completion after update (students only)
     $profileComplete = 0;
     if ($role === 'student') {

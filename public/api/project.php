@@ -102,15 +102,24 @@ if ($method === 'POST') {
             jsonResponse(['error' => 'إنشاء المشاريع بواسطة الطلاب معطل حالياً'], 403);
         }
         $userId = current_user_id();
-        
+
+        // Students are limited to 1 project
+        if (countUserProjects($userId) >= 1) {
+            jsonResponse(['error' => 'لا يمكنك إنشاء أو الانضمام لأكثر من مشروع واحد'], 403);
+        }
+        // Locked if they have an accepted project
+        if (isStudentProjectLocked($userId)) {
+            jsonResponse(['error' => 'تم قبول مشروعك ولا يمكنك إنشاء أو الانضمام لمشروع آخر'], 403);
+        }
+
         $stmt = $pdo->prepare("INSERT INTO projects (title, type, description, join_code, status) VALUES (?, ?, ?, ?, 'draft')");
         $stmt->execute([$title, $type, $description ?: null, $joinCode]);
         $projectId = (int)$pdo->lastInsertId();
-        
+
         // Add creator as leader
         $stmt = $pdo->prepare("INSERT INTO project_members (project_id, user_id, role) VALUES (?, ?, 'leader')");
         $stmt->execute([$projectId, $userId]);
-        
+
         jsonResponse([
             'success' => true,
             'project_id' => $projectId,

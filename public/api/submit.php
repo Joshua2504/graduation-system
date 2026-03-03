@@ -60,7 +60,7 @@ foreach ($members as $member) {
     if (!isProfileComplete($member)) {
         $incompleteMembers[] = $member['name'];
     }
-    
+
     // Also check images exist on disk
     $userUploadDir = dirname(__DIR__) . '/uploads/user_' . $member['id'];
     foreach (['card_image', 'national_id_image', 'receipt_image'] as $imgField) {
@@ -77,6 +77,21 @@ if (!empty($incompleteMembers)) {
     jsonResponse([
         'error' => 'بعض أعضاء الفريق لم يكملوا ملفاتهم الشخصية',
         'incomplete_members' => $incompleteMembers
+    ], 400);
+}
+
+// Verify all members have submitted their papers
+$papersNotSubmitted = [];
+foreach ($members as $member) {
+    if (empty($member['paper_submitted'])) {
+        $papersNotSubmitted[] = $member['name'];
+    }
+}
+
+if (!empty($papersNotSubmitted)) {
+    jsonResponse([
+        'error' => 'لم يقم جميع أعضاء الفريق بتقديم أوراقهم بعد',
+        'members_not_submitted' => $papersNotSubmitted
     ], 400);
 }
 

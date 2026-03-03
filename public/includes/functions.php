@@ -162,7 +162,7 @@ function getProject(int $id): ?array {
 function getProjectMembers(int $projectId): array {
     $pdo = getDB();
     $stmt = $pdo->prepare("
-        SELECT u.*, pm.role AS member_role, pm.joined_at
+        SELECT u.*, pm.role AS member_role, pm.paper_submitted, pm.joined_at
         FROM project_members pm
         JOIN users u ON u.id = pm.user_id
         WHERE pm.project_id = ?
@@ -190,7 +190,7 @@ function getUserProjects(int $userId): array {
     $stmt = $pdo->prepare("
         SELECT p.*, pm.role AS my_role,
             (SELECT COUNT(*) FROM project_members WHERE project_id = p.id) AS member_count,
-            (SELECT u.name FROM project_members pm2 JOIN users u ON u.id = pm2.user_id 
+            (SELECT u.name FROM project_members pm2 JOIN users u ON u.id = pm2.user_id
              WHERE pm2.project_id = p.id AND pm2.role = 'leader' LIMIT 1) AS leader_name,
             reviewer.name AS reviewer_name
         FROM projects p
@@ -200,6 +200,55 @@ function getUserProjects(int $userId): array {
     ");
     $stmt->execute([$userId]);
     return $stmt->fetchAll();
+}
+
+/**
+ * Count how many projects a student is currently in (any status)
+ */
+function countUserProjects(int $userId): int {
+    $pdo = getDB();
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM project_members WHERE user_id = ?");
+    $stmt->execute([$userId]);
+    return (int)$stmt->fetchColumn();
+}
+
+/**
+ * Check if a student is locked from joining/creating new projects
+ * (they have an accepted project)
+ */
+function isStudentProjectLocked(int $userId): bool {
+    $pdo = getDB();
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*) FROM project_members pm
+        JOIN projects p ON p.id = pm.project_id
+        WHERE pm.user_id = ? AND p.status = 'accepted'
+    ");
+    $stmt->execute([$userId]);
+    return (int)$stmt->fetchColumn() > 0;
+}
+
+/**
+ * Check if all members of a project have submitted their papers
+ */
+function allMembersPapersSubmitted(int $projectId): bool {
+    $pdo = getDB();
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*) FROM project_members
+        WHERE project_id = ? AND paper_submitted = 0
+    ");
+    $stmt->execute([$projectId]);
+    return (int)$stmt->fetchColumn() === 0;
+}
+
+/**
+ * Get member's paper submission status for a project
+ */
+function getMemberPaperStatus(int $projectId, int $userId): bool {
+    $pdo = getDB();
+    $stmt = $pdo->prepare("SELECT paper_submitted FROM project_members WHERE project_id = ? AND user_id = ?");
+    $stmt->execute([$projectId, $userId]);
+    $row = $stmt->fetch();
+    return $row ? (bool)$row['paper_submitted'] : false;
 }
 
 /**

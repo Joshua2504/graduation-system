@@ -14,6 +14,11 @@ $profileComplete = isProfileComplete($user);
 $isAr = getLang() === 'ar';
 $settings = getSettings();
 
+// Check if student is locked (has accepted project) or already in a project
+$projectCount = countUserProjects($userId);
+$studentLocked = isStudentProjectLocked($userId);
+$canCreateOrJoin = $projectCount < 1 && !$studentLocked;
+
 $statusLabels = getStatusLabels();
 $statusColors = getStatusColors();
 
@@ -42,10 +47,14 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
         <div class="col-lg-8 mb-4">
             <div class="d-flex align-items-center justify-content-between mb-3">
                 <h4 class="mb-0"><i class="bi bi-folder2-open me-2"></i><?= __('my_projects') ?></h4>
-                <?php if (!empty($settings['student_project_creation'])): ?>
+                <?php if (!empty($settings['student_project_creation']) && $canCreateOrJoin): ?>
                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createProjectModal">
                         <i class="bi bi-plus-circle me-1"></i><?= __('create_project') ?>
                     </button>
+                <?php elseif ($studentLocked): ?>
+                    <span class="badge bg-success fs-6"><i class="bi bi-lock-fill me-1"></i><?= __('project_accepted_locked') ?></span>
+                <?php elseif ($projectCount >= 1): ?>
+                    <span class="badge bg-secondary fs-6"><i class="bi bi-lock-fill me-1"></i><?= __('project_limit_reached') ?></span>
                 <?php endif; ?>
             </div>
 
@@ -119,13 +128,14 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
         <!-- Right Column: Invites & Join -->
         <div class="col-lg-4">
             <!-- Join by Code -->
+            <?php if ($canCreateOrJoin): ?>
             <div class="card shadow-sm mb-3">
                 <div class="card-header">
                     <h6 class="mb-0"><i class="bi bi-link-45deg me-1"></i><?= __('join_project') ?></h6>
                 </div>
                 <div class="card-body">
                     <div class="input-group">
-                        <input type="text" class="form-control" id="joinCodeInput" 
+                        <input type="text" class="form-control" id="joinCodeInput"
                                placeholder="<?= __('enter_join_code') ?>" maxlength="8"
                                style="text-transform: uppercase; letter-spacing: 2px; font-weight: bold;">
                         <button class="btn btn-primary" onclick="joinByCode()">
@@ -135,9 +145,25 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                     <div id="joinAlert" class="alert d-none mt-2 mb-0 py-1 small"></div>
                 </div>
             </div>
+            <?php elseif ($studentLocked): ?>
+            <div class="card shadow-sm mb-3 border-success">
+                <div class="card-body text-center py-3">
+                    <i class="bi bi-lock-fill text-success fs-4"></i>
+                    <p class="text-success mb-0 mt-1 small fw-bold"><?= __('project_accepted_locked') ?></p>
+                    <small class="text-muted"><?= __('project_accepted_locked_msg') ?></small>
+                </div>
+            </div>
+            <?php else: ?>
+            <div class="card shadow-sm mb-3 border-secondary">
+                <div class="card-body text-center py-3">
+                    <i class="bi bi-lock-fill text-secondary fs-4"></i>
+                    <p class="text-muted mb-0 mt-1 small"><?= __('project_limit_reached_msg') ?></p>
+                </div>
+            </div>
+            <?php endif; ?>
 
-            <!-- Pending Invitations -->
-            <?php if (!empty($pendingInvitations)): ?>
+            <!-- Pending Invitations — only shown if student can still join -->
+            <?php if (!empty($pendingInvitations) && $canCreateOrJoin): ?>
                 <div class="card shadow-sm mb-3 border-warning">
                     <div class="card-header bg-warning text-dark">
                         <h6 class="mb-0"><i class="bi bi-envelope-open me-1"></i><?= __('pending_invitations') ?> (<?= count($pendingInvitations) ?>)</h6>

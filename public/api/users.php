@@ -86,6 +86,13 @@ if ($method === 'PUT') {
     if (isset($input['year']) && !empty($input['year']) && !in_array($input['year'], ['1st', '2nd', '3rd', '4th'])) {
         jsonResponse(['error' => 'السنة الدراسية غير صالحة'], 400);
     }
+    if (isset($input['section']) && !empty($input['section'])) {
+        $departments = getDepartments();
+        $deptNames = array_column($departments, 'name');
+        if (!in_array(trim($input['section']), $deptNames)) {
+            jsonResponse(['error' => 'القسم المحدد غير صالح'], 400);
+        }
+    }
     if (isset($input['email']) && !empty($input['email'])) {
         // Check uniqueness
         $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ? AND id != ?");

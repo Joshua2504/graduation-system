@@ -542,6 +542,21 @@ $translations = [
     'landing_stat_easy' => ['ar' => 'سهل الاستخدام', 'en' => 'Easy to Use', 'de' => 'Einfach zu bedienen'],
     'landing_stat_fast' => ['ar' => 'سريع وفعّال', 'en' => 'Fast & Efficient', 'de' => 'Schnell & Effizient'],
     'landing_stat_complete' => ['ar' => 'نظام متكامل', 'en' => 'All-in-One', 'de' => 'Alles-in-Einem'],
+
+    // Paper submission
+    'paper' => ['ar' => 'الورقة', 'en' => 'Paper', 'de' => 'Arbeit'],
+    'paper_submitted_label' => ['ar' => 'تم تقديم الورقة', 'en' => 'Paper submitted', 'de' => 'Arbeit eingereicht'],
+    'paper_not_submitted' => ['ar' => 'لم تقدم الورقة بعد', 'en' => 'Paper not submitted', 'de' => 'Arbeit noch nicht eingereicht'],
+    'submit_paper' => ['ar' => 'تأكيد تقديم ورقتي', 'en' => 'Mark my paper as submitted', 'de' => 'Meine Arbeit als eingereicht markieren'],
+    'withdraw_paper' => ['ar' => 'إلغاء تقديم ورقتي', 'en' => 'Withdraw my paper submission', 'de' => 'Einreichung meiner Arbeit zurückziehen'],
+    'all_papers_submitted' => ['ar' => 'جميع الأوراق مقدمة', 'en' => 'All papers submitted', 'de' => 'Alle Arbeiten eingereicht'],
+    'papers_pending' => ['ar' => 'بعض الأوراق لم تقدم بعد', 'en' => 'Some papers not submitted yet', 'de' => 'Einige Arbeiten noch nicht eingereicht'],
+
+    // Student project limit
+    'project_limit_reached' => ['ar' => 'تم الوصول للحد الأقصى', 'en' => 'Project Limit Reached', 'de' => 'Projektlimit erreicht'],
+    'project_limit_reached_msg' => ['ar' => 'أنت بالفعل عضو في مشروع. لا يمكنك الانضمام لمشروع آخر.', 'en' => 'You are already in a project. You cannot join another one.', 'de' => 'Sie sind bereits in einem Projekt. Sie können keinem anderen beitreten.'],
+    'project_accepted_locked' => ['ar' => 'المشروع مقبول', 'en' => 'Project Accepted', 'de' => 'Projekt angenommen'],
+    'project_accepted_locked_msg' => ['ar' => 'تم قبول مشروعك. لا يمكنك الانضمام لمشروع آخر.', 'en' => 'Your project has been accepted. You cannot join another project.', 'de' => 'Ihr Projekt wurde angenommen. Sie können keinem anderen Projekt beitreten.'],
 ];
 
 /**

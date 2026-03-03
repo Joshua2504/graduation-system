@@ -245,13 +245,22 @@ if ($method === 'PUT') {
     if (isProjectMember($projectId, $userId)) {
         jsonResponse(['error' => 'أنت عضو بالفعل في هذا المشروع'], 400);
     }
-    
+
+    // Students are limited to 1 project
+    if (countUserProjects($userId) >= 1) {
+        jsonResponse(['error' => 'لا يمكنك الانضمام لأكثر من مشروع واحد'], 403);
+    }
+    // Locked if they have an accepted project
+    if (isStudentProjectLocked($userId)) {
+        jsonResponse(['error' => 'تم قبول مشروعك ولا يمكنك الانضمام لمشروع آخر'], 403);
+    }
+
     $settings = getSettings();
     $memberCount = countProjectMembers($projectId);
     if ($memberCount >= (int)$settings['max_team_size']) {
         jsonResponse(['error' => 'الفريق مكتمل العدد'], 400);
     }
-    
+
     // Add as member
     $stmt = $pdo->prepare("INSERT INTO project_members (project_id, user_id, role) VALUES (?, ?, 'member')");
     $stmt->execute([$projectId, $userId]);
