@@ -296,7 +296,7 @@ function showDeptAlert(msg, type = 'success') {
 
 async function loadDepartments() {
     try {
-        const res = await fetch('/api/departments.php');
+        const res = await fetch('/api/departments');
         const data = await res.json();
         const list = document.getElementById('departmentsList');
         if (!data.departments || data.departments.length === 0) {
@@ -333,7 +333,7 @@ async function addDepartment() {
     if (!name) return;
 
     try {
-        const res = await fetch('/api/departments.php', {
+        const res = await fetch('/api/departments', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name })
@@ -356,7 +356,7 @@ async function editDepartment(id, currentName) {
     if (!newName || newName.trim() === currentName) return;
 
     try {
-        const res = await fetch('/api/departments.php', {
+        const res = await fetch('/api/departments', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id, name: newName.trim() })
@@ -377,7 +377,7 @@ async function deleteDepartment(id, name) {
     if (!confirm(<?= json_encode(__('confirm_delete_department')) ?>)) return;
 
     try {
-        const res = await fetch('/api/departments.php', {
+        const res = await fetch('/api/departments', {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id })
