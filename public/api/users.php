@@ -57,13 +57,19 @@ if ($method === 'PUT') {
     }
 
     $allowedFields = ['name', 'email', 'student_code', 'gender', 'national_id', 'birth_date', 'governorate', 'address', 'phone', 'year', 'section'];
+    $nullableFields = ['student_code', 'gender', 'national_id', 'birth_date', 'governorate', 'address', 'phone', 'year', 'section'];
     $updates = [];
     $params = [];
 
     foreach ($allowedFields as $field) {
         if (isset($input[$field])) {
+            $val = trim($input[$field]);
+            // Store empty optional fields as NULL to avoid DB type errors (e.g. empty string in DATE column)
+            if ($val === '' && in_array($field, $nullableFields)) {
+                $val = null;
+            }
             $updates[] = "`$field` = ?";
-            $params[] = trim($input[$field]);
+            $params[] = $val;
         }
     }
 
@@ -118,8 +124,12 @@ if ($method === 'PUT') {
 
     $params[] = $userId;
     $sql = "UPDATE users SET " . implode(', ', $updates) . " WHERE id = ?";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
+    try {
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+    } catch (PDOException $e) {
+        jsonResponse(['error' => 'خطأ في قاعدة البيانات: ' . $e->getMessage()], 500);
+    }
 
     jsonResponse([
         'success' => true,
