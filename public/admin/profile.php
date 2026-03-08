@@ -1,15 +1,14 @@
 <?php
 /**
- * Professor Profile — edit personal data & upload profile picture
+ * Admin Profile — edit personal data & upload profile picture
  */
 require_once dirname(__DIR__) . '/includes/bootstrap.php';
 
-require_role('doctor');
+require_admin();
 
 $userId = current_user_id();
 $user = getUserProfile($userId);
 $isAr = getLang() === 'ar';
-$departments = getDepartments();
 
 $pageTitle = __('my_profile');
 require_once dirname(__DIR__) . '/includes/header.php';
@@ -19,7 +18,6 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <!-- Profile Header -->
             <div class="d-flex align-items-center justify-content-between mb-4">
                 <h4 class="mb-0">
                     <i class="bi bi-person-circle me-2"></i><?= __('my_profile') ?>
@@ -28,7 +26,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
 
             <div class="alert alert-info">
                 <i class="bi bi-info-circle me-2"></i>
-                <?= __('professor_profile_info') ?>
+                <?= __('admin_profile_info') ?>
             </div>
 
             <!-- Profile Picture Card -->
@@ -81,18 +79,15 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                 <div class="card-body p-4">
                     <form id="profileForm">
                         <div class="row g-3">
-                            <!-- Name (read-only from registration) -->
                             <div class="col-md-6">
                                 <label class="form-label fw-bold"><?= __('name') ?></label>
                                 <input type="text" class="form-control" value="<?= sanitize($user['name']) ?>" readonly disabled>
                             </div>
-                            <!-- Email (read-only) -->
                             <div class="col-md-6">
                                 <label class="form-label fw-bold"><?= __('email') ?></label>
                                 <input type="email" class="form-control" value="<?= sanitize($user['email']) ?>" readonly disabled>
                             </div>
                             <hr>
-                            <!-- Gender -->
                             <div class="col-md-6">
                                 <label class="form-label fw-bold"><?= __('gender') ?></label>
                                 <select class="form-select" name="gender" id="gender">
@@ -101,22 +96,16 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                     <option value="female" <?= ($user['gender'] ?? '') === 'female' ? 'selected' : '' ?>><?= __('female') ?></option>
                                 </select>
                             </div>
-                            <!-- Phone -->
                             <div class="col-md-6">
                                 <label class="form-label fw-bold"><?= __('phone') ?></label>
                                 <input type="tel" class="form-control" name="phone" id="phone" 
                                        value="<?= sanitize($user['phone'] ?? '') ?>" 
                                        maxlength="11" pattern="\d{11}" placeholder="<?= __('eleven_digits') ?>">
                             </div>
-                            <!-- Section/Department -->
                             <div class="col-md-6">
                                 <label class="form-label fw-bold"><?= __('section') ?></label>
-                                <select class="form-select" name="section" id="section">
-                                    <option value=""><?= __('select_department') ?></option>
-                                    <?php foreach ($departments as $dept): ?>
-                                        <option value="<?= sanitize($dept['name']) ?>" <?= ($user['section'] ?? '') === $dept['name'] ? 'selected' : '' ?>><?= sanitize($dept['name']) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
+                                <input type="text" class="form-control" name="section" id="section" 
+                                       value="<?= sanitize($user['section'] ?? '') ?>">
                             </div>
                         </div>
 
@@ -133,7 +122,6 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
 </div>
 
 <script>
-// Profile form submission
 document.getElementById('profileForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const alertEl = document.getElementById('profile-alert');

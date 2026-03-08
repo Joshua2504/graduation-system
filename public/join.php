@@ -21,7 +21,16 @@ $success = '';
 $project = null;
 $alreadyMember = false;
 
-if ($token) {
+// Check if student is already in a project or locked by acceptance
+if (countUserProjects($userId) >= 1) {
+    if (isStudentProjectLocked($userId)) {
+        $error = __('project_accepted_locked_msg');
+    } else {
+        $error = __('project_limit_reached_msg');
+    }
+}
+
+if (!$error && $token) {
     // Token-based invite
     $pdo = getDB();
     $stmt = $pdo->prepare("SELECT i.*, p.title, p.type, p.status AS project_status, p.join_code,
@@ -52,13 +61,13 @@ if ($token) {
         $memberCount = countProjectMembers($invitation['project_id']);
         $isFull = $memberCount >= (int)$settings['max_team_size'];
     }
-} elseif ($code) {
+} elseif (!$error && $code) {
     // Code-based join
     $pdo = getDB();
     $stmt = $pdo->prepare("SELECT p.*, u.name AS leader_name
                            FROM projects p
-                           JOIN project_members pm ON pm.project_id = p.id AND pm.role = 'leader'
-                           JOIN users u ON u.id = pm.user_id
+                           LEFT JOIN project_members pm ON pm.project_id = p.id AND pm.role = 'leader'
+                           LEFT JOIN users u ON u.id = pm.user_id
                            WHERE p.join_code = ?");
     $stmt->execute([$code]);
     $result = $stmt->fetch();
@@ -80,7 +89,7 @@ if ($token) {
         $memberCount = countProjectMembers($result['id']);
         $isFull = $memberCount >= (int)$settings['max_team_size'];
     }
-} else {
+} elseif (!$error) {
     redirect('/student/dashboard');
 }
 

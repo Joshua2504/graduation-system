@@ -37,9 +37,19 @@ foreach ($members as $m) {
     }
 }
 
-$canSubmit = $isLeader && $project['status'] === 'draft' && $memberCount >= $minSize && $allProfilesComplete;
-$canResubmit = $isLeader && $project['status'] === 'rejected' && !empty($project['allow_resubmit']) && $memberCount >= $minSize && $allProfilesComplete;
-$canTransferLeadership = $isLeader && !empty($settings['leader_transfer']) && $memberCount > 1;
+// Check if all members have submitted their papers
+$allPapersSubmitted = allMembersPapersSubmitted($projectId);
+
+// Check current user's paper submission status
+$myPaperSubmitted = getMemberPaperStatus($projectId, $userId);
+
+// Project is editable by this member when draft or rejected-resubmittable
+$projectEditable = $project['status'] === 'draft' ||
+                   ($project['status'] === 'rejected' && !empty($project['allow_resubmit']));
+
+$canSubmit = $isLeader && $project['status'] === 'draft' && $memberCount >= $minSize && $allProfilesComplete && $allPapersSubmitted;
+$canResubmit = $isLeader && $project['status'] === 'rejected' && !empty($project['allow_resubmit']) && $memberCount >= $minSize && $allProfilesComplete && $allPapersSubmitted;
+$canTransferLeadership = $isLeader && !empty($settings['leader_transfer']) && $memberCount > 1 && $project['status'] === 'draft';
 $reviews = getProjectReviews($projectId);
 
 $statusLabels = getStatusLabels();
@@ -199,13 +209,20 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
         <!-- Team Members -->
         <div class="col-lg-<?= ($isLeader && $project['status'] === 'draft') ? '7' : '12' ?>">
             <div class="card shadow mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i><?= __('team_members') ?> (<?= $memberCount ?>/<?= $maxSize ?>)</h5>
-                    <?php if ($allProfilesComplete): ?>
-                        <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i><?= __('all_profiles_complete') ?></span>
-                    <?php else: ?>
-                        <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i><?= __('profiles_incomplete') ?></span>
-                    <?php endif; ?>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <?php if ($allProfilesComplete): ?>
+                            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i><?= __('all_profiles_complete') ?></span>
+                        <?php else: ?>
+                            <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i><?= __('profiles_incomplete') ?></span>
+                        <?php endif; ?>
+                        <?php if ($allPapersSubmitted): ?>
+                            <span class="badge bg-success"><i class="bi bi-file-earmark-check me-1"></i><?= __('all_papers_submitted') ?></span>
+                        <?php else: ?>
+                            <span class="badge bg-warning text-dark"><i class="bi bi-file-earmark-x me-1"></i><?= __('papers_pending') ?></span>
+                        <?php endif; ?>
+                    </div>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -217,6 +234,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                     <th><?= __('student_code') ?></th>
                                     <th><?= __('role') ?></th>
                                     <th><?= __('profile') ?></th>
+                                    <th><?= __('paper') ?></th>
                                     <?php if (($isLeader && $project['status'] === 'draft') || $canTransferLeadership): ?>
                                         <th></th>
                                     <?php endif; ?>
@@ -225,8 +243,11 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             <tbody>
                                 <?php foreach ($members as $i => $m): 
                                     $complete = isProfileComplete($m);
-                                    $mPic = $m['profile_picture'] ?? '';
-                                    $mPicUrl = $mPic ? secureFileUrl($m['id'], $mPic) : '';
+                                    $mPicUrl = '';
+                                    if (!empty($settings['profile_pictures_enabled'])) {
+                                        $mPic = $m['profile_picture'] ?? '';
+                                        $mPicUrl = $mPic ? secureFileUrl($m['id'], $mPic) : '';
+                                    }
                                 ?>
                                     <tr>
                                         <td><?= $i + 1 ?></td>
@@ -253,17 +274,30 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                                 <span class="text-warning"><i class="bi bi-exclamation-circle-fill"></i></span>
                                             <?php endif; ?>
                                         </td>
+                                        <td>
+                                            <?php if (!empty($m['paper_submitted'])): ?>
+                                                <span class="text-success"><i class="bi bi-file-earmark-check-fill" title="<?= __('paper_submitted_label') ?>"></i></span>
+                                            <?php else: ?>
+                                                <span class="text-danger"><i class="bi bi-file-earmark-x" title="<?= __('paper_not_submitted') ?>"></i></span>
+                                            <?php endif; ?>
+                                            <?php if ($m['id'] == $userId && $projectEditable): ?>
+                                                <button class="btn btn-sm <?= !empty($m['paper_submitted']) ? 'btn-outline-warning' : 'btn-outline-success' ?> ms-1 py-0 px-1"
+                                                        onclick="togglePaper()" title="<?= !empty($m['paper_submitted']) ? __('withdraw_paper') : __('submit_paper') ?>">
+                                                    <i class="bi bi-<?= !empty($m['paper_submitted']) ? 'x-lg' : 'check-lg' ?>"></i>
+                                                </button>
+                                            <?php endif; ?>
+                                        </td>
                                         <?php if (($isLeader && $project['status'] === 'draft') || $canTransferLeadership): ?>
                                             <td>
                                                 <?php if ($m['member_role'] !== 'leader'): ?>
                                                     <div class="d-flex align-items-center gap-1">
                                                         <?php if ($canTransferLeadership): ?>
-                                                            <button class="btn btn-sm btn-outline-primary" onclick="transferLeadership(<?= $m['id'] ?>, '<?= sanitize($m['name']) ?>')" title="<?= __('transfer_leadership') ?>">
+                                                            <button class="btn btn-sm btn-outline-primary" onclick="transferLeadership(<?= $m['id'] ?>, <?= htmlspecialchars(json_encode($m['name']), ENT_QUOTES, 'UTF-8') ?>)" title="<?= __('transfer_leadership') ?>">
                                                                 <i class="bi bi-star"></i>
                                                             </button>
                                                         <?php endif; ?>
                                                         <?php if ($isLeader && $project['status'] === 'draft'): ?>
-                                                            <button class="btn btn-sm btn-outline-danger" onclick="removeMember(<?= $m['id'] ?>, '<?= sanitize($m['name']) ?>')">
+                                                            <button class="btn btn-sm btn-outline-danger" onclick="removeMember(<?= $m['id'] ?>, <?= htmlspecialchars(json_encode($m['name']), ENT_QUOTES, 'UTF-8') ?>)">
                                                                 <i class="bi bi-x-lg"></i>
                                                             </button>
                                                         <?php endif; ?>
@@ -288,6 +322,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                         <td>
                                             <span class="badge bg-warning text-dark"><?= __('invited') ?></span>
                                         </td>
+                                        <td>—</td>
                                         <td>—</td>
                                         <?php if (($isLeader && $project['status'] === 'draft') || $canTransferLeadership): ?>
                                             <td>
@@ -391,7 +426,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                     <i class="bi bi-send me-2"></i><?= $canResubmit ? __('edit_resubmit') : __('submit_project') ?>
                 </button>
             <?php elseif ($isLeader && $project['status'] === 'draft'): ?>
-                <button class="btn btn-success btn-lg" disabled title="<?= !$allProfilesComplete ? __('profiles_incomplete') : ($memberCount < $minSize ? __('min_members') . ': ' . $minSize : '') ?>">
+                <button class="btn btn-success btn-lg" disabled>
                     <i class="bi bi-send me-2"></i><?= __('submit_project') ?>
                 </button>
                 <small class="text-muted align-self-center">
@@ -399,10 +434,12 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                         <?= sprintf(__('team_min_size_msg'), $minSize) ?>
                     <?php elseif (!$allProfilesComplete): ?>
                         <?= __('profiles_incomplete') ?>
+                    <?php elseif (!$allPapersSubmitted): ?>
+                        <?= __('papers_pending') ?>
                     <?php endif; ?>
                 </small>
             <?php elseif ($isLeader && $project['status'] === 'rejected' && !empty($project['allow_resubmit'])): ?>
-                <button class="btn btn-success btn-lg" disabled title="<?= !$allProfilesComplete ? __('profiles_incomplete') : ($memberCount < $minSize ? __('min_members') . ': ' . $minSize : '') ?>">
+                <button class="btn btn-success btn-lg" disabled>
                     <i class="bi bi-send me-2"></i><?= __('edit_resubmit') ?>
                 </button>
                 <small class="text-muted align-self-center">
@@ -410,6 +447,8 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                         <?= sprintf(__('team_min_size_msg'), $minSize) ?>
                     <?php elseif (!$allProfilesComplete): ?>
                         <?= __('profiles_incomplete') ?>
+                    <?php elseif (!$allPapersSubmitted): ?>
+                        <?= __('papers_pending') ?>
                     <?php endif; ?>
                 </small>
             <?php endif; ?>
@@ -689,6 +728,20 @@ document.getElementById('submitConfirmBtn')?.addEventListener('click', async fun
         btn.disabled = false;
     }
 });
+
+// Toggle paper submission
+async function togglePaper() {
+    try {
+        const res = await fetch('/api/paper', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ project_id: PROJECT_ID })
+        });
+        const data = await res.json();
+        if (data.success) location.reload();
+        else alert(data.error);
+    } catch (err) { alert(err.message); }
+}
 
 // Cancel invitation
 async function cancelInvitation(invitationId) {

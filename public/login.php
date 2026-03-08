@@ -4,16 +4,26 @@
  */
 require_once __DIR__ . '/includes/bootstrap.php';
 require_once __DIR__ . '/includes/mailer.php';
-require_once __DIR__ . '/includes/demo.php';
 
 // If already logged in, redirect
 if (is_logged_in()) {
     redirect('/');
 }
 
+// If no users exist and not in demo mode, redirect to initial setup
+if (!isDemoMode()) {
+    $pdo = getDB();
+    $userCount = (int)$pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
+    if ($userCount === 0) {
+        redirect('/register');
+    }
+}
+
 $error = '';
 $showResend = false;
 $resendEmail = '';
+$settings = getSettings();
+$loginMethods = $settings['login_methods'] ?? 'both';
 
 // Handle resend verification
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['resend_verification'])) {
@@ -39,8 +49,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['resend_verification'
         $error = __('required_field');
     } else {
         $pdo = getDB();
+        // Determine login method based on setting
+        $isEmail = strpos($login_input, '@') !== false;
+
+        // Enforce login method restriction (only for students; admins/professors always use email)
+        if ($loginMethods === 'email_only' && !$isEmail) {
+            $error = __('login_method_not_allowed');
+        } elseif ($loginMethods === 'student_code_only' && $isEmail) {
+            // Allow email login for non-student roles (admin/professor)
+            $pdo2 = getDB();
+            $stmtCheck = $pdo2->prepare("SELECT role FROM users WHERE email = ?");
+            $stmtCheck->execute([$login_input]);
+            $roleCheck = $stmtCheck->fetchColumn();
+            if ($roleCheck && $roleCheck !== 'student') {
+                // Allow — admin/professor can always use email
+            } else {
+                $error = __('login_method_not_allowed');
+            }
+        }
+
+        if (empty($error)) {
         // Allow login with email or student code
-        if (strpos($login_input, '@') !== false) {
+        if ($isEmail) {
             $stmt = $pdo->prepare("SELECT id, name, email, password, role, email_verified, account_enabled FROM users WHERE email = ?");
         } else {
             $stmt = $pdo->prepare("SELECT id, name, email, password, role, email_verified, account_enabled FROM users WHERE student_code = ?");
@@ -61,6 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['resend_verification'
                     $resendEmail = $user['email'];
                 } else {
                     // Verification not required — allow login
+                    session_regenerate_id(true);
                     $_SESSION['user_id'] = $user['id'];
                     $_SESSION['name'] = $user['name'];
                     $_SESSION['email'] = $user['email'];
@@ -68,9 +99,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['resend_verification'
                     scheduleDemoReset();
                     $redir = $_SESSION['redirect_after_login'] ?? '/';
                     unset($_SESSION['redirect_after_login']);
+                    if (!str_starts_with($redir, '/') || str_starts_with($redir, '//')) $redir = '/';
                     redirect($redir);
                 }
             } else {
+                session_regenerate_id(true);
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['name'] = $user['name'];
                 $_SESSION['email'] = $user['email'];
@@ -78,11 +111,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['resend_verification'
                 scheduleDemoReset();
                 $redir = $_SESSION['redirect_after_login'] ?? '/';
                 unset($_SESSION['redirect_after_login']);
+                if (!str_starts_with($redir, '/') || str_starts_with($redir, '//')) $redir = '/';
                 redirect($redir);
             }
         } else {
             $error = __('invalid_credentials');
         }
+        } // end if (empty($error))
     }
 }
 
@@ -207,17 +242,21 @@ require_once __DIR__ . '/includes/header.php';
                         </button>
                         <?php
                         $langLabels = ['ar' => 'العربية', 'en' => 'English', 'de' => 'Deutsch'];
+                        global $supportedLangs;
+                        $activeLangLabels = array_intersect_key($langLabels, array_flip($supportedLangs ?? ['ar']));
                         ?>
+                        <?php if (count($activeLangLabels) > 1): ?>
                         <div class="btn-group">
                             <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-translate me-1"></i><?= $langLabels[getLang()] ?>
+                                <i class="bi bi-translate me-1"></i><?= $activeLangLabels[getLang()] ?? reset($activeLangLabels) ?>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <?php foreach ($langLabels as $code => $label): ?>
+                                <?php foreach ($activeLangLabels as $code => $label): ?>
                                     <li><a class="dropdown-item <?= getLang() === $code ? 'active' : '' ?>" href="?lang=<?= $code ?>"><?= $label ?></a></li>
                                 <?php endforeach; ?>
                             </ul>
                         </div>
+                        <?php endif; ?>
                     </div>
 
                     <!-- Mobile-only intro -->
@@ -271,12 +310,31 @@ require_once __DIR__ . '/includes/header.php';
 
                             <form method="POST" novalidate>
                                 <div class="mb-3">
-                                    <label for="email" class="form-label"><?= __('email_or_code') ?></label>
+                                    <?php
+                                    // Dynamic label and placeholder based on login_methods setting
+                                    if ($loginMethods === 'email_only') {
+                                        $loginLabel = __('email');
+                                        $loginPlaceholder = __('email_placeholder');
+                                        $loginIcon = 'bi-envelope';
+                                        $inputType = 'email';
+                                    } elseif ($loginMethods === 'student_code_only') {
+                                        $loginLabel = __('student_code');
+                                        $loginPlaceholder = __('student_code_placeholder');
+                                        $loginIcon = 'bi-person-badge';
+                                        $inputType = 'text';
+                                    } else {
+                                        $loginLabel = __('email_or_code');
+                                        $loginPlaceholder = __('email_or_code_placeholder');
+                                        $loginIcon = 'bi-person';
+                                        $inputType = 'text';
+                                    }
+                                    ?>
+                                    <label for="email" class="form-label"><?= $loginLabel ?></label>
                                     <div class="input-group">
-                                        <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                        <input type="text" class="form-control" id="email" name="email"
+                                        <span class="input-group-text"><i class="bi <?= $loginIcon ?>"></i></span>
+                                        <input type="<?= $inputType ?>" class="form-control" id="email" name="email"
                                                value="<?= sanitize($login_input ?? '') ?>" required autofocus
-                                               placeholder="<?= __('email_or_code_placeholder') ?>">
+                                               placeholder="<?= $loginPlaceholder ?>">
                                     </div>
                                 </div>
                                 <div class="mb-3">

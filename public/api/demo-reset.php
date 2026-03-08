@@ -25,11 +25,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_login(true);
     try {
         performDemoReset();
         jsonResponse(['success' => true, 'message' => 'Demo has been reset']);
     } catch (Exception $e) {
-        jsonResponse(['error' => 'Reset failed: ' . $e->getMessage()], 500);
+        error_log('[DemoReset] ' . $e->getMessage());
+        jsonResponse(['error' => 'Reset failed'], 500);
     }
 }
 

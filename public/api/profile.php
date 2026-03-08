@@ -37,8 +37,8 @@ if ($method === 'PUT') {
     $pdo = getDB();
     $role = $_SESSION['role'] ?? 'student';
     
-    // Students can edit more fields; professors have a smaller set
-    $allowedFields = $role === 'doctor'
+    // Students can edit more fields; professors/admins have a smaller set
+    $allowedFields = ($role === 'doctor' || $role === 'admin')
         ? ['gender', 'phone', 'section']
         : ['gender', 'national_id', 'birth_date', 'governorate', 'address', 'phone', 'year', 'section'];
     $updates = [];
@@ -73,7 +73,16 @@ if ($method === 'PUT') {
     if (isset($input['year']) && !in_array($input['year'], ['1st', '2nd', '3rd', '4th'])) {
         jsonResponse(['error' => 'السنة الدراسية غير صالحة'], 400);
     }
-    
+
+    // Validate section is one of the existing departments
+    if (isset($input['section']) && !empty($input['section'])) {
+        $departments = getDepartments();
+        $deptNames = array_column($departments, 'name');
+        if (!in_array($input['section'], $deptNames)) {
+            jsonResponse(['error' => 'القسم المحدد غير صالح'], 400);
+        }
+    }
+
     // Check profile completion after update (students only)
     $profileComplete = 0;
     if ($role === 'student') {
@@ -103,8 +112,17 @@ if ($method === 'POST') {
     
     $type = trim($_POST['type'] ?? '');
     $role = $_SESSION['role'] ?? 'student';
-    // Professors can only upload profile pictures; students can upload documents too
-    $allowedTypes = $role === 'doctor'
+
+    // Block profile_picture uploads when profile pictures are disabled
+    if ($type === 'profile_picture') {
+        $settings = getSettings();
+        if (empty($settings['profile_pictures_enabled'])) {
+            jsonResponse(['error' => 'Profile pictures are currently disabled'], 403);
+        }
+    }
+
+    // Professors/admins can only upload profile pictures; students can upload documents too
+    $allowedTypes = ($role === 'doctor' || $role === 'admin')
         ? ['profile_picture']
         : ['card', 'national_id', 'receipt', 'profile_picture'];
     

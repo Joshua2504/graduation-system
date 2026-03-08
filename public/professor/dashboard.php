@@ -8,7 +8,10 @@ require_role('doctor');
 
 $pdo = getDB();
 $sort = ($_GET['sort'] ?? 'recent') === 'oldest' ? 'ASC' : 'DESC';
+$sortParam = $sort === 'ASC' ? 'oldest' : 'recent';
 $activeTab = $_GET['tab'] ?? 'under_review';
+$validTabs = ['draft', 'under_review', 'accepted', 'rejected'];
+if (!in_array($activeTab, $validTabs)) $activeTab = 'under_review';
 
 // Stats
 $stats = [];
@@ -67,7 +70,7 @@ $isAr = getLang() === 'ar';
                     foreach ($tabs as $key => $tab): ?>
                         <li class="nav-item">
                             <a class="nav-link <?= $activeTab === $key ? 'active' : '' ?>" 
-                               href="?tab=<?= $key ?>&sort=<?= $_GET['sort'] ?? 'recent' ?>">
+                               href="?tab=<?= $key ?>&sort=<?= sanitize($sortParam) ?>">
                                 <i class="bi bi-<?= $tab['icon'] ?> text-<?= $tab['color'] ?> me-1"></i>
                                 <?= $tab['label'] ?>
                                 <span class="badge bg-<?= $tab['color'] ?> ms-1"><?= $stats[$key] ?></span>

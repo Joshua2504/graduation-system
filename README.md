@@ -1,6 +1,6 @@
 # 🎓 Graduation Project Management System
 
-**نظام إدارة مشاريع التخرج** — A multilingual (Arabic / English / German) web application for managing university graduation projects. Students form teams, complete profiles, submit projects for review, and professors approve or reject them.
+**نظام إدارة مشاريع التخرج** — A multilingual (Arabic / English / German) web application for managing university graduation projects. An admin manages professors and system settings, professors review and approve projects, and students form teams, complete profiles, and submit projects.
 
 ---
 
@@ -19,7 +19,16 @@
 - **Submit for review** — once team meets size requirements and all member profiles are complete
 - **Rich description editor** — bold, italic, underline, lists, links, and image uploads (click, paste, or drag & drop)
 - **Track status** — view doctor feedback, review history timeline, resubmit if rejected (when allowed by professor)
-- **Transfer leadership** — team leaders can transfer leadership to another team member (when enabled by professor)
+- **Transfer leadership** — team leaders can transfer leadership to another team member (when enabled by professor, only while project is in draft status)
+
+### Admin (Super Admin) Flow
+- **Dashboard** — overview with professor/student counts, project stats by status, recent professors and projects
+- **Manage professors** — create, enable/disable, delete professor accounts; reset passwords; send welcome emails with credentials; impersonate professors
+- **Manage students** — same student management interface as professors (list, edit profiles, verify emails, enable/disable, create accounts, impersonate)
+- **All projects** — read-only overview of all projects with tab filtering (All, Draft, Under Review, Accepted, Rejected)
+- **System settings** — toggle registration, email verification, min/max team size (2–10), student project creation, show reviewer name, leader transfer by team leader, login methods (email & student code / email only / student code only), language selection
+- **Department management** — add, edit, and delete departments; departments appear as selectable dropdowns in all profile forms
+- **Profile** — edit personal info (gender, phone, department) and upload a profile picture
 
 ### Professor (Doctor) Flow
 - **Profile** — edit personal info (gender, phone, department) and upload a profile picture
@@ -28,19 +37,21 @@
 - **Review history** — full audit trail of all accept/reject actions with timestamps, notes, and resubmission permissions
 - **Edit projects** — inline editing of project title, type, and rich-text description for any project
 - **Duplicate detection** — automatic warning when project titles match
-- **System settings** — toggle registration, email verification, min/max team size (2–10), student project creation, show reviewer name, leader transfer by team leader
+- **System settings** — toggle registration, email verification, min/max team size (2–10), student project creation, show reviewer name, leader transfer by team leader, login methods (email & student code / email only / student code only)
 - **Manage students** — list all student accounts, verify emails manually, enable/disable accounts
 
 ### Demo Mode
-- **Quick login** — one-click login buttons for doctor and student on the login page
+- **Quick login** — one-click login buttons for admin, doctor, and student on the login page
 - **Random passwords** — generated on first boot and regenerated on each reset; displayed on the login page
 - **Auto-reset** — 30-minute countdown timer starts after any login; resets all data to seed state
 - **Countdown banner** — live timer above the navbar shows remaining time before reset
-- **Seed users** — 7 pre-created accounts (1 doctor + 1 test student + 5 demo students) survive every reset
-- **Seed projects** — 2 pre-created projects survive every reset:
+- **Seed users** — 7 pre-created accounts (1 admin + 1 doctor + 5 demo students) created automatically on first request
+- **Seed projects** — 2 pre-created projects:
   - 📚 *نظام إدارة المكتبات* (Library Management System) — accepted, 3 members (students 1-3)
   - 🏋️ *تطبيق تتبع اللياقة البدنية* (Fitness Tracking App) — under review, 2 members (students 4-5)
+- **All languages enabled** — Arabic, English, and German are all available in demo mode
 - Enable with `DEMO_MODE=true` in `.env`
+- No demo accounts or content exist when demo mode is disabled
 
 ### General
 - 🌍 Multilingual: Arabic (RTL), English (LTR) & German (LTR) — default language auto-detected from browser; switch via navbar dropdown- 🌙 Dark mode — toggle available on login/register pages and in the navbar; preference saved in browser- � User dropdown menu — click username in navbar for profile & logout
@@ -87,15 +98,15 @@ docker compose up --build -d
 open http://localhost:8642
 ```
 
-The database schema and seed data are applied automatically on first run.
+The database schema is applied automatically on first run.
 
-### Default Credentials
+### Initial Setup (Production)
 
-| Role | Email | Password |
-|------|-------|----------|
-| Professor | `doctor@treudler.net` | `doctor123` |
-| Student | `student@treudler.net` | `student123` |
-| Demo Student 1–5 | `student1@treudler.net` … `student5@treudler.net` | *random — shown on login page* |
+When `DEMO_MODE=false` (default), the first user to register becomes the **admin**. Navigate to the app after starting it and you will be guided through the initial setup wizard to create the admin account. The admin can then create professor accounts from the admin dashboard.
+
+### Demo Mode
+
+With `DEMO_MODE=true`, demo accounts and sample projects are seeded automatically on first request. See the **Demo Mode** section above for details.
 
 ---
 
@@ -121,6 +132,7 @@ graduation-system/
     ├── api/                      # REST API endpoints
     │   ├── project.php           # CRUD for projects
     │   ├── invitations.php       # Invitation management
+    │   ├── professors.php        # Professor account management (admin only)
     │   ├── profile.php           # Profile read/update/image upload
     │   ├── description-upload.php # Project description image uploads
     │   ├── file.php              # Secure authenticated file serving
@@ -133,11 +145,19 @@ graduation-system/
     │   ├── dashboard.php         # Project list, join by code, invitations
     │   ├── project.php           # Project detail, team, invites, submit
     │   └── profile.php           # Profile editor with document uploads
+    ├── admin/
+    │   ├── dashboard.php         # Admin overview with stats
+    │   ├── professors.php        # Professor account management
+    │   ├── students.php          # Student account management (admin)
+    │   ├── projects.php          # Read-only all-projects overview
+    │   ├── settings.php          # System configuration (admin)
+    │   └── profile.php           # Admin profile editor
     ├── professor/
     │   ├── dashboard.php         # Project lists by status with stats
     │   ├── project.php           # Project review with student data
     │   ├── settings.php          # System configuration
-    │   └── students.php          # Student account management
+    │   ├── students.php          # Student account management
+    │   └── profile.php           # Professor profile editor
     ├── includes/                 # Shared PHP modules
     │   ├── bootstrap.php         # Common includes loader
     │   ├── auth.php              # Session auth & role enforcement
@@ -199,13 +219,13 @@ graduation-system/
 | `email` | VARCHAR(255) | Unique email |
 | `password` | VARCHAR(255) | bcrypt hash |
 | `student_code` | VARCHAR(50) | Unique student identifier |
-| `role` | ENUM | `student` or `doctor` |
+| `role` | ENUM | `student`, `doctor`, or `admin` |
 | `gender`, `national_id`, `birth_date`, `governorate`, `address`, `phone`, `section` | — | Profile fields |
 | `profile_picture` | VARCHAR(255) | Optional profile picture filename |
 | `card_image`, `national_id_image`, `receipt_image` | VARCHAR(255) | Document filenames |
 | `profile_completed` | TINYINT(1) | Auto-calculated completeness flag |
 | `email_verified` | TINYINT(1) | Email verification status |
-| `account_enabled` | TINYINT(1) | Can be disabled by doctor |
+| `account_enabled` | TINYINT(1) | Can be disabled by doctor/admin |
 
 ### `projects` — Graduation projects
 | Column | Type | Description |
@@ -214,7 +234,7 @@ graduation-system/
 | `type` | VARCHAR(255) | Project type/category |
 | `join_code` | VARCHAR(8) | Unique 6-char alphanumeric join code |
 | `status` | ENUM | `draft` → `under_review` → `accepted` / `rejected` |
-| `group_number` | INT | Auto-assigned on acceptance |
+| `group_number` | VARCHAR(10) | Auto-assigned alphanumeric code on acceptance (e.g. WG01) |
 | `doctor_note` | TEXT | Professor's feedback |
 | `allow_resubmit` | TINYINT(1) | Whether student can edit & resubmit after rejection |
 
@@ -288,17 +308,28 @@ graduation-system/
 |--------|--------|-------------|
 | `POST` | `{project_id, action, doctor_note?, allow_resubmit?}` | Accept or reject project (doctor only) |
 
+### Professors — `/api/professors` (admin only)
+| Method | Params | Description |
+|--------|--------|-------------|
+| `GET` | `?search=X` | List all professor accounts |
+| `POST` | `{action: 'create_professor', name, email, password, section?, send_email?}` | Create a new professor account |
+| `POST` | `{action: 'enable', user_id}` | Enable a professor account |
+| `POST` | `{action: 'disable', user_id}` | Disable a professor account |
+| `POST` | `{action: 'delete', user_id}` | Delete a professor account |
+| `POST` | `{action: 'reset_password', user_id, password, send_email?}` | Reset professor password |
+| `POST` | `{action: 'impersonate', user_id}` | Impersonate a professor |
+
 ### Settings — `/api/settings`
 | Method | Params | Description |
 |--------|--------|-------------|
 | `GET` | — | Get system settings |
-| `POST` | `{registration_open, email_verification_required, min_team_size, max_team_size}` | Update settings (doctor only) |
+| `POST` | `{registration_open, email_verification_required, min_team_size, max_team_size}` | Update settings (admin or doctor) |
 
 ### Users — `/api/users`
 | Method | Params | Description |
 |--------|--------|-------------|
-| `GET` | — | List all student accounts (doctor only) |
-| `POST` | `{user_id, action}` | Toggle verify/enable/disable (doctor only) |
+| `GET` | — | List all student accounts (admin or doctor) |
+| `POST` | `{user_id, action}` | Toggle verify/enable/disable (admin or doctor) |
 
 ---
 
@@ -322,6 +353,7 @@ Container names are derived from `COMPOSE_PROJECT_NAME` (e.g. `graduation-system
 - Upload limit: 50MB per file / 55MB POST
 - Apache `mod_rewrite` enabled for clean URLs (no `.php` extension in browser)
 - Schema auto-applied on first database initialization
+- Demo seed data created automatically via PHP when `DEMO_MODE=true` (no seed data in SQL for non-demo mode)
 - Health check on MariaDB before app container starts
 
 ### Common Commands

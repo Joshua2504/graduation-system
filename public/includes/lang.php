@@ -9,25 +9,39 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Check if demo mode is active (inline check to avoid dependency on demo.php)
+$_isDemoMode = filter_var($_ENV['DEMO_MODE'] ?? getenv('DEMO_MODE') ?: 'false', FILTER_VALIDATE_BOOLEAN);
+
 // Load enabled languages from settings (DB)
 $enabledLangsStr = null;
+$defaultLangFromDB = null;
 try {
     if (function_exists('getDB')) {
         $pdo = getDB();
-        $stmt = $pdo->query("SELECT enabled_languages FROM settings WHERE id = 1");
+        $stmt = $pdo->query("SELECT enabled_languages, default_language FROM settings WHERE id = 1");
         $row = $stmt->fetch();
         if ($row && !empty($row['enabled_languages'])) {
             $enabledLangsStr = $row['enabled_languages'];
         }
+        if ($row && !empty($row['default_language'])) {
+            $defaultLangFromDB = $row['default_language'];
+        }
     }
 } catch (Exception $e) {
-    // DB not ready yet, use all languages
+    // DB not ready yet, use fallback
 }
 
+// When demo mode is enabled, fall back to all languages; otherwise only Arabic
+$defaultLangs = $_isDemoMode ? $allLangs : ['ar'];
 $supportedLangs = $enabledLangsStr
     ? array_values(array_filter(explode(',', $enabledLangsStr), fn($l) => in_array($l, $allLangs)))
-    : $allLangs;
+    : $defaultLangs;
 if (empty($supportedLangs)) $supportedLangs = ['ar'];
+
+// Determine default language: use DB setting if enabled, otherwise first enabled language
+$defaultLang = ($defaultLangFromDB && in_array($defaultLangFromDB, $supportedLangs))
+    ? $defaultLangFromDB
+    : $supportedLangs[0];
 
 // Handle language switch
 if (isset($_GET['lang']) && in_array($_GET['lang'], $supportedLangs)) {
@@ -41,7 +55,7 @@ if (isset($_SESSION['lang']) && !in_array($_SESSION['lang'], $supportedLangs)) {
 
 // Detect browser language if no session language is set
 if (!isset($_SESSION['lang'])) {
-    $browserLang = $supportedLangs[0]; // fallback to first enabled
+    $browserLang = $defaultLang; // fallback to default language from settings
     if (!empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
         $acceptLang = strtolower($_SERVER['HTTP_ACCEPT_LANGUAGE']);
         $bestPos = PHP_INT_MAX;
@@ -92,6 +106,13 @@ $translations = [
     'register_title' => ['ar' => 'تسجيل حساب جديد', 'en' => 'Create Account', 'de' => 'Konto erstellen'],
     'no_account' => ['ar' => 'ليس لديك حساب؟', 'en' => "Don't have an account?", 'de' => 'Noch kein Konto?'],
     'has_account' => ['ar' => 'لديك حساب بالفعل؟', 'en' => 'Already have an account?', 'de' => 'Bereits ein Konto?'],
+
+    // Initial setup (first user becomes admin)
+    'initial_setup_title' => ['ar' => 'إعداد النظام', 'en' => 'System Setup', 'de' => 'Systemeinrichtung'],
+    'initial_setup_description' => ['ar' => 'أنشئ حساب مدير النظام الأول لبدء استخدام النظام', 'en' => 'Create the first admin account to start using the system', 'de' => 'Erstellen Sie das erste Administratorkonto, um das System zu nutzen'],
+    'initial_setup_submit' => ['ar' => 'إنشاء حساب المدير', 'en' => 'Create Admin Account', 'de' => 'Administratorkonto erstellen'],
+    'initial_setup_redirect' => ['ar' => 'يرجى إنشاء حساب المدير أولاً', 'en' => 'Please create the admin account first', 'de' => 'Bitte erstellen Sie zuerst das Administratorkonto'],
+
     'registration_closed' => ['ar' => 'تسجيل مشاريع التخرج مغلق حالياً', 'en' => 'Graduation project registration is currently closed', 'de' => 'Die Registrierung für Abschlussprojekte ist derzeit geschlossen'],
     'invalid_credentials' => ['ar' => 'بيانات الدخول غير صحيحة', 'en' => 'Invalid email/student code or password', 'de' => 'Ungültige E-Mail/Matrikelnummer oder Passwort'],
     'email_or_code' => ['ar' => 'البريد الإلكتروني أو كود الطالب', 'en' => 'Email or Student Code', 'de' => 'E-Mail oder Matrikelnummer'],
@@ -296,9 +317,24 @@ $translations = [
     'toggle_leader_transfer' => ['ar' => 'نقل القيادة بواسطة القائد', 'en' => 'Leader Transfer by Team Leader', 'de' => 'Leiterübertragung durch Teamleiter'],
     'leader_transfer_description' => ['ar' => 'السماح لقائد الفريق بنقل القيادة لعضو آخر في الفريق', 'en' => 'Allow team leaders to transfer leadership to another team member', 'de' => 'Teamleitern erlauben, die Leitung an ein anderes Teammitglied zu übertragen'],
 
+    'toggle_profile_pictures' => ['ar' => 'الصور الشخصية', 'en' => 'Profile Pictures', 'de' => 'Profilbilder'],
+    'profile_pictures_description' => ['ar' => 'السماح للمستخدمين برفع وعرض الصور الشخصية', 'en' => 'Allow users to upload and display profile pictures', 'de' => 'Benutzern erlauben, Profilbilder hochzuladen und anzuzeigen'],
+
     'enabled_languages' => ['ar' => 'اللغات المتاحة', 'en' => 'Enabled Languages', 'de' => 'Aktivierte Sprachen'],
     'enabled_languages_description' => ['ar' => 'اختر اللغات التي يمكن للمستخدمين التبديل بينها في الواجهة', 'en' => 'Choose which languages users can switch between in the interface', 'de' => 'Wählen Sie, zwischen welchen Sprachen die Benutzer in der Oberfläche wechseln können'],
     'enabled_languages_hint' => ['ar' => 'يجب تفعيل لغة واحدة على الأقل. سيتم تحويل المستخدمين الذين يستخدمون لغة معطلة تلقائياً.', 'en' => 'At least one language must be enabled. Users on a disabled language will be switched automatically.', 'de' => 'Mindestens eine Sprache muss aktiviert sein. Benutzer mit einer deaktivierten Sprache werden automatisch umgeschaltet.'],
+
+    'default_language' => ['ar' => 'اللغة الافتراضية', 'en' => 'Default Language', 'de' => 'Standardsprache'],
+    'default_language_description' => ['ar' => 'اللغة التي تُعرض للمستخدمين الجدد عند زيارتهم الأولى', 'en' => 'The language shown to new users on their first visit', 'de' => 'Die Sprache, die neuen Benutzern beim ersten Besuch angezeigt wird'],
+
+    'login_methods' => ['ar' => 'طرق تسجيل الدخول', 'en' => 'Login Methods', 'de' => 'Anmeldemethoden'],
+    'login_methods_description' => ['ar' => 'اختر الطرق المتاحة لتسجيل دخول الطلاب', 'en' => 'Choose which methods students can use to log in', 'de' => 'Wählen Sie, welche Methoden Studenten zur Anmeldung verwenden können'],
+    'login_method_both' => ['ar' => 'البريد الإلكتروني وكود الطالب', 'en' => 'Email and Student Code', 'de' => 'E-Mail und Matrikelnummer'],
+    'login_method_email_only' => ['ar' => 'البريد الإلكتروني فقط', 'en' => 'Email Only', 'de' => 'Nur E-Mail'],
+    'login_method_student_code_only' => ['ar' => 'كود الطالب فقط', 'en' => 'Student Code Only', 'de' => 'Nur Matrikelnummer'],
+    'email_placeholder' => ['ar' => 'أدخل بريدك الإلكتروني', 'en' => 'Enter your email', 'de' => 'E-Mail eingeben'],
+    'student_code_placeholder' => ['ar' => 'أدخل كود الطالب', 'en' => 'Enter your student code', 'de' => 'Matrikelnummer eingeben'],
+    'login_method_not_allowed' => ['ar' => 'طريقة تسجيل الدخول هذه غير متاحة', 'en' => 'This login method is not available', 'de' => 'Diese Anmeldemethode ist nicht verfügbar'],
 
     'transfer_leadership' => ['ar' => 'نقل القيادة', 'en' => 'Transfer Leadership', 'de' => 'Leitung übertragen'],
     'confirm_transfer_leadership' => ['ar' => 'هل أنت متأكد من نقل قيادة الفريق إلى', 'en' => 'Are you sure you want to transfer leadership to', 'de' => 'Sind Sie sicher, dass Sie die Leitung übertragen möchten an'],
@@ -452,10 +488,75 @@ $translations = [
     // Misc
     'details' => ['ar' => 'التفاصيل', 'en' => 'Details', 'de' => 'Details'],
 
+    // Department management
+    'departments' => ['ar' => 'الأقسام', 'en' => 'Departments', 'de' => 'Abteilungen'],
+    'department_name' => ['ar' => 'اسم القسم', 'en' => 'Department Name', 'de' => 'Abteilungsname'],
+    'add_department' => ['ar' => 'إضافة قسم', 'en' => 'Add Department', 'de' => 'Abteilung hinzufügen'],
+    'edit_department' => ['ar' => 'تعديل القسم', 'en' => 'Edit Department', 'de' => 'Abteilung bearbeiten'],
+    'delete_department' => ['ar' => 'حذف القسم', 'en' => 'Delete Department', 'de' => 'Abteilung löschen'],
+    'select_department' => ['ar' => '-- اختر القسم --', 'en' => '-- Select Department --', 'de' => '-- Abteilung auswählen --'],
+    'department_exists' => ['ar' => 'هذا القسم موجود بالفعل', 'en' => 'This department already exists', 'de' => 'Diese Abteilung existiert bereits'],
+    'department_created' => ['ar' => 'تم إضافة القسم بنجاح', 'en' => 'Department created successfully', 'de' => 'Abteilung erfolgreich erstellt'],
+    'department_updated' => ['ar' => 'تم تعديل القسم بنجاح', 'en' => 'Department updated successfully', 'de' => 'Abteilung erfolgreich aktualisiert'],
+    'department_deleted' => ['ar' => 'تم حذف القسم بنجاح', 'en' => 'Department deleted successfully', 'de' => 'Abteilung erfolgreich gelöscht'],
+    'department_name_required' => ['ar' => 'اسم القسم مطلوب', 'en' => 'Department name is required', 'de' => 'Abteilungsname ist erforderlich'],
+    'confirm_delete_department' => ['ar' => 'هل أنت متأكد من حذف هذا القسم؟ سيتم إزالته من جميع المستخدمين.', 'en' => 'Are you sure you want to delete this department? It will be removed from all users.', 'de' => 'Sind Sie sicher, dass Sie diese Abteilung löschen möchten? Sie wird von allen Benutzern entfernt.'],
+    'departments_description' => ['ar' => 'إدارة الأقسام المتاحة للاختيار في الملف الشخصي', 'en' => 'Manage departments available for selection in profiles', 'de' => 'Abteilungen verwalten, die in Profilen zur Auswahl stehen'],
+    'no_departments' => ['ar' => 'لا توجد أقسام مضافة', 'en' => 'No departments added', 'de' => 'Keine Abteilungen hinzugefügt'],
+    'leader_transfer_after_submit' => ['ar' => 'لا يمكن نقل القيادة بعد تقديم المشروع', 'en' => 'Cannot transfer leadership after project submission', 'de' => 'Leiterübertragung nach Projekteinreichung nicht möglich'],
+
+    // Admin
+    'admin_dashboard' => ['ar' => 'لوحة تحكم المدير', 'en' => 'Admin Dashboard', 'de' => 'Admin-Dashboard'],
+    'admin_profile_info' => ['ar' => 'يمكنك تعديل بياناتك الشخصية وصورتك من هنا', 'en' => 'You can edit your personal information and photo here', 'de' => 'Hier können Sie Ihre persönlichen Daten und Ihr Foto bearbeiten'],
+    'professor_accounts' => ['ar' => 'حسابات الأساتذة', 'en' => 'Professor Accounts', 'de' => 'Professorenkonten'],
+    'professors' => ['ar' => 'الأساتذة', 'en' => 'Professors', 'de' => 'Professoren'],
+    'professors_count' => ['ar' => 'أستاذ', 'en' => 'professors', 'de' => 'Professoren'],
+    'students' => ['ar' => 'الطلاب', 'en' => 'Students', 'de' => 'Studenten'],
+    'total_projects' => ['ar' => 'إجمالي المشاريع', 'en' => 'Total Projects', 'de' => 'Gesamtprojekte'],
+    'all_projects' => ['ar' => 'جميع المشاريع', 'en' => 'All Projects', 'de' => 'Alle Projekte'],
+    'all' => ['ar' => 'الكل', 'en' => 'All', 'de' => 'Alle'],
+    'recent_professors' => ['ar' => 'آخر الأساتذة', 'en' => 'Recent Professors', 'de' => 'Neueste Professoren'],
+    'recent_projects' => ['ar' => 'آخر المشاريع', 'en' => 'Recent Projects', 'de' => 'Neueste Projekte'],
+    'view_all' => ['ar' => 'عرض الكل', 'en' => 'View All', 'de' => 'Alle anzeigen'],
+    'no_professors' => ['ar' => 'لا يوجد أساتذة مسجلين', 'en' => 'No professors registered', 'de' => 'Keine Professoren registriert'],
+    'add_professor' => ['ar' => 'إضافة أستاذ', 'en' => 'Add Professor', 'de' => 'Professor hinzufügen'],
+    'add_new_professor' => ['ar' => 'إضافة أستاذ جديد', 'en' => 'Add New Professor', 'de' => 'Neuen Professor hinzufügen'],
+    'professor_created' => ['ar' => 'تم إنشاء حساب الأستاذ بنجاح', 'en' => 'Professor account created successfully', 'de' => 'Professorenkonto erfolgreich erstellt'],
+    'professor_deleted' => ['ar' => 'تم حذف حساب الأستاذ', 'en' => 'Professor account deleted', 'de' => 'Professorenkonto gelöscht'],
+    'account_enabled_msg' => ['ar' => 'تم تفعيل الحساب', 'en' => 'Account enabled', 'de' => 'Konto aktiviert'],
+    'account_disabled_msg' => ['ar' => 'تم تعطيل الحساب', 'en' => 'Account disabled', 'de' => 'Konto deaktiviert'],
+    'login_as_professor' => ['ar' => 'الدخول كأستاذ', 'en' => 'Login as Professor', 'de' => 'Als Professor anmelden'],
+    'impersonating_professor' => ['ar' => 'تم الدخول كأستاذ', 'en' => 'Now viewing as professor', 'de' => 'Jetzt als Professor angemeldet'],
+    'back_to_admin' => ['ar' => 'العودة للمدير', 'en' => 'Back to Admin', 'de' => 'Zurück zum Admin'],
+    'confirm_disable_professor' => ['ar' => 'تعطيل حساب هذا الأستاذ؟', 'en' => "Disable this professor's account?", 'de' => 'Konto dieses Professors deaktivieren?'],
+    'confirm_enable_professor' => ['ar' => 'تفعيل حساب هذا الأستاذ؟', 'en' => "Enable this professor's account?", 'de' => 'Konto dieses Professors aktivieren?'],
+    'confirm_delete_professor' => ['ar' => 'حذف هذا الحساب نهائياً؟ سيتم حذف جميع بياناته.', 'en' => 'Permanently delete this account? All data will be removed.', 'de' => 'Dieses Konto endgültig löschen? Alle Daten werden entfernt.'],
+    'confirm_impersonate_professor' => ['ar' => 'الدخول كهذا الأستاذ؟', 'en' => 'Login as this professor?', 'de' => 'Als dieser Professor anmelden?'],
+    'reset_password' => ['ar' => 'إعادة تعيين كلمة المرور', 'en' => 'Reset Password', 'de' => 'Passwort zurücksetzen'],
+    'new_password' => ['ar' => 'كلمة المرور الجديدة', 'en' => 'New Password', 'de' => 'Neues Passwort'],
+    'password_reset_success' => ['ar' => 'تم إعادة تعيين كلمة المرور بنجاح', 'en' => 'Password reset successfully', 'de' => 'Passwort erfolgreich zurückgesetzt'],
+    'send_new_password_email' => ['ar' => 'إرسال كلمة المرور الجديدة بالبريد', 'en' => 'Send new password via email', 'de' => 'Neues Passwort per E-Mail senden'],
+    'demo_admin' => ['ar' => 'مدير النظام', 'en' => 'Admin', 'de' => 'Administrator'],
+
     // Landing — Stats
     'landing_stat_easy' => ['ar' => 'سهل الاستخدام', 'en' => 'Easy to Use', 'de' => 'Einfach zu bedienen'],
     'landing_stat_fast' => ['ar' => 'سريع وفعّال', 'en' => 'Fast & Efficient', 'de' => 'Schnell & Effizient'],
     'landing_stat_complete' => ['ar' => 'نظام متكامل', 'en' => 'All-in-One', 'de' => 'Alles-in-Einem'],
+
+    // Paper submission
+    'paper' => ['ar' => 'الورقة', 'en' => 'Paper', 'de' => 'Arbeit'],
+    'paper_submitted_label' => ['ar' => 'تم تقديم الورقة', 'en' => 'Paper submitted', 'de' => 'Arbeit eingereicht'],
+    'paper_not_submitted' => ['ar' => 'لم تقدم الورقة بعد', 'en' => 'Paper not submitted', 'de' => 'Arbeit noch nicht eingereicht'],
+    'submit_paper' => ['ar' => 'تأكيد تقديم ورقتي', 'en' => 'Mark my paper as submitted', 'de' => 'Meine Arbeit als eingereicht markieren'],
+    'withdraw_paper' => ['ar' => 'إلغاء تقديم ورقتي', 'en' => 'Withdraw my paper submission', 'de' => 'Einreichung meiner Arbeit zurückziehen'],
+    'all_papers_submitted' => ['ar' => 'جميع الأوراق مقدمة', 'en' => 'All papers submitted', 'de' => 'Alle Arbeiten eingereicht'],
+    'papers_pending' => ['ar' => 'بعض الأوراق لم تقدم بعد', 'en' => 'Some papers not submitted yet', 'de' => 'Einige Arbeiten noch nicht eingereicht'],
+
+    // Student project limit
+    'project_limit_reached' => ['ar' => 'تم الوصول للحد الأقصى', 'en' => 'Project Limit Reached', 'de' => 'Projektlimit erreicht'],
+    'project_limit_reached_msg' => ['ar' => 'أنت بالفعل عضو في مشروع. لا يمكنك الانضمام لمشروع آخر.', 'en' => 'You are already in a project. You cannot join another one.', 'de' => 'Sie sind bereits in einem Projekt. Sie können keinem anderen beitreten.'],
+    'project_accepted_locked' => ['ar' => 'المشروع مقبول', 'en' => 'Project Accepted', 'de' => 'Projekt angenommen'],
+    'project_accepted_locked_msg' => ['ar' => 'تم قبول مشروعك. لا يمكنك الانضمام لمشروع آخر.', 'en' => 'Your project has been accepted. You cannot join another project.', 'de' => 'Ihr Projekt wurde angenommen. Sie können keinem anderen Projekt beitreten.'],
 ];
 
 /**

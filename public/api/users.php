@@ -86,6 +86,13 @@ if ($method === 'PUT') {
     if (isset($input['year']) && !empty($input['year']) && !in_array($input['year'], ['1st', '2nd', '3rd', '4th'])) {
         jsonResponse(['error' => 'السنة الدراسية غير صالحة'], 400);
     }
+    if (isset($input['section']) && !empty($input['section'])) {
+        $departments = getDepartments();
+        $deptNames = array_column($departments, 'name');
+        if (!in_array(trim($input['section']), $deptNames)) {
+            jsonResponse(['error' => 'القسم المحدد غير صالح'], 400);
+        }
+    }
     if (isset($input['email']) && !empty($input['email'])) {
         // Check uniqueness
         $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
@@ -267,11 +274,12 @@ if ($method === 'POST') {
             if (!$student) {
                 jsonResponse(['error' => 'الطالب غير موجود'], 404);
             }
-            // Store original doctor session
+            // Store original doctor/admin session
             $_SESSION['impersonator_id'] = $_SESSION['user_id'];
             $_SESSION['impersonator_name'] = $_SESSION['name'];
             $_SESSION['impersonator_email'] = $_SESSION['email'];
             $_SESSION['impersonator_role'] = $_SESSION['role'];
+            $_SESSION['impersonator_return_to'] = $_SESSION['role'] === 'admin' ? '/admin/students' : '/professor/students';
             // Switch to student session
             $_SESSION['user_id'] = $student['id'];
             $_SESSION['name'] = $student['name'];

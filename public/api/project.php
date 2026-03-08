@@ -71,8 +71,8 @@ if ($method === 'POST') {
     
     $joinCode = generateJoinCode();
     
-    if ($role === 'doctor') {
-        // Doctor creates project — optionally with assigned students
+    if ($role === 'doctor' || $role === 'admin') {
+        // Doctor/admin creates project — optionally with assigned students
         $stmt = $pdo->prepare("INSERT INTO projects (title, type, description, join_code, status) VALUES (?, ?, ?, ?, 'draft')");
         $stmt->execute([$title, $type, $description ?: null, $joinCode]);
         $projectId = (int)$pdo->lastInsertId();
@@ -84,6 +84,7 @@ if ($method === 'POST') {
         foreach ($students as $sid) {
             $sid = (int)$sid;
             if ($sid === 0) continue;
+            if (countUserProjects($sid) >= 1 || isStudentProjectLocked($sid)) continue;
             $memberRole = ($sid === $leaderId) ? 'leader' : 'member';
             $stmt = $pdo->prepare("INSERT IGNORE INTO project_members (project_id, user_id, role) VALUES (?, ?, ?)");
             $stmt->execute([$projectId, $sid, $memberRole]);
@@ -102,15 +103,24 @@ if ($method === 'POST') {
             jsonResponse(['error' => 'إنشاء المشاريع بواسطة الطلاب معطل حالياً'], 403);
         }
         $userId = current_user_id();
-        
+
+        // Students are limited to 1 project
+        if (countUserProjects($userId) >= 1) {
+            jsonResponse(['error' => 'لا يمكنك إنشاء أو الانضمام لأكثر من مشروع واحد'], 403);
+        }
+        // Locked if they have an accepted project
+        if (isStudentProjectLocked($userId)) {
+            jsonResponse(['error' => 'تم قبول مشروعك ولا يمكنك إنشاء أو الانضمام لمشروع آخر'], 403);
+        }
+
         $stmt = $pdo->prepare("INSERT INTO projects (title, type, description, join_code, status) VALUES (?, ?, ?, ?, 'draft')");
         $stmt->execute([$title, $type, $description ?: null, $joinCode]);
         $projectId = (int)$pdo->lastInsertId();
-        
+
         // Add creator as leader
         $stmt = $pdo->prepare("INSERT INTO project_members (project_id, user_id, role) VALUES (?, ?, 'leader')");
         $stmt->execute([$projectId, $userId]);
-        
+
         jsonResponse([
             'success' => true,
             'project_id' => $projectId,
@@ -237,7 +247,7 @@ if ($method === 'PATCH') {
     
     $settings = getSettings();
     $maxSize = (int)$settings['max_team_size'];
-    $isDoctor = current_role() === 'doctor';
+    $isDoctor = current_role() === 'doctor' || current_role() === 'admin';
     $isLeaderOfProject = !$isDoctor && isProjectLeader($projectId, current_user_id());
     
     // Team leader can only use set_leader action (when setting is enabled)
@@ -281,6 +291,17 @@ if ($method === 'PATCH') {
             jsonResponse(['error' => 'معرف الطالب مطلوب'], 400);
         }
         
+        // Verify the user exists, is a student, and is enabled
+        $stmtCheck = $pdo->prepare("SELECT id, role, account_enabled FROM users WHERE id = ?");
+        $stmtCheck->execute([$studentId]);
+        $targetUser = $stmtCheck->fetch();
+        if (!$targetUser || $targetUser['role'] !== 'student') {
+            jsonResponse(['error' => 'الطالب غير موجود'], 404);
+        }
+        if (!$targetUser['account_enabled']) {
+            jsonResponse(['error' => 'حساب الطالب معطل'], 400);
+        }
+        
         // Check if already a member
         if (isProjectMember($projectId, $studentId)) {
             jsonResponse(['error' => 'الطالب عضو بالفعل في هذا المشروع'], 400);
@@ -291,7 +312,15 @@ if ($method === 'PATCH') {
         if ($memberCount >= $maxSize) {
             jsonResponse(['error' => 'الفريق مكتمل العدد'], 400);
         }
-        
+
+        // Enforce 1-project limit
+        if (countUserProjects($studentId) >= 1) {
+            jsonResponse(['error' => 'الطالب مسجل بالفعل في مشروع آخر'], 403);
+        }
+        if (isStudentProjectLocked($studentId)) {
+            jsonResponse(['error' => 'تم قبول مشروع الطالب ولا يمكن إضافته لمشروع آخر'], 403);
+        }
+
         $role = 'member';
         if ($asLeader) {
             // Demote current leader if exists
@@ -313,6 +342,11 @@ if ($method === 'PATCH') {
             jsonResponse(['error' => 'معرف الطالب مطلوب'], 400);
         }
         
+        // Prevent removing the project leader
+        if (isProjectLeader($projectId, $studentId)) {
+            jsonResponse(['error' => 'لا يمكن إزالة قائد الفريق — قم بتغيير القائد أولاً'], 400);
+        }
+        
         $stmt = $pdo->prepare("DELETE FROM project_members WHERE project_id = ? AND user_id = ?");
         $stmt->execute([$projectId, $studentId]);
         
@@ -327,10 +361,33 @@ if ($method === 'PATCH') {
             jsonResponse(['error' => 'معرف الطالب مطلوب'], 400);
         }
         
-        // Demote current leader
-        $pdo->prepare("UPDATE project_members SET role = 'member' WHERE project_id = ? AND role = 'leader'")->execute([$projectId]);
-        // Promote new leader
-        $pdo->prepare("UPDATE project_members SET role = 'leader' WHERE project_id = ? AND user_id = ?")->execute([$projectId, $studentId]);
+        // Block leadership transfer once project is submitted (not in draft)
+        if ($project['status'] !== 'draft') {
+            jsonResponse(['error' => __('leader_transfer_after_submit')], 400);
+        }
+        
+        // Verify the target is actually a member of this project
+        if (!isProjectMember($projectId, $studentId)) {
+            jsonResponse(['error' => 'الطالب ليس عضواً في هذا المشروع'], 400);
+        }
+        
+        // Use a transaction to prevent leaving the project without a leader
+        $pdo->beginTransaction();
+        try {
+            // Demote current leader
+            $pdo->prepare("UPDATE project_members SET role = 'member' WHERE project_id = ? AND role = 'leader'")->execute([$projectId]);
+            // Promote new leader
+            $stmt = $pdo->prepare("UPDATE project_members SET role = 'leader' WHERE project_id = ? AND user_id = ?");
+            $stmt->execute([$projectId, $studentId]);
+            if ($stmt->rowCount() === 0) {
+                $pdo->rollBack();
+                jsonResponse(['error' => 'فشل في تغيير القائد'], 500);
+            }
+            $pdo->commit();
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
         
         jsonResponse(['success' => true, 'message' => 'تم تغيير قائد الفريق']);
     }

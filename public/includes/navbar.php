@@ -17,7 +17,8 @@ $navProfilePic = '';
 if ($isLoggedIn) {
     require_once __DIR__ . '/functions.php';
     $navUser = getUserProfile(current_user_id());
-    if (!empty($navUser['profile_picture'])) {
+    $navSettings = getSettings();
+    if (!empty($navSettings['profile_pictures_enabled']) && !empty($navUser['profile_picture'])) {
         $navProfilePic = secureFileUrl(current_user_id(), $navUser['profile_picture']);
     }
 }
@@ -78,7 +79,7 @@ if ($demoActive) {
     <strong><?= __('viewing_as') ?>:</strong>
     <?= sanitize($_SESSION['name']) ?>
     <a href="/stop-impersonation" class="btn btn-sm btn-dark ms-2">
-        <i class="bi bi-box-arrow-left me-1"></i><?= __('back_to_professor') ?>
+        <i class="bi bi-box-arrow-left me-1"></i><?= is_admin() ? __('back_to_admin') : __('back_to_professor') ?>
     </a>
 </div>
 <?php endif; ?>
@@ -97,6 +98,32 @@ if ($demoActive) {
                     <li class="nav-item">
                         <a class="nav-link <?= $currentPage === 'dashboard' ? 'active' : '' ?>" href="/student/dashboard">
                             <i class="bi bi-house-door me-1"></i><?= __('dashboard') ?>
+                        </a>
+                    </li>
+                <?php elseif ($isLoggedIn && $role === 'admin'): ?>
+                    <li class="nav-item">
+                        <a class="nav-link <?= $currentPage === 'dashboard' && strpos($_SERVER['PHP_SELF'], '/admin/') !== false ? 'active' : '' ?>" href="/admin/dashboard">
+                            <i class="bi bi-house-door me-1"></i><?= __('dashboard') ?>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= $currentPage === 'professors' ? 'active' : '' ?>" href="/admin/professors">
+                            <i class="bi bi-person-workspace me-1"></i><?= __('professor_accounts') ?>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= $currentPage === 'students' && strpos($_SERVER['PHP_SELF'], '/admin/') !== false ? 'active' : '' ?>" href="/admin/students">
+                            <i class="bi bi-people me-1"></i><?= __('student_accounts') ?>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= $currentPage === 'projects' && strpos($_SERVER['PHP_SELF'], '/admin/') !== false ? 'active' : '' ?>" href="/admin/projects">
+                            <i class="bi bi-folder me-1"></i><?= __('all_projects') ?>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= $currentPage === 'settings' && strpos($_SERVER['PHP_SELF'], '/admin/') !== false ? 'active' : '' ?>" href="/admin/settings">
+                            <i class="bi bi-gear me-1"></i><?= __('settings') ?>
                         </a>
                     </li>
                 <?php elseif ($isLoggedIn && $role === 'doctor'): ?>
@@ -151,6 +178,13 @@ if ($demoActive) {
                             <?php if ($role === 'student'): ?>
                                 <li>
                                     <a class="dropdown-item" href="/student/profile">
+                                        <i class="bi bi-person me-2"></i><?= __('my_profile') ?>
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                            <?php elseif ($role === 'admin'): ?>
+                                <li>
+                                    <a class="dropdown-item" href="/admin/profile">
                                         <i class="bi bi-person me-2"></i><?= __('my_profile') ?>
                                     </a>
                                 </li>

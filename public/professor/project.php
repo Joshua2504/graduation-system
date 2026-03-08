@@ -176,9 +176,13 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                         </tr>
                     </thead>
                     <tbody>
+                        <?php $ppSettings = getSettings(); ?>
                         <?php foreach ($members as $i => $member):
-                            $memberPic = $member['profile_picture'] ?? '';
-                            $memberPicUrl = $memberPic ? secureFileUrl($member['id'], $memberPic) : '';
+                            $memberPicUrl = '';
+                            if (!empty($ppSettings['profile_pictures_enabled'])) {
+                                $memberPic = $member['profile_picture'] ?? '';
+                                $memberPicUrl = $memberPic ? secureFileUrl($member['id'], $memberPic) : '';
+                            }
                             $complete = isProfileComplete($member);
                             $docsCount = 0;
                             $docsTotal = 3;
@@ -226,7 +230,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                                 <i class="bi bi-star"></i>
                                             </button>
                                         <?php endif; ?>
-                                        <button class="btn btn-sm btn-outline-danger" onclick="removeMember(<?= $member['id'] ?>, '<?= sanitize($member['name']) ?>')" title="<?= __('remove_from_project') ?>">
+                                        <button class="btn btn-sm btn-outline-danger" onclick="removeMember(<?= $member['id'] ?>, <?= htmlspecialchars(json_encode($member['name']), ENT_QUOTES, 'UTF-8') ?>)" title="<?= __('remove_from_project') ?>">
                                             <i class="bi bi-person-x"></i>
                                         </button>
                                     </div>

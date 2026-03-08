@@ -10,6 +10,7 @@ $userId = current_user_id();
 $user = getUserProfile($userId);
 $isAr = getLang() === 'ar';
 $governorates = getGovernorates();
+$departments = getDepartments();
 $profileComplete = isProfileComplete($user);
 
 $pageTitle = __('my_profile');
@@ -38,9 +39,11 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
 
             <!-- Profile Picture Card -->
             <?php
+                $profilePicsEnabled = !empty($settings['profile_pictures_enabled'] ?? getSettings()['profile_pictures_enabled'] ?? 1);
                 $profilePic = $user['profile_picture'] ?? '';
                 $profilePicUrl = $profilePic ? secureFileUrl($userId, $profilePic) : '';
             ?>
+            <?php if ($profilePicsEnabled): ?>
             <div class="card shadow mb-4">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0"><i class="bi bi-camera me-2"></i><?= __('profile_picture') ?></h5>
@@ -74,6 +77,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
 
             <!-- Personal Info Card -->
             <div class="card shadow mb-4">
@@ -158,8 +162,12 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             <!-- Section/Department -->
                             <div class="col-md-6">
                                 <label class="form-label fw-bold"><?= __('section') ?> <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" name="section" id="section" 
-                                       value="<?= sanitize($user['section'] ?? '') ?>" required>
+                                <select class="form-select" name="section" id="section" required>
+                                    <option value=""><?= __('select_department') ?></option>
+                                    <?php foreach ($departments as $dept): ?>
+                                        <option value="<?= sanitize($dept['name']) ?>" <?= ($user['section'] ?? '') === $dept['name'] ? 'selected' : '' ?>><?= sanitize($dept['name']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
                             </div>
                         </div>
 

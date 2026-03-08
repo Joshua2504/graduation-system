@@ -19,9 +19,15 @@ function sanitizeHtml(?string $html): string {
     if (empty($html)) return '';
     $allowed = '<b><i><u><strong><em><ul><ol><li><a><br><p><div><span><img>';
     $clean = strip_tags(trim($html), $allowed);
-    // Remove event handlers and javascript: URLs
+    // Remove event handlers (both quoted and unquoted values)
     $clean = preg_replace('/\bon\w+\s*=\s*["\'][^"\']*["\']\s*/i', '', $clean);
-    $clean = preg_replace('/href\s*=\s*["\']javascript:[^"\']*["\']\s*/i', 'href="#"', $clean);
+    $clean = preg_replace('/\bon\w+\s*=\s*[^\s>]+/i', '', $clean);
+    // Block dangerous URI schemes in href (javascript:, data:, vbscript:)
+    $clean = preg_replace('/href\s*=\s*["\']\s*(javascript|data|vbscript):[^"\']*["\']\s*/i', 'href="#"', $clean);
+    $clean = preg_replace('/href\s*=\s*(javascript|data|vbscript):[^\s>]*/i', 'href="#"', $clean);
+    // Remove style attributes to prevent CSS injection/UI redressing
+    $clean = preg_replace('/\bstyle\s*=\s*["\'][^"\']*["\']\s*/i', '', $clean);
+    $clean = preg_replace('/\bstyle\s*=\s*[^\s>]+/i', '', $clean);
     // Only allow img src from our file API
     $clean = preg_replace_callback('/<img\s[^>]*>/i', function($match) {
         $tag = $match[0];
@@ -73,12 +79,21 @@ function redirect(string $url): void {
 }
 
 /**
+ * Get all departments from the database (for dropdown lists)
+ */
+function getDepartments(): array {
+    $pdo = getDB();
+    $stmt = $pdo->query("SELECT id, name FROM departments ORDER BY name ASC");
+    return $stmt->fetchAll();
+}
+
+/**
  * Get system settings
  */
 function getSettings(): array {
     $pdo = getDB();
     $stmt = $pdo->query("SELECT * FROM settings WHERE id = 1");
-    return $stmt->fetch() ?: ['registration_open' => 1, 'min_team_size' => 2, 'max_team_size' => 7];
+    return $stmt->fetch() ?: ['registration_open' => 1, 'min_team_size' => 2, 'max_team_size' => 7, 'login_methods' => 'both'];
 }
 
 /**
@@ -96,19 +111,27 @@ function generateJoinCode(): string {
 
 /**
  * Assign the next group number to an accepted project (transaction-safe)
+ * Generates a 4-char alphanumeric code like WG01, WG02, ..., WG99, then WG100, etc.
  */
-function assignGroupNumber(int $projectId): int {
+function assignGroupNumber(int $projectId): string {
     $pdo = getDB();
+    $prefix = 'WG';
     $pdo->beginTransaction();
     try {
-        $stmt = $pdo->query("SELECT COALESCE(MAX(group_number), 0) + 1 AS next_num FROM projects FOR UPDATE");
-        $nextNum = (int)$stmt->fetch()['next_num'];
+        $stmt = $pdo->query("SELECT group_number FROM projects WHERE group_number IS NOT NULL ORDER BY CAST(SUBSTRING(group_number, 3) AS UNSIGNED) DESC LIMIT 1 FOR UPDATE");
+        $lastCode = $stmt->fetchColumn();
+        if ($lastCode && preg_match('/^[A-Z]{2}(\d+)$/', $lastCode, $m)) {
+            $nextSeq = (int)$m[1] + 1;
+        } else {
+            $nextSeq = 1;
+        }
+        $groupNumber = $prefix . str_pad($nextSeq, 2, '0', STR_PAD_LEFT);
 
         $stmt = $pdo->prepare("UPDATE projects SET group_number = ?, status = 'accepted' WHERE id = ?");
-        $stmt->execute([$nextNum, $projectId]);
+        $stmt->execute([$groupNumber, $projectId]);
 
         $pdo->commit();
-        return $nextNum;
+        return $groupNumber;
     } catch (Exception $e) {
         $pdo->rollBack();
         throw $e;
@@ -139,7 +162,7 @@ function getProject(int $id): ?array {
 function getProjectMembers(int $projectId): array {
     $pdo = getDB();
     $stmt = $pdo->prepare("
-        SELECT u.*, pm.role AS member_role, pm.joined_at
+        SELECT u.*, pm.role AS member_role, pm.paper_submitted, pm.joined_at
         FROM project_members pm
         JOIN users u ON u.id = pm.user_id
         WHERE pm.project_id = ?
@@ -167,7 +190,7 @@ function getUserProjects(int $userId): array {
     $stmt = $pdo->prepare("
         SELECT p.*, pm.role AS my_role,
             (SELECT COUNT(*) FROM project_members WHERE project_id = p.id) AS member_count,
-            (SELECT u.name FROM project_members pm2 JOIN users u ON u.id = pm2.user_id 
+            (SELECT u.name FROM project_members pm2 JOIN users u ON u.id = pm2.user_id
              WHERE pm2.project_id = p.id AND pm2.role = 'leader' LIMIT 1) AS leader_name,
             reviewer.name AS reviewer_name
         FROM projects p
@@ -177,6 +200,55 @@ function getUserProjects(int $userId): array {
     ");
     $stmt->execute([$userId]);
     return $stmt->fetchAll();
+}
+
+/**
+ * Count how many projects a student is currently in (any status)
+ */
+function countUserProjects(int $userId): int {
+    $pdo = getDB();
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM project_members WHERE user_id = ?");
+    $stmt->execute([$userId]);
+    return (int)$stmt->fetchColumn();
+}
+
+/**
+ * Check if a student is locked from joining/creating new projects
+ * (they have an accepted project)
+ */
+function isStudentProjectLocked(int $userId): bool {
+    $pdo = getDB();
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*) FROM project_members pm
+        JOIN projects p ON p.id = pm.project_id
+        WHERE pm.user_id = ? AND p.status = 'accepted'
+    ");
+    $stmt->execute([$userId]);
+    return (int)$stmt->fetchColumn() > 0;
+}
+
+/**
+ * Check if all members of a project have submitted their papers
+ */
+function allMembersPapersSubmitted(int $projectId): bool {
+    $pdo = getDB();
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*) FROM project_members
+        WHERE project_id = ? AND paper_submitted = 0
+    ");
+    $stmt->execute([$projectId]);
+    return (int)$stmt->fetchColumn() === 0;
+}
+
+/**
+ * Get member's paper submission status for a project
+ */
+function getMemberPaperStatus(int $projectId, int $userId): bool {
+    $pdo = getDB();
+    $stmt = $pdo->prepare("SELECT paper_submitted FROM project_members WHERE project_id = ? AND user_id = ?");
+    $stmt->execute([$projectId, $userId]);
+    $row = $stmt->fetch();
+    return $row ? (bool)$row['paper_submitted'] : false;
 }
 
 /**
@@ -388,6 +460,17 @@ function validateNationalId(string $nationalId): ?string {
  * @return array Response array with success/error
  */
 function handleFileUpload(int $userId, string $type, array $file, bool $checkProfile = true): array {
+    // Whitelist allowed type values to prevent SQL injection via dynamic column name
+    $allowedTypes = [
+        'card'            => 'card_image',
+        'national_id'     => 'national_id_image',
+        'receipt'         => 'receipt_image',
+        'profile_picture' => 'profile_picture',
+    ];
+    if (!isset($allowedTypes[$type])) {
+        return ['error' => 'نوع الملف غير صالح', 'code' => 400];
+    }
+
     $validationError = validateUploadedFile($file);
     if ($validationError) {
         return ['error' => $validationError, 'code' => 400];
@@ -402,7 +485,7 @@ function handleFileUpload(int $userId, string $type, array $file, bool $checkPro
     $mime = $finfo->file($file['tmp_name']);
     $ext = $mime === 'image/png' ? 'png' : 'jpg';
 
-    $dbField = $type === 'profile_picture' ? 'profile_picture' : $type . '_image';
+    $dbField = $allowedTypes[$type];
     $filename = $userId . '_' . $type . '.' . $ext;
     $destPath = $uploadDir . '/' . $filename;
 

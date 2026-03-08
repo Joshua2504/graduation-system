@@ -12,12 +12,30 @@ header('Content-Type: application/json; charset=utf-8');
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
+    // Public settings needed by login/register pages (safe subset only)
     $settings = getSettings();
-    jsonResponse($settings);
+    $publicSettings = [
+        'registration_open' => $settings['registration_open'] ?? 1,
+        'min_team_size' => $settings['min_team_size'] ?? 2,
+        'max_team_size' => $settings['max_team_size'] ?? 7,
+        'login_methods' => $settings['login_methods'] ?? 'both',
+        'enabled_languages' => $settings['enabled_languages'] ?? 'ar',
+        'default_language' => $settings['default_language'] ?? 'ar',
+        'profile_pictures_enabled' => $settings['profile_pictures_enabled'] ?? 0,
+    ];
+    // Authenticated users with admin/doctor role get full settings
+    if (is_logged_in() && is_admin_or_doctor()) {
+        jsonResponse($settings);
+    }
+    jsonResponse($publicSettings);
 }
 
 if ($method === 'POST') {
-    require_role('doctor', true);
+    // Admin and doctor can both update settings
+    require_login(true);
+    if (!is_admin_or_doctor()) {
+        jsonResponse(['error' => 'غير مصرح بالوصول', 'error_en' => 'Forbidden'], 403);
+    }
     
     $input = json_decode(file_get_contents('php://input'), true);
     $pdo = getDB();
@@ -64,6 +82,25 @@ if ($method === 'POST') {
         if (empty($valid)) $valid = ['ar'];
         $updates[] = "enabled_languages = ?";
         $params[] = implode(',', $valid);
+    }
+
+    if (isset($input['default_language'])) {
+        $allLangs = ['ar', 'en', 'de'];
+        $val = in_array($input['default_language'], $allLangs) ? $input['default_language'] : 'ar';
+        $updates[] = "default_language = ?";
+        $params[] = $val;
+    }
+
+    if (isset($input['login_methods'])) {
+        $allowed = ['both', 'email_only', 'student_code_only'];
+        $val = in_array($input['login_methods'], $allowed) ? $input['login_methods'] : 'both';
+        $updates[] = "login_methods = ?";
+        $params[] = $val;
+    }
+
+    if (isset($input['profile_pictures_enabled'])) {
+        $updates[] = "profile_pictures_enabled = ?";
+        $params[] = (int)(bool)$input['profile_pictures_enabled'];
     }
     
     if (empty($updates)) {

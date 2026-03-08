@@ -1,10 +1,10 @@
 <?php
 /**
- * Professor — Settings Page (toggle registration)
+ * Admin — Settings Page (system configuration)
  */
 require_once dirname(__DIR__) . '/includes/bootstrap.php';
 
-require_role('doctor');
+require_admin();
 
 $pdo = getDB();
 $settings = getSettings();
@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Enabled languages — at least one must be selected
     $allLangs = ['ar', 'en', 'de'];
     $selectedLangs = array_filter($allLangs, fn($l) => isset($_POST['lang_' . $l]));
-    if (empty($selectedLangs)) $selectedLangs = ['ar']; // fallback
+    if (empty($selectedLangs)) $selectedLangs = ['ar'];
     $enabledLanguages = implode(',', $selectedLangs);
 
     // Default language — must be one of the enabled languages
@@ -38,17 +38,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $stmt = $pdo->prepare("UPDATE settings SET registration_open = ?, email_verification_required = ?, min_team_size = ?, max_team_size = ?, student_project_creation = ?, show_reviewer_name = ?, leader_transfer = ?, enabled_languages = ?, default_language = ?, login_methods = ?, profile_pictures_enabled = ? WHERE id = 1");
     $stmt->execute([$regOpen, $emailVerReq, $minTeam, $maxTeam, $studentCreation, $showReviewerName, $leaderTransfer, $enabledLanguages, $defaultLanguage, $loginMethods, $profilePicturesEnabled]);
-    $settings['registration_open'] = $regOpen;
-    $settings['email_verification_required'] = $emailVerReq;
-    $settings['min_team_size'] = $minTeam;
-    $settings['max_team_size'] = $maxTeam;
-    $settings['student_project_creation'] = $studentCreation;
-    $settings['show_reviewer_name'] = $showReviewerName;
-    $settings['leader_transfer'] = $leaderTransfer;
-    $settings['enabled_languages'] = $enabledLanguages;
-    $settings['default_language'] = $defaultLanguage;
-    $settings['login_methods'] = $loginMethods;
-    $settings['profile_pictures_enabled'] = $profilePicturesEnabled;
+    $settings = array_merge($settings, [
+        'registration_open' => $regOpen,
+        'email_verification_required' => $emailVerReq,
+        'min_team_size' => $minTeam,
+        'max_team_size' => $maxTeam,
+        'student_project_creation' => $studentCreation,
+        'show_reviewer_name' => $showReviewerName,
+        'leader_transfer' => $leaderTransfer,
+        'enabled_languages' => $enabledLanguages,
+        'default_language' => $defaultLanguage,
+        'login_methods' => $loginMethods,
+        'profile_pictures_enabled' => $profilePicturesEnabled,
+    ]);
     $message = __('settings_saved');
 }
 
@@ -73,9 +75,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                         <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded mb-3">
                             <div>
                                 <h6 class="mb-1"><?= __('toggle_registration') ?></h6>
-                                <small class="text-muted">
-                                    <?= __('registration_description') ?>
-                                </small>
+                                <small class="text-muted"><?= __('registration_description') ?></small>
                             </div>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" role="switch" 
@@ -88,9 +88,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                         <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded mb-3">
                             <div>
                                 <h6 class="mb-1"><?= __('toggle_email_verification') ?></h6>
-                                <small class="text-muted">
-                                    <?= __('email_verification_description') ?>
-                                </small>
+                                <small class="text-muted"><?= __('email_verification_description') ?></small>
                             </div>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" role="switch" 
@@ -103,9 +101,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                         <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded mb-3">
                             <div>
                                 <h6 class="mb-1"><?= __('toggle_student_project_creation') ?></h6>
-                                <small class="text-muted">
-                                    <?= __('student_project_creation_description') ?>
-                                </small>
+                                <small class="text-muted"><?= __('student_project_creation_description') ?></small>
                             </div>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" role="switch" 
@@ -118,9 +114,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                         <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded mb-3">
                             <div>
                                 <h6 class="mb-1"><?= __('toggle_show_reviewer_name') ?></h6>
-                                <small class="text-muted">
-                                    <?= __('show_reviewer_name_description') ?>
-                                </small>
+                                <small class="text-muted"><?= __('show_reviewer_name_description') ?></small>
                             </div>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" role="switch" 
@@ -133,9 +127,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                         <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded mb-3">
                             <div>
                                 <h6 class="mb-1"><?= __('toggle_leader_transfer') ?></h6>
-                                <small class="text-muted">
-                                    <?= __('leader_transfer_description') ?>
-                                </small>
+                                <small class="text-muted"><?= __('leader_transfer_description') ?></small>
                             </div>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" role="switch" 
@@ -148,9 +140,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                         <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded mb-3">
                             <div>
                                 <h6 class="mb-1"><?= __('toggle_profile_pictures') ?></h6>
-                                <small class="text-muted">
-                                    <?= __('profile_pictures_description') ?>
-                                </small>
+                                <small class="text-muted"><?= __('profile_pictures_description') ?></small>
                             </div>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" role="switch" 
@@ -163,9 +153,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                         <!-- Enabled Languages -->
                         <div class="p-3 bg-light rounded mb-3">
                             <h6 class="mb-2"><i class="bi bi-translate me-1"></i><?= __('enabled_languages') ?></h6>
-                            <small class="text-muted d-block mb-3">
-                                <?= __('enabled_languages_description') ?>
-                            </small>
+                            <small class="text-muted d-block mb-3"><?= __('enabled_languages_description') ?></small>
                             <?php
                             $enabledLangs = explode(',', $settings['enabled_languages'] ?? 'ar');
                             $langOptions = [
@@ -204,9 +192,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                         <!-- Login Methods -->
                         <div class="p-3 bg-light rounded mb-3">
                             <h6 class="mb-2"><i class="bi bi-box-arrow-in-right me-1"></i><?= __('login_methods') ?></h6>
-                            <small class="text-muted d-block mb-3">
-                                <?= __('login_methods_description') ?>
-                            </small>
+                            <small class="text-muted d-block mb-3"><?= __('login_methods_description') ?></small>
                             <?php $currentLoginMethod = $settings['login_methods'] ?? 'both'; ?>
                             <div class="form-check mb-2">
                                 <input class="form-check-input" type="radio" name="login_methods" id="login_both" value="both"
@@ -228,9 +214,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                         <!-- Team Size Settings -->
                         <div class="p-3 bg-light rounded mb-3">
                             <h6 class="mb-2"><i class="bi bi-people me-1"></i><?= __('team_size') ?></h6>
-                            <small class="text-muted d-block mb-3">
-                                <?= __('team_size_description') ?>
-                            </small>
+                            <small class="text-muted d-block mb-3"><?= __('team_size_description') ?></small>
                             <div class="row g-3">
                                 <div class="col-6">
                                     <label class="form-label small fw-bold"><?= __('min_members') ?></label>
@@ -251,6 +235,33 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                     </form>
                 </div>
             </div>
+
+            <!-- Departments Management Card -->
+            <div class="card shadow mt-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-building me-2"></i><?= __('departments') ?></h5>
+                </div>
+                <div class="card-body p-4">
+                    <small class="text-muted d-block mb-3"><?= __('departments_description') ?></small>
+
+                    <!-- Add Department Form -->
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" id="newDepartmentName" placeholder="<?= __('department_name') ?>">
+                        <button class="btn btn-primary" type="button" id="addDepartmentBtn" onclick="addDepartment()">
+                            <i class="bi bi-plus-lg me-1"></i><?= __('add_department') ?>
+                        </button>
+                    </div>
+
+                    <div id="deptAlert" class="alert d-none mb-3"></div>
+
+                    <!-- Department List -->
+                    <div id="departmentsList">
+                        <div class="text-center py-3">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -263,15 +274,131 @@ document.querySelectorAll('input[id^="lang_"]').forEach(cb => {
     cb.addEventListener('change', () => {
         const sel = document.getElementById('default_language');
         const enabledCodes = [...document.querySelectorAll('input[id^="lang_"]:checked')].map(c => c.id.replace('lang_', ''));
-        // Enable/disable options
         [...sel.options].forEach(opt => {
             opt.disabled = !enabledCodes.includes(opt.value);
         });
-        // If current selection is now disabled, pick first enabled option
         if (sel.selectedOptions[0]?.disabled) {
             const first = [...sel.options].find(o => !o.disabled);
             if (first) first.selected = true;
         }
     });
 });
+
+// ─── Departments CRUD ─── 
+const deptAlert = document.getElementById('deptAlert');
+
+function showDeptAlert(msg, type = 'success') {
+    deptAlert.className = 'alert alert-' + type + ' mb-3';
+    deptAlert.textContent = msg;
+    deptAlert.classList.remove('d-none');
+    setTimeout(() => deptAlert.classList.add('d-none'), 3000);
+}
+
+async function loadDepartments() {
+    try {
+        const res = await fetch('/api/departments.php');
+        const data = await res.json();
+        const list = document.getElementById('departmentsList');
+        if (!data.departments || data.departments.length === 0) {
+            list.innerHTML = '<p class="text-muted text-center py-2">' + <?= json_encode(__('no_departments')) ?> + '</p>';
+            return;
+        }
+        list.innerHTML = data.departments.map(d => `
+            <div class="d-flex align-items-center justify-content-between p-2 bg-light rounded mb-2" id="dept-${d.id}">
+                <span class="dept-name fw-medium">${escapeHtml(d.name)}</span>
+                <div>
+                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editDepartment(${d.id}, '${escapeHtml(d.name).replace(/'/g, "\\'")}')">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteDepartment(${d.id}, '${escapeHtml(d.name).replace(/'/g, "\\'")}')">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+function escapeHtml(text) {
+    const el = document.createElement('span');
+    el.textContent = text;
+    return el.innerHTML;
+}
+
+async function addDepartment() {
+    const input = document.getElementById('newDepartmentName');
+    const name = input.value.trim();
+    if (!name) return;
+
+    try {
+        const res = await fetch('/api/departments.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name })
+        });
+        const data = await res.json();
+        if (data.success) {
+            input.value = '';
+            showDeptAlert(data.message, 'success');
+            loadDepartments();
+        } else {
+            showDeptAlert(data.error, 'danger');
+        }
+    } catch (err) {
+        showDeptAlert(err.message, 'danger');
+    }
+}
+
+async function editDepartment(id, currentName) {
+    const newName = prompt(<?= json_encode(__('department_name')) ?>, currentName);
+    if (!newName || newName.trim() === currentName) return;
+
+    try {
+        const res = await fetch('/api/departments.php', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, name: newName.trim() })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showDeptAlert(data.message, 'success');
+            loadDepartments();
+        } else {
+            showDeptAlert(data.error, 'danger');
+        }
+    } catch (err) {
+        showDeptAlert(err.message, 'danger');
+    }
+}
+
+async function deleteDepartment(id, name) {
+    if (!confirm(<?= json_encode(__('confirm_delete_department')) ?>)) return;
+
+    try {
+        const res = await fetch('/api/departments.php', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showDeptAlert(data.message, 'success');
+            loadDepartments();
+        } else {
+            showDeptAlert(data.error, 'danger');
+        }
+    } catch (err) {
+        showDeptAlert(err.message, 'danger');
+    }
+}
+
+// Enter key on new department input
+document.getElementById('newDepartmentName').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') addDepartment();
+});
+
+// Load departments on page load
+document.addEventListener('DOMContentLoaded', loadDepartments);
 </script>

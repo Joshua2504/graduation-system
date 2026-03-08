@@ -8,13 +8,23 @@ CREATE TABLE IF NOT EXISTS `settings` (
   `student_project_creation` TINYINT(1) NOT NULL DEFAULT 1,
   `show_reviewer_name` TINYINT(1) NOT NULL DEFAULT 0,
   `leader_transfer` TINYINT(1) NOT NULL DEFAULT 1,
-  `enabled_languages` VARCHAR(50) NOT NULL DEFAULT 'ar,en,de',
+  `enabled_languages` VARCHAR(50) NOT NULL DEFAULT 'ar',
+  `default_language` VARCHAR(5) NOT NULL DEFAULT 'ar',
+  `login_methods` VARCHAR(20) NOT NULL DEFAULT 'both',
+  `profile_pictures_enabled` TINYINT(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `settings` (`id`, `registration_open`, `email_verification_required`, `min_team_size`, `max_team_size`, `student_project_creation`, `show_reviewer_name`, `leader_transfer`, `enabled_languages`)
-VALUES (1, 1, 1, 2, 7, 1, 0, 1, 'ar,en,de')
+INSERT INTO `settings` (`id`, `registration_open`, `email_verification_required`, `min_team_size`, `max_team_size`, `student_project_creation`, `show_reviewer_name`, `leader_transfer`, `enabled_languages`, `default_language`, `login_methods`)
+VALUES (1, 1, 1, 2, 7, 1, 0, 1, 'ar', 'ar', 'both')
 ON DUPLICATE KEY UPDATE `id` = `id`;
+
+-- Migration: add login_methods column if missing
+SET @col_exists = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'settings' AND COLUMN_NAME = 'login_methods');
+SET @sql = IF(@col_exists = 0, 'ALTER TABLE `settings` ADD COLUMN `login_methods` VARCHAR(20) NOT NULL DEFAULT \'both\' AFTER `enabled_languages`', 'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 -- ─── Users (with profile fields) ───
 CREATE TABLE IF NOT EXISTS `users` (
@@ -23,7 +33,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `email` VARCHAR(255) NOT NULL,
   `password` VARCHAR(255) NOT NULL,
   `student_code` VARCHAR(50) DEFAULT NULL,
-  `role` ENUM('student','doctor') NOT NULL DEFAULT 'student',
+  `role` ENUM('student','doctor','admin') NOT NULL DEFAULT 'student',
   `gender` ENUM('male','female') DEFAULT NULL,
   `national_id` VARCHAR(20) DEFAULT NULL,
   `birth_date` DATE DEFAULT NULL,
@@ -56,7 +66,7 @@ CREATE TABLE IF NOT EXISTS `projects` (
   `join_code` VARCHAR(8) NOT NULL,
   `submission_date` DATETIME DEFAULT NULL,
   `status` ENUM('draft','under_review','accepted','rejected') NOT NULL DEFAULT 'draft',
-  `group_number` INT DEFAULT NULL,
+  `group_number` VARCHAR(10) DEFAULT NULL,
   `doctor_note` TEXT DEFAULT NULL,
   `reviewed_by` INT DEFAULT NULL,
   `allow_resubmit` TINYINT(1) NOT NULL DEFAULT 1,
@@ -73,6 +83,7 @@ CREATE TABLE IF NOT EXISTS `project_members` (
   `project_id` INT NOT NULL,
   `user_id` INT NOT NULL,
   `role` ENUM('leader','member') NOT NULL DEFAULT 'member',
+  `paper_submitted` TINYINT(1) NOT NULL DEFAULT 0,
   `joined_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_project_user` (`project_id`, `user_id`),
@@ -111,57 +122,6 @@ CREATE TABLE IF NOT EXISTS `project_reviews` (
   CONSTRAINT `fk_pr_project` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_pr_reviewer` FOREIGN KEY (`reviewer_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ─── Seed: Doctor account (password: doctor123) ───
-INSERT INTO `users` (`name`, `email`, `password`, `role`, `email_verified`) VALUES
-('Doctor', 'doctor@treudler.net', '$2y$10$1hH9/Y0Noq//YW5rA9Xwbu5K9yPtX8VlbYXKqiwlZa77.LxsmGHHy', 'doctor', 1)
-ON DUPLICATE KEY UPDATE `id` = `id`;
-
--- ─── Seed: Demo student accounts (password: student123) ───
-INSERT INTO `users` (`name`, `email`, `password`, `student_code`, `role`, `email_verified`) VALUES
-('Student 1', 'student1@treudler.net', '$2y$10$yqqDmhPnvBeLXswbIx3dfepMRnibuYMv/UuUb8hp8T3NAWn0yNepO', '001', 'student', 1)
-ON DUPLICATE KEY UPDATE `id` = `id`;
-INSERT INTO `users` (`name`, `email`, `password`, `student_code`, `role`, `email_verified`) VALUES
-('Student 2', 'student2@treudler.net', '$2y$10$yqqDmhPnvBeLXswbIx3dfepMRnibuYMv/UuUb8hp8T3NAWn0yNepO', '002', 'student', 1)
-ON DUPLICATE KEY UPDATE `id` = `id`;
-INSERT INTO `users` (`name`, `email`, `password`, `student_code`, `role`, `email_verified`) VALUES
-('Student 3', 'student3@treudler.net', '$2y$10$yqqDmhPnvBeLXswbIx3dfepMRnibuYMv/UuUb8hp8T3NAWn0yNepO', '003', 'student', 1)
-ON DUPLICATE KEY UPDATE `id` = `id`;
-INSERT INTO `users` (`name`, `email`, `password`, `student_code`, `role`, `email_verified`) VALUES
-('Student 4', 'student4@treudler.net', '$2y$10$yqqDmhPnvBeLXswbIx3dfepMRnibuYMv/UuUb8hp8T3NAWn0yNepO', '004', 'student', 1)
-ON DUPLICATE KEY UPDATE `id` = `id`;
-INSERT INTO `users` (`name`, `email`, `password`, `student_code`, `role`, `email_verified`) VALUES
-('Student 5', 'student5@treudler.net', '$2y$10$yqqDmhPnvBeLXswbIx3dfepMRnibuYMv/UuUb8hp8T3NAWn0yNepO', '005', 'student', 1)
-ON DUPLICATE KEY UPDATE `id` = `id`;
-
--- ─── Seed: Demo projects ───
-INSERT INTO `projects` (`title`, `type`, `description`, `join_code`, `status`, `group_number`, `submission_date`, `reviewed_by`)
-SELECT 'Library Management System', 'Web Application',
-       'A comprehensive library management system that allows registering books and members, handling borrowing and return operations, and generating periodic reports. The system includes a user-friendly interface for patrons and an advanced admin panel for librarians.',
-       'DEMO0001', 'accepted', 1, NOW(),
-       (SELECT `id` FROM `users` WHERE `email` = 'doctor@treudler.net' LIMIT 1)
-FROM dual WHERE NOT EXISTS (SELECT 1 FROM `projects` WHERE `join_code` = 'DEMO0001');
-
-INSERT INTO `projects` (`title`, `type`, `description`, `join_code`, `status`, `submission_date`)
-SELECT 'Fitness Tracking App', 'Mobile Application',
-       'A smartphone application that helps users track their physical activity, log workouts, count calories, and monitor progress toward their health goals.',
-       'DEMO0002', 'under_review', NOW()
-FROM dual WHERE NOT EXISTS (SELECT 1 FROM `projects` WHERE `join_code` = 'DEMO0002');
-
--- ─── Seed: Demo project members ───
--- Project 1 (Library System): student1 = leader, student2 & student3 = members
-INSERT IGNORE INTO `project_members` (`project_id`, `user_id`, `role`)
-SELECT p.id, u.id, 'leader' FROM `projects` p, `users` u WHERE p.join_code = 'DEMO0001' AND u.email = 'student1@treudler.net';
-INSERT IGNORE INTO `project_members` (`project_id`, `user_id`, `role`)
-SELECT p.id, u.id, 'member' FROM `projects` p, `users` u WHERE p.join_code = 'DEMO0001' AND u.email = 'student2@treudler.net';
-INSERT IGNORE INTO `project_members` (`project_id`, `user_id`, `role`)
-SELECT p.id, u.id, 'member' FROM `projects` p, `users` u WHERE p.join_code = 'DEMO0001' AND u.email = 'student3@treudler.net';
-
--- Project 2 (Fitness App): student4 = leader, student5 = member
-INSERT IGNORE INTO `project_members` (`project_id`, `user_id`, `role`)
-SELECT p.id, u.id, 'leader' FROM `projects` p, `users` u WHERE p.join_code = 'DEMO0002' AND u.email = 'student4@treudler.net';
-INSERT IGNORE INTO `project_members` (`project_id`, `user_id`, `role`)
-SELECT p.id, u.id, 'member' FROM `projects` p, `users` u WHERE p.join_code = 'DEMO0002' AND u.email = 'student5@treudler.net';
 
 -- ─── Migrations ───
 
@@ -230,4 +190,54 @@ CREATE TABLE IF NOT EXISTS `project_reviews` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ─── Migrations ───
-ALTER TABLE `settings` ADD COLUMN IF NOT EXISTS `enabled_languages` VARCHAR(50) NOT NULL DEFAULT 'ar,en,de' AFTER `leader_transfer`;
+ALTER TABLE `settings` ADD COLUMN IF NOT EXISTS `enabled_languages` VARCHAR(50) NOT NULL DEFAULT 'ar' AFTER `leader_transfer`;
+
+-- Add 'admin' to users role ENUM (safe for existing databases)
+SET @has_admin = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'role' AND COLUMN_TYPE LIKE '%admin%');
+SET @sql = IF(@has_admin = 0, "ALTER TABLE `users` MODIFY COLUMN `role` ENUM('student','doctor','admin') NOT NULL DEFAULT 'student'", 'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Upgrade first doctor to admin if no admin exists yet (for existing installations)
+SET @admin_count = (SELECT COUNT(*) FROM `users` WHERE `role` = 'admin');
+SET @first_doctor = (SELECT MIN(id) FROM `users` WHERE `role` = 'doctor');
+SET @sql = IF(@admin_count = 0 AND @first_doctor IS NOT NULL, CONCAT('UPDATE `users` SET `role` = ''admin'' WHERE id = ', @first_doctor), 'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Add default_language column to settings (safe for existing databases)
+SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'settings' AND COLUMN_NAME = 'default_language');
+SET @sql = IF(@col_exists = 0, 'ALTER TABLE `settings` ADD COLUMN `default_language` VARCHAR(5) NOT NULL DEFAULT \'ar\' AFTER `enabled_languages`', 'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Migrate group_number from INT to VARCHAR(10) if it's still INT (safe for existing databases)
+SET @is_int = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'projects' AND COLUMN_NAME = 'group_number' AND DATA_TYPE = 'int');
+SET @sql = IF(@is_int > 0, 'ALTER TABLE `projects` MODIFY COLUMN `group_number` VARCHAR(10) DEFAULT NULL', 'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Convert existing numeric group_numbers to WG-prefixed format
+UPDATE `projects` SET `group_number` = CONCAT('WG', LPAD(`group_number`, 2, '0')) WHERE `group_number` IS NOT NULL AND `group_number` REGEXP '^[0-9]+$';
+
+-- ─── Departments table ───
+CREATE TABLE IF NOT EXISTS `departments` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_dept_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─── Migrations: paper_submitted column in project_members ───
+
+-- Add paper_submitted column to project_members (tracks whether each student submitted their paper)
+SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'project_members' AND COLUMN_NAME = 'paper_submitted');
+SET @sql = IF(@col_exists = 0, 'ALTER TABLE `project_members` ADD COLUMN `paper_submitted` TINYINT(1) NOT NULL DEFAULT 0 AFTER `role`', 'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;

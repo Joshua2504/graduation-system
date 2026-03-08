@@ -245,13 +245,22 @@ if ($method === 'PUT') {
     if (isProjectMember($projectId, $userId)) {
         jsonResponse(['error' => 'أنت عضو بالفعل في هذا المشروع'], 400);
     }
-    
+
+    // Students are limited to 1 project
+    if (countUserProjects($userId) >= 1) {
+        jsonResponse(['error' => 'لا يمكنك الانضمام لأكثر من مشروع واحد'], 403);
+    }
+    // Locked if they have an accepted project
+    if (isStudentProjectLocked($userId)) {
+        jsonResponse(['error' => 'تم قبول مشروعك ولا يمكنك الانضمام لمشروع آخر'], 403);
+    }
+
     $settings = getSettings();
     $memberCount = countProjectMembers($projectId);
     if ($memberCount >= (int)$settings['max_team_size']) {
         jsonResponse(['error' => 'الفريق مكتمل العدد'], 400);
     }
-    
+
     // Add as member
     $stmt = $pdo->prepare("INSERT INTO project_members (project_id, user_id, role) VALUES (?, ?, 'member')");
     $stmt->execute([$projectId, $userId]);
@@ -285,8 +294,8 @@ if ($method === 'PATCH') {
         jsonResponse(['error' => 'معرف الدعوة مطلوب'], 400);
     }
 
-    // Doctors can resend any invitation, students can only resend their own
-    if ($role === 'doctor') {
+    // Doctors/admins can resend any invitation, students can only resend their own
+    if ($role === 'doctor' || $role === 'admin') {
         $stmt = $pdo->prepare("SELECT i.*, p.status AS project_status FROM invitations i JOIN projects p ON p.id = i.project_id WHERE i.id = ? AND i.status = 'pending'");
         $stmt->execute([$invitationId]);
     } else {
