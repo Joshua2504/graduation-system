@@ -2,10 +2,12 @@
 /**
  * Bootstrap — common includes for all pages.
  * Loads DB connection, authentication, helper functions, and i18n.
- * 
+ *
  * Usage: require_once __DIR__ . '/../includes/bootstrap.php';
  *   (or from same dir: require_once __DIR__ . '/bootstrap.php';)
  */
+
+ob_start();
 
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/auth.php';
