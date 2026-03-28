@@ -323,7 +323,8 @@ function getPendingInvitations(int $userId): array {
     $pdo = getDB();
     $stmt = $pdo->prepare("
         SELECT i.*, p.title AS project_title, p.type AS project_type,
-               u.name AS invited_by_name
+               u.name AS invited_by_name,
+               (SELECT COUNT(*) FROM project_members pm WHERE pm.project_id = p.id) AS member_count
         FROM invitations i
         JOIN projects p ON p.id = i.project_id
         JOIN users u ON u.id = i.invited_by
