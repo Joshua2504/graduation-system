@@ -128,7 +128,7 @@ $isAr = getLang() === 'ar';
                                     }
                                 }
                             ?>
-                                <tr>
+                                <tr style="cursor:pointer" onclick="location.href='/professor/project?id=<?= $p['id'] ?>'">
                                     <td><?= $i + 1 ?></td>
                                     <td>
                                         <strong><?= sanitize($p['title']) ?></strong>
@@ -138,7 +138,7 @@ $isAr = getLang() === 'ar';
                                                 <i class="bi bi-exclamation-triangle me-1"></i><?= __('duplicate_warning') ?>
                                             </span>
                                             <?php if ($dupeLink): ?>
-                                                <a href="<?= $dupeLink ?>" class="small"><?= __('view_similar') ?></a>
+                                                <a href="<?= $dupeLink ?>" class="small" onclick="event.stopPropagation()"><?= __('view_similar') ?></a>
                                             <?php endif; ?>
                                         <?php endif; ?>
                                     </td>
