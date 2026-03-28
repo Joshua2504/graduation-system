@@ -25,7 +25,7 @@ if ($method === 'GET') {
     if ($type === 'sent' && $projectId > 0) {
         // Sent invitations for a project (leader only)
         if (!isProjectLeader($projectId, $userId)) {
-            jsonResponse(['error' => 'غير مصرح'], 403);
+            jsonResponse(['error' => __('unauthorized')], 403);
         }
         $stmt = $pdo->prepare("
             SELECT i.*, u.name AS invited_name, u.email AS invited_email
@@ -63,25 +63,25 @@ if ($method === 'POST') {
     $userId = current_user_id();
     
     if ($projectId === 0) {
-        jsonResponse(['error' => 'معرف المشروع مطلوب'], 400);
+        jsonResponse(['error' => __('project_id_required')], 400);
     }
-    
+
     // Must be leader
     if (!isProjectLeader($projectId, $userId)) {
-        jsonResponse(['error' => 'فقط قائد الفريق يمكنه إرسال الدعوات'], 403);
+        jsonResponse(['error' => __('leader_only_invite')], 403);
     }
-    
+
     // Project must be in draft
     $project = getProject($projectId);
     if (!$project || $project['status'] !== 'draft') {
-        jsonResponse(['error' => 'لا يمكن إرسال دعوات للمشروع في حالته الحالية'], 400);
+        jsonResponse(['error' => __('project_status_no_invite')], 400);
     }
-    
+
     // Check member count
     $settings = getSettings();
     $memberCount = countProjectMembers($projectId);
     if ($memberCount >= (int)$settings['max_team_size']) {
-        jsonResponse(['error' => 'الفريق مكتمل العدد'], 400);
+        jsonResponse(['error' => __('team_full')], 400);
     }
     
     // Generate invitation token
@@ -92,30 +92,30 @@ if ($method === 'POST') {
         // Direct invite by email or student_code
         $search = trim($input['search'] ?? '');
         if (empty($search)) {
-            jsonResponse(['error' => 'البريد الإلكتروني أو كود الطالب مطلوب'], 400);
+            jsonResponse(['error' => __('email_or_code_required')], 400);
         }
-        
+
         // Find student
         $stmt = $pdo->prepare("SELECT id, name, email FROM users WHERE role = 'student' AND (email = ? OR student_code = ?) AND id != ?");
         $stmt->execute([$search, $search, $userId]);
         $invitee = $stmt->fetch();
-        
+
         if (!$invitee) {
-            jsonResponse(['error' => 'الطالب غير موجود'], 404);
+            jsonResponse(['error' => __('student_not_found')], 404);
         }
-        
+
         // Check if already a member
         if (isProjectMember($projectId, $invitee['id'])) {
-            jsonResponse(['error' => 'الطالب عضو بالفعل في هذا المشروع'], 400);
+            jsonResponse(['error' => __('student_already_in_project')], 400);
         }
-        
+
         // Check if invitation already pending
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM invitations WHERE project_id = ? AND invited_user_id = ? AND status = 'pending' AND expires_at > NOW()");
         $stmt->execute([$projectId, $invitee['id']]);
         if ((int)$stmt->fetchColumn() > 0) {
-            jsonResponse(['error' => 'يوجد دعوة معلقة لهذا الطالب بالفعل'], 400);
+            jsonResponse(['error' => __('pending_invitation_exists')], 400);
         }
-        
+
         $stmt = $pdo->prepare("INSERT INTO invitations (project_id, invited_by, invited_user_id, token, expires_at) VALUES (?, ?, ?, ?, ?)");
         $stmt->execute([$projectId, $userId, $invitee['id'], $token, $expiresAt]);
 
@@ -135,7 +135,7 @@ if ($method === 'POST') {
             'success' => true,
             'invitation_id' => (int)$pdo->lastInsertId(),
             'invited_name' => $invitee['name'],
-            'message' => 'تم إرسال الدعوة بنجاح'
+            'message' => __('invitation_sent_success')
         ]);
     } else {
         // Generate token link (no specific user)
@@ -148,7 +148,7 @@ if ($method === 'POST') {
             'token' => $token,
             'join_url' => '/join?token=' . $token,
             'expires_at' => $expiresAt,
-            'message' => 'تم إنشاء رابط الدعوة'
+            'message' => __('invite_link_created')
         ]);
     }
 }
@@ -167,7 +167,7 @@ if ($method === 'PUT') {
     $invitationId = (int)($input['invitation_id'] ?? 0);
     
     if (!in_array($action, ['accept', 'decline'])) {
-        jsonResponse(['error' => 'الإجراء غير صالح'], 400);
+        jsonResponse(['error' => __('invalid_action')], 400);
     }
     
     $invitation = null;
@@ -180,20 +180,20 @@ if ($method === 'PUT') {
         $invitation = $stmt->fetch();
         
         if (!$invitation) {
-            jsonResponse(['error' => 'رابط الدعوة غير صالح'], 404);
+            jsonResponse(['error' => __('invalid_invitation_token')], 404);
         }
         if ($invitation['status'] !== 'pending') {
-            jsonResponse(['error' => 'هذه الدعوة تم استخدامها بالفعل'], 400);
+            jsonResponse(['error' => __('invitation_already_used')], 400);
         }
         if (strtotime($invitation['expires_at']) < time()) {
-            jsonResponse(['error' => 'رابط الدعوة منتهي الصلاحية'], 400);
+            jsonResponse(['error' => __('invitation_token_expired')], 400);
         }
         if ($invitation['project_status'] !== 'draft') {
-            jsonResponse(['error' => 'المشروع لم يعد يقبل أعضاء جدد'], 400);
+            jsonResponse(['error' => __('project_not_accepting')], 400);
         }
         // If it's a direct invite, ensure it's for this user
         if ($invitation['invited_user_id'] && (int)$invitation['invited_user_id'] !== $userId) {
-            jsonResponse(['error' => 'هذه الدعوة ليست موجهة لك'], 403);
+            jsonResponse(['error' => __('invitation_not_for_you')], 403);
         }
         $projectId = (int)$invitation['project_id'];
         
@@ -204,15 +204,15 @@ if ($method === 'PUT') {
         $project = $stmt->fetch();
         
         if (!$project) {
-            jsonResponse(['error' => 'كود الانضمام غير صالح'], 404);
+            jsonResponse(['error' => __('invalid_join_code')], 404);
         }
         if ($project['status'] !== 'draft') {
-            jsonResponse(['error' => 'المشروع لم يعد يقبل أعضاء جدد'], 400);
+            jsonResponse(['error' => __('project_not_accepting')], 400);
         }
         $projectId = (int)$project['id'];
         // No invitation record for join code — action must be accept
         if ($action === 'decline') {
-            jsonResponse(['error' => 'لا يمكن رفض الانضمام بالكود'], 400);
+            jsonResponse(['error' => __('cannot_decline_join_code')], 400);
         }
         
     } elseif ($invitationId > 0) {
@@ -222,43 +222,43 @@ if ($method === 'PUT') {
         $invitation = $stmt->fetch();
         
         if (!$invitation) {
-            jsonResponse(['error' => 'الدعوة غير موجودة'], 404);
+            jsonResponse(['error' => __('invitation_not_found')], 404);
         }
         if ($invitation['status'] !== 'pending') {
-            jsonResponse(['error' => 'هذه الدعوة تم الرد عليها بالفعل'], 400);
+            jsonResponse(['error' => __('invitation_already_responded')], 400);
         }
         if ($invitation['project_status'] !== 'draft') {
-            jsonResponse(['error' => 'المشروع لم يعد يقبل أعضاء جدد'], 400);
+            jsonResponse(['error' => __('project_not_accepting')], 400);
         }
         $projectId = (int)$invitation['project_id'];
     } else {
-        jsonResponse(['error' => 'يجب تحديد رمز الدعوة أو كود الانضمام'], 400);
+        jsonResponse(['error' => __('token_or_code_required')], 400);
     }
     
     if ($action === 'decline' && $invitation) {
         $stmt = $pdo->prepare("UPDATE invitations SET status = 'declined' WHERE id = ?");
         $stmt->execute([$invitation['id']]);
-        jsonResponse(['success' => true, 'message' => 'تم رفض الدعوة']);
+        jsonResponse(['success' => true, 'message' => __('invitation_declined')]);
     }
     
     // Accept: add user to project
     if (isProjectMember($projectId, $userId)) {
-        jsonResponse(['error' => 'أنت عضو بالفعل في هذا المشروع'], 400);
+        jsonResponse(['error' => __('already_in_project')], 400);
     }
 
     // Students are limited to 1 project
     if (countUserProjects($userId) >= 1) {
-        jsonResponse(['error' => 'لا يمكنك الانضمام لأكثر من مشروع واحد'], 403);
+        jsonResponse(['error' => __('project_limit_reached_msg')], 403);
     }
     // Locked if they have an accepted project
     if (isStudentProjectLocked($userId)) {
-        jsonResponse(['error' => 'تم قبول مشروعك ولا يمكنك الانضمام لمشروع آخر'], 403);
+        jsonResponse(['error' => __('project_accepted_locked_msg')], 403);
     }
 
     $settings = getSettings();
     $memberCount = countProjectMembers($projectId);
     if ($memberCount >= (int)$settings['max_team_size']) {
-        jsonResponse(['error' => 'الفريق مكتمل العدد'], 400);
+        jsonResponse(['error' => __('team_full')], 400);
     }
 
     // Add as member
@@ -277,7 +277,7 @@ if ($method === 'PUT') {
         'success' => true,
         'project_id' => $projectId,
         'project_title' => $project['title'] ?? '',
-        'message' => 'تم الانضمام للمشروع بنجاح'
+        'message' => __('joined_project_success')
     ]);
 }
 
@@ -291,7 +291,7 @@ if ($method === 'PATCH') {
     $role = current_role();
 
     if ($invitationId === 0) {
-        jsonResponse(['error' => 'معرف الدعوة مطلوب'], 400);
+        jsonResponse(['error' => __('invitation_id_required')], 400);
     }
 
     // Doctors/admins can resend any invitation, students can only resend their own
@@ -305,10 +305,10 @@ if ($method === 'PATCH') {
     $invitation = $stmt->fetch();
 
     if (!$invitation) {
-        jsonResponse(['error' => 'الدعوة غير موجودة أو لا يمكن إعادة إرسالها'], 404);
+        jsonResponse(['error' => __('invitation_not_resendable')], 404);
     }
     if ($invitation['project_status'] !== 'draft') {
-        jsonResponse(['error' => 'المشروع لم يعد يقبل أعضاء جدد'], 400);
+        jsonResponse(['error' => __('project_not_accepting')], 400);
     }
 
     // Refresh token and extend expiry by 7 days
@@ -339,7 +339,7 @@ if ($method === 'PATCH') {
     $response = [
         'success' => true,
         'expires_at' => $newExpiry,
-        'message' => 'تم إعادة إرسال الدعوة بنجاح'
+        'message' => __('invitation_resent')
     ];
 
     // If it's a link invitation (no invited_user_id), return the new join URL
@@ -360,21 +360,21 @@ if ($method === 'DELETE') {
     $userId = current_user_id();
     
     if ($invitationId === 0) {
-        jsonResponse(['error' => 'معرف الدعوة مطلوب'], 400);
+        jsonResponse(['error' => __('invitation_id_required')], 400);
     }
-    
+
     $stmt = $pdo->prepare("SELECT * FROM invitations WHERE id = ? AND invited_by = ? AND status = 'pending'");
     $stmt->execute([$invitationId, $userId]);
     $invitation = $stmt->fetch();
     
     if (!$invitation) {
-        jsonResponse(['error' => 'الدعوة غير موجودة أو لا يمكن إلغاؤها'], 404);
+        jsonResponse(['error' => __('invitation_not_cancellable')], 404);
     }
     
     $stmt = $pdo->prepare("DELETE FROM invitations WHERE id = ?");
     $stmt->execute([$invitationId]);
     
-    jsonResponse(['success' => true, 'message' => 'تم إلغاء الدعوة']);
+    jsonResponse(['success' => true, 'message' => __('invitation_cancelled')]);
 }
 
 jsonResponse(['error' => 'Method not allowed'], 405);
