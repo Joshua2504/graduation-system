@@ -141,7 +141,7 @@ $isAr = getLang() === 'ar';
                                     </td>
                                 </tr>
                                 <?php foreach ($groupProjects as $i => $p): ?>
-                                <tr data-status="<?= $key ?>">
+                                <tr data-status="<?= $key ?>" style="cursor:pointer" onclick="location.href='/professor/project?id=<?= $p['id'] ?>'">
                                     <td><?= $i + 1 ?></td>
                                     <td class="fw-bold"><?= sanitize($p['title']) ?></td>
                                     <td><small class="text-muted"><?= sanitize($p['type'] ?: '—') ?></small></td>
