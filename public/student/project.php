@@ -230,11 +230,11 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             <thead class="table-light">
                                 <tr>
                                     <th>#</th>
-                                    <th><?= __('name') ?></th>
-                                    <th><?= __('student_code') ?></th>
-                                    <th><?= __('role') ?></th>
-                                    <th><?= __('profile') ?></th>
-                                    <th><?= __('paper') ?></th>
+                                    <th data-sortable><?= __('name') ?></th>
+                                    <th data-sortable><?= __('student_code') ?></th>
+                                    <th data-sortable><?= __('role') ?></th>
+                                    <th data-sortable><?= __('profile') ?></th>
+                                    <th data-sortable><?= __('paper') ?></th>
                                     <?php if (($isLeader && $project['status'] === 'draft') || $canTransferLeadership): ?>
                                         <th></th>
                                     <?php endif; ?>

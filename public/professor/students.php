@@ -46,13 +46,13 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                     <thead class="table-dark">
                         <tr>
                             <th>#</th>
-                            <th><?= __('name') ?></th>
-                            <th><?= __('email') ?></th>
-                            <th><?= __('student_code') ?></th>
-                            <th><?= __('profile') ?></th>
-                            <th><?= __('email_col') ?></th>
-                            <th><?= __('account') ?></th>
-                            <th><?= __('registered') ?></th>
+                            <th data-sortable><?= __('name') ?></th>
+                            <th data-sortable><?= __('email') ?></th>
+                            <th data-sortable><?= __('student_code') ?></th>
+                            <th data-sortable><?= __('profile') ?></th>
+                            <th data-sortable><?= __('email_col') ?></th>
+                            <th data-sortable><?= __('account') ?></th>
+                            <th data-sortable><?= __('registered') ?></th>
                             <th><?= __('actions') ?></th>
                         </tr>
                     </thead>

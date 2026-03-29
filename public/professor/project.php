@@ -167,11 +167,11 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                     <thead class="table-light">
                         <tr>
                             <th>#</th>
-                            <th><?= __('name') ?></th>
-                            <th><?= __('student_code') ?></th>
-                            <th><?= __('role') ?></th>
-                            <th><?= __('profile') ?></th>
-                            <th><?= __('documents') ?></th>
+                            <th data-sortable><?= __('name') ?></th>
+                            <th data-sortable><?= __('student_code') ?></th>
+                            <th data-sortable><?= __('role') ?></th>
+                            <th data-sortable><?= __('profile') ?></th>
+                            <th data-sortable><?= __('documents') ?></th>
                             <th></th>
                         </tr>
                     </thead>
@@ -315,12 +315,12 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                     <table class="table table-sm mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th><?= __('invited_student') ?></th>
-                                <th><?= __('email_col') ?></th>
-                                <th><?= __('code') ?></th>
-                                <th><?= __('invited_by') ?></th>
-                                <th><?= __('invited_at') ?></th>
-                                <th><?= __('expires') ?></th>
+                                <th data-sortable><?= __('invited_student') ?></th>
+                                <th data-sortable><?= __('email_col') ?></th>
+                                <th data-sortable><?= __('code') ?></th>
+                                <th data-sortable><?= __('invited_by') ?></th>
+                                <th data-sortable><?= __('invited_at') ?></th>
+                                <th data-sortable><?= __('expires') ?></th>
                                 <th></th>
                             </tr>
                         </thead>
