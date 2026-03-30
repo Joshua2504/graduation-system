@@ -74,8 +74,8 @@ if ($method === 'PUT') {
         jsonResponse(['error' => 'السنة الدراسية غير صالحة'], 400);
     }
 
-    // Validate section is one of the existing departments
-    if (isset($input['section']) && !empty($input['section'])) {
+    // Validate section is one of the existing departments (skip for admin)
+    if ($role !== 'admin' && isset($input['section']) && !empty($input['section'])) {
         $departments = getDepartments();
         $deptNames = array_column($departments, 'name');
         if (!in_array($input['section'], $deptNames)) {

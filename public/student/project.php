@@ -773,6 +773,7 @@ async function resendInvitation(invitationId) {
             location.reload();
         } else {
             alert(data.error);
+            location.reload();
         }
     } catch (err) { alert(err.message); }
 }

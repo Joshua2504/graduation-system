@@ -112,6 +112,11 @@ if ($demoActive) {
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link <?= $currentPage === 'departments' ? 'active' : '' ?>" href="/admin/departments">
+                            <i class="bi bi-diagram-3 me-1"></i><?= __('departments') ?>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link <?= $currentPage === 'students' && strpos($_SERVER['PHP_SELF'], '/admin/') !== false ? 'active' : '' ?>" href="/admin/students">
                             <i class="bi bi-people me-1"></i><?= __('student_accounts') ?>
                         </a>
