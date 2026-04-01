@@ -179,7 +179,7 @@ function sendVerificationEmail(string $email, string $name, string $token, strin
     if ($lang === 'ar') {
         $subject = 'تأكيد البريد الإلكتروني - نظام مشاريع التخرج';
         $heading = 'تأكيد البريد الإلكتروني';
-        $greeting = "مرحباً $name،";
+        $greeting = "مرحباً {$name}،";
         $message = 'شكراً لتسجيلك في نظام إدارة مشاريع التخرج. يرجى الضغط على الزر أدناه لتأكيد بريدك الإلكتروني.';
         $btnText = 'تأكيد البريد الإلكتروني';
         $expiry = 'هذا الرابط صالح لمدة 24 ساعة.';
@@ -242,7 +242,7 @@ function sendInvitationEmail(string $email, string $inviteeName, string $inviter
     if ($lang === 'ar') {
         $subject = 'دعوة للانضمام لمشروع تخرج - ' . $projectTitle;
         $heading = 'دعوة للانضمام لمشروع تخرج';
-        $greeting = "مرحباً $inviteeName،";
+        $greeting = "مرحباً {$inviteeName}،";
         $message = "قام <strong>$inviterName</strong> بدعوتك للانضمام لمشروع التخرج <strong>$projectTitle</strong>. اضغط على الزر أدناه لقبول الدعوة.";
         $btnText = 'قبول الدعوة';
         $expiry = 'هذه الدعوة صالحة لمدة 7 أيام.';
@@ -303,7 +303,7 @@ function sendWelcomeEmail(string $email, string $name, string $password, string 
     if ($lang === 'ar') {
         $subject = 'حساب جديد - نظام مشاريع التخرج';
         $heading = 'مرحباً بك في نظام مشاريع التخرج';
-        $greeting = "مرحباً $name،";
+        $greeting = "مرحباً {$name}،";
         $message = 'تم إنشاء حساب لك في نظام إدارة مشاريع التخرج. يمكنك تسجيل الدخول باستخدام البيانات التالية:';
         $emailLabel = 'البريد الإلكتروني';
         $passLabel = 'كلمة المرور';
@@ -391,7 +391,7 @@ function sendProfessorWelcomeEmail(string $email, string $name, string $password
     } else {
         $subject = 'حساب أستاذ جديد - نظام مشاريع التخرج';
         $heading = 'مرحباً بك في نظام مشاريع التخرج';
-        $greeting = "مرحباً $name،";
+        $greeting = "مرحباً {$name}،";
         $message = 'تم إنشاء حساب أستاذ لك في نظام إدارة مشاريع التخرج. يمكنك تسجيل الدخول باستخدام البيانات التالية:';
         $emailLabel = 'البريد الإلكتروني';
         $passLabel = 'كلمة المرور';
