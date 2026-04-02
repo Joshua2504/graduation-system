@@ -128,7 +128,9 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                 <label class="form-label fw-bold"><?= __('national_id') ?> <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" name="national_id" id="national_id" 
                                        value="<?= sanitize($user['national_id'] ?? '') ?>" 
-                                       maxlength="14" pattern="\d{14}" placeholder="<?= __('fourteen_digits') ?>" required>
+                                       maxlength="14" pattern="\d{14}" placeholder="<?= __('fourteen_digits') ?>" required
+                                       oninvalid="this.setCustomValidity('<?= htmlspecialchars(__('national_id_format'), ENT_QUOTES, 'UTF-8') ?>')"
+                                       oninput="this.setCustomValidity('')">
                             </div>
                             <!-- Birth Date -->
                             <div class="col-md-6">
@@ -157,7 +159,9 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                 <label class="form-label fw-bold"><?= __('phone') ?> <span class="text-danger">*</span></label>
                                 <input type="tel" class="form-control" name="phone" id="phone" 
                                        value="<?= sanitize($user['phone'] ?? '') ?>" 
-                                       maxlength="11" pattern="\d{11}" placeholder="<?= __('eleven_digits') ?>" required>
+                                       maxlength="11" pattern="\d{11}" placeholder="<?= __('eleven_digits') ?>" required
+                                       oninvalid="this.setCustomValidity('<?= htmlspecialchars(__('phone_format'), ENT_QUOTES, 'UTF-8') ?>')"
+                                       oninput="this.setCustomValidity('')">
                             </div>
                             <!-- Section/Department -->
                             <div class="col-md-6">

@@ -206,11 +206,15 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
                             <label class="form-label"><?= __('national_id') ?></label>
-                            <input type="text" class="form-control" id="edit_national_id" pattern="\d{14}" maxlength="14">
+                            <input type="text" class="form-control" id="edit_national_id" pattern="\d{14}" maxlength="14"
+                                   oninvalid="this.setCustomValidity('<?= htmlspecialchars(__('national_id_format'), ENT_QUOTES, 'UTF-8') ?>')"
+                                   oninput="this.setCustomValidity('')">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label"><?= __('phone') ?></label>
-                            <input type="text" class="form-control" id="edit_phone" pattern="\d{11}" maxlength="11">
+                            <input type="text" class="form-control" id="edit_phone" pattern="\d{11}" maxlength="11"
+                                   oninvalid="this.setCustomValidity('<?= htmlspecialchars(__('phone_format'), ENT_QUOTES, 'UTF-8') ?>')"
+                                   oninput="this.setCustomValidity('')">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label"><?= __('governorate') ?></label>

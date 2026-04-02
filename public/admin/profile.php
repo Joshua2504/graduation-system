@@ -100,7 +100,9 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                 <label class="form-label fw-bold"><?= __('phone') ?></label>
                                 <input type="tel" class="form-control" name="phone" id="phone" 
                                        value="<?= sanitize($user['phone'] ?? '') ?>" 
-                                       maxlength="11" pattern="\d{11}" placeholder="<?= __('eleven_digits') ?>">
+                                       maxlength="11" pattern="\d{11}" placeholder="<?= __('eleven_digits') ?>"
+                                       oninvalid="this.setCustomValidity('<?= htmlspecialchars(__('phone_format'), ENT_QUOTES, 'UTF-8') ?>')"
+                                       oninput="this.setCustomValidity('')">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold"><?= __('section') ?></label>

@@ -394,8 +394,10 @@ $translations = [
     // Student — Profile
     'select_option_full' => ['ar' => '-- اختر --', 'en' => '-- Select --', 'de' => '-- Auswählen --'],
     'fourteen_digits' => ['ar' => '14 رقم', 'en' => '14 digits', 'de' => '14 Ziffern'],
+    'national_id_format' => ['ar' => 'يجب أن يتكون الرقم القومي من 14 رقماً', 'en' => 'National ID must be exactly 14 digits', 'de' => 'Die Personalausweisnummer muss genau 14 Ziffern enthalten'],
     'select_governorate_full' => ['ar' => '-- اختر المحافظة --', 'en' => '-- Select Governorate --', 'de' => '-- Gouvernement auswählen --'],
     'eleven_digits' => ['ar' => '11 رقم', 'en' => '11 digits', 'de' => '11 Ziffern'],
+    'phone_format' => ['ar' => 'يجب أن يتكون رقم الهاتف من 11 رقماً', 'en' => 'Phone number must be exactly 11 digits', 'de' => 'Die Telefonnummer muss genau 11 Ziffern enthalten'],
     'change' => ['ar' => 'تغيير', 'en' => 'Change', 'de' => 'Ändern'],
 
     // Join Page
