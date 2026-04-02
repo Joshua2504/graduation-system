@@ -139,12 +139,25 @@ if ($method === 'POST') {
         ]);
     } else {
         // Generate token link (no specific user)
-        $stmt = $pdo->prepare("INSERT INTO invitations (project_id, invited_by, token, expires_at) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$projectId, $userId, $token, $expiresAt]);
-        
+        // Use a transaction to atomically replace any existing pending link invitation for this
+        // project, preventing duplicate "Invite link" rows in the team members list.
+        $pdo->beginTransaction();
+        try {
+            $stmt = $pdo->prepare("DELETE FROM invitations WHERE project_id = ? AND invited_user_id IS NULL AND status = 'pending'");
+            $stmt->execute([$projectId]);
+
+            $stmt = $pdo->prepare("INSERT INTO invitations (project_id, invited_by, token, expires_at) VALUES (?, ?, ?, ?)");
+            $stmt->execute([$projectId, $userId, $token, $expiresAt]);
+            $newId = (int)$pdo->lastInsertId();
+            $pdo->commit();
+        } catch (\Exception $e) {
+            $pdo->rollBack();
+            jsonResponse(['error' => __('internal_error')], 500);
+        }
+
         jsonResponse([
             'success' => true,
-            'invitation_id' => (int)$pdo->lastInsertId(),
+            'invitation_id' => $newId,
             'token' => $token,
             'join_url' => '/join?token=' . $token,
             'expires_at' => $expiresAt,
