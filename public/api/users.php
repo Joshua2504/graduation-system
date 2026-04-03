@@ -276,6 +276,31 @@ if ($method === 'POST') {
             }
             break;
 
+        case 'reset_password':
+            $newPassword = trim($input['password'] ?? '');
+            if (empty($newPassword) || strlen($newPassword) < 6) {
+                jsonResponse(['error' => __('password_min_length')], 400);
+            }
+            $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+            $stmt = $pdo->prepare("UPDATE users SET password = ?, reset_token = NULL, reset_token_expires_at = NULL WHERE id = ?");
+            $stmt->execute([$hashedPassword, $userId]);
+
+            $emailSent = false;
+            if ($input['send_email'] === true) {
+                $stmt2 = $pdo->prepare("SELECT name, email FROM users WHERE id = ?");
+                $stmt2->execute([$userId]);
+                $student = $stmt2->fetch();
+                $lang = getLang();
+                $emailSent = sendWelcomeEmail($student['email'], $student['name'], $newPassword, $lang);
+            }
+
+            jsonResponse([
+                'success' => true,
+                'email_sent' => $emailSent,
+                'message' => __('password_reset_success')
+            ]);
+            break;
+
         case 'impersonate':
             // Allow doctor to login as a student
             $stmt2 = $pdo->prepare("SELECT id, name, email, role FROM users WHERE id = ? AND role = 'student'");
