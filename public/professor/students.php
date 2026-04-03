@@ -135,6 +135,9 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                     <button class="btn btn-outline-secondary" onclick="userAction(<?= $s['id'] ?>, 'impersonate')" title="<?= __('login_as_student') ?>">
                                         <i class="bi bi-incognito"></i>
                                     </button>
+                                    <button class="btn btn-outline-warning" onclick="openResetPasswordModal(<?= $s['id'] ?>)" title="<?= __('reset_password') ?>">
+                                        <i class="bi bi-key"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -339,6 +342,44 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= __('close') ?></button>
                 <button type="button" class="btn btn-primary" id="createStudentBtn" onclick="createStudent()">
                     <i class="bi bi-person-plus me-1"></i><?= __('create_account') ?>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reset Student Password Modal -->
+<div class="modal fade" id="resetStudentPasswordModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title"><i class="bi bi-key me-2"></i><?= __('reset_password') ?></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="resetStudentPassError" class="alert alert-danger d-none"></div>
+                <div id="resetStudentPassSuccess" class="alert alert-success d-none"></div>
+                <input type="hidden" id="resetStudentPassUserId">
+                <div class="mb-3">
+                    <label class="form-label"><?= __('new_password') ?></label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="resetStudentPassValue" minlength="6">
+                        <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('resetStudentPassValue').value = generateRandomPassword()">
+                            <i class="bi bi-shuffle"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="resetStudentPassSendEmail" checked>
+                    <label class="form-check-label" for="resetStudentPassSendEmail">
+                        <i class="bi bi-envelope me-1"></i><?= __('send_new_password_email') ?>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= __('cancel') ?></button>
+                <button type="button" class="btn btn-warning" onclick="resetStudentPassword()">
+                    <i class="bi bi-key me-1"></i><?= __('reset_password') ?>
                 </button>
             </div>
         </div>
@@ -554,10 +595,60 @@ async function userAction(userId, action) {
 
 // Generate random password
 function generatePassword() {
-    const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    document.getElementById('create_password').value = generateRandomPassword();
+}
+
+function generateRandomPassword() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
     let pass = '';
     for (let i = 0; i < 10; i++) pass += chars.charAt(Math.floor(Math.random() * chars.length));
-    document.getElementById('create_password').value = pass;
+    return pass;
+}
+
+function openResetPasswordModal(userId) {
+    document.getElementById('resetStudentPassUserId').value = userId;
+    document.getElementById('resetStudentPassValue').value = generateRandomPassword();
+    document.getElementById('resetStudentPassError').classList.add('d-none');
+    document.getElementById('resetStudentPassSuccess').classList.add('d-none');
+    new bootstrap.Modal(document.getElementById('resetStudentPasswordModal')).show();
+}
+
+async function resetStudentPassword() {
+    const userId = document.getElementById('resetStudentPassUserId').value;
+    const password = document.getElementById('resetStudentPassValue').value;
+    const sendEmail = document.getElementById('resetStudentPassSendEmail').checked;
+    const errEl = document.getElementById('resetStudentPassError');
+    const successEl = document.getElementById('resetStudentPassSuccess');
+    errEl.classList.add('d-none');
+    successEl.classList.add('d-none');
+
+    if (!password || password.length < 6) {
+        errEl.textContent = <?= json_encode(__('password_min_length')) ?>;
+        errEl.classList.remove('d-none');
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/users', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({user_id: parseInt(userId), action: 'reset_password', password, send_email: sendEmail})
+        });
+        const json = await res.json();
+        if (json.success) {
+            successEl.textContent = json.message || <?= json_encode(__('success')) ?>;
+            successEl.classList.remove('d-none');
+            setTimeout(() => {
+                bootstrap.Modal.getInstance(document.getElementById('resetStudentPasswordModal')).hide();
+            }, 1500);
+        } else {
+            errEl.textContent = json.error || <?= json_encode(__('error')) ?>;
+            errEl.classList.remove('d-none');
+        }
+    } catch (e) {
+        errEl.textContent = <?= json_encode(__('error')) ?>;
+        errEl.classList.remove('d-none');
+    }
 }
 
 // Create student account

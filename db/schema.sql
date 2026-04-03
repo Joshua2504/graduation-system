@@ -241,3 +241,19 @@ SET @sql = IF(@col_exists = 0, 'ALTER TABLE `project_members` ADD COLUMN `paper_
 PREPARE stmt FROM @sql;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
+
+-- ─── Migrations: password reset token columns in users ───
+
+-- Add reset_token column to users (for password reset flow)
+SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'reset_token');
+SET @sql = IF(@col_exists = 0, 'ALTER TABLE `users` ADD COLUMN `reset_token` VARCHAR(64) DEFAULT NULL AFTER `token_expires_at`', 'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Add reset_token_expires_at column to users (expiry for the password reset token)
+SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'reset_token_expires_at');
+SET @sql = IF(@col_exists = 0, 'ALTER TABLE `users` ADD COLUMN `reset_token_expires_at` DATETIME DEFAULT NULL AFTER `reset_token`', 'SELECT 1');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
