@@ -208,7 +208,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                         <?= $member['member_role'] === 'leader' ? __('leader') : __('member') ?>
                                     </span>
                                 </td>
-                                <td>
+                                <td data-sort-value="<?= $complete ? 1 : 0 ?>">
                                     <?php if ($complete): ?>
                                         <span class="text-success"><i class="bi bi-check-circle-fill"></i></span>
                                     <?php else: ?>

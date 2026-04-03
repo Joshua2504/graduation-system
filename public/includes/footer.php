@@ -55,8 +55,8 @@
         rowGroups.sort(function (a, b) {
             const aCell = a[0].querySelectorAll('td')[col];
             const bCell = b[0].querySelectorAll('td')[col];
-            const aText = aCell ? aCell.textContent.trim() : '';
-            const bText = bCell ? bCell.textContent.trim() : '';
+            const aText = aCell ? (aCell.dataset.sortValue !== undefined ? aCell.dataset.sortValue : aCell.textContent.trim()) : '';
+            const bText = bCell ? (bCell.dataset.sortValue !== undefined ? bCell.dataset.sortValue : bCell.textContent.trim()) : '';
             const dateRe = /^\d{4}-\d{2}-\d{2}/;
             if (dateRe.test(aText) && dateRe.test(bText)) {
                 const c = aText.localeCompare(bText);
