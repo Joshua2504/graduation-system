@@ -90,6 +90,7 @@ $translations = [
     'loading' => ['ar' => 'جاري التحميل...', 'en' => 'Loading...', 'de' => 'Wird geladen...'],
     'error' => ['ar' => 'خطأ', 'en' => 'Error', 'de' => 'Fehler'],
     'success' => ['ar' => 'نجاح', 'en' => 'Success', 'de' => 'Erfolg'],
+    'internal_error' => ['ar' => 'حدث خطأ داخلي، يرجى المحاولة مرة أخرى', 'en' => 'An internal error occurred, please try again', 'de' => 'Ein interner Fehler ist aufgetreten, bitte versuchen Sie es erneut'],
     'required_field' => ['ar' => 'هذا الحقل مطلوب', 'en' => 'This field is required', 'de' => 'Dieses Feld ist erforderlich'],
     'settings' => ['ar' => 'الإعدادات', 'en' => 'Settings', 'de' => 'Einstellungen'],
     'actions' => ['ar' => 'الإجراءات', 'en' => 'Actions', 'de' => 'Aktionen'],
