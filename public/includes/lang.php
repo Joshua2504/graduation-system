@@ -129,6 +129,22 @@ $translations = [
     'verification_invalid' => ['ar' => 'رابط التأكيد غير صالح أو منتهي الصلاحية.', 'en' => 'Verification link is invalid or has expired.', 'de' => 'Der Bestätigungslink ist ungültig oder abgelaufen.'],
     'verification_already' => ['ar' => 'تم تأكيد بريدك الإلكتروني مسبقاً.', 'en' => 'Your email has already been verified.', 'de' => 'Ihre E-Mail wurde bereits bestätigt.'],
 
+    // Password reset
+    'forgot_password' => ['ar' => 'نسيت كلمة المرور؟', 'en' => 'Forgot password?', 'de' => 'Passwort vergessen?'],
+    'forgot_password_title' => ['ar' => 'استعادة كلمة المرور', 'en' => 'Reset Password', 'de' => 'Passwort zurücksetzen'],
+    'forgot_password_desc' => ['ar' => 'أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور.', 'en' => 'Enter your email address and we will send you a link to reset your password.', 'de' => 'Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen einen Link zum Zurücksetzen Ihres Passworts.'],
+    'forgot_password_submit' => ['ar' => 'إرسال رابط الاسترداد', 'en' => 'Send Reset Link', 'de' => 'Link senden'],
+    'invalid_email_format' => ['ar' => 'يرجى إدخال بريد إلكتروني صحيح.', 'en' => 'Please enter a valid email address.', 'de' => 'Bitte geben Sie eine gültige E-Mail-Adresse ein.'],
+    'password_reset_sent' => ['ar' => 'إذا كان البريد الإلكتروني مسجلاً في النظام، ستتلقى رابط إعادة التعيين خلال دقائق.', 'en' => 'If this email is registered in the system, you will receive a reset link within a few minutes.', 'de' => 'Wenn diese E-Mail im System registriert ist, erhalten Sie in wenigen Minuten einen Link zum Zurücksetzen.'],
+    'reset_password_title' => ['ar' => 'تعيين كلمة مرور جديدة', 'en' => 'Set New Password', 'de' => 'Neues Passwort festlegen'],
+    'reset_password_desc' => ['ar' => 'أدخل كلمة المرور الجديدة أدناه.', 'en' => 'Enter your new password below.', 'de' => 'Geben Sie unten Ihr neues Passwort ein.'],
+    'confirm_new_password' => ['ar' => 'تأكيد كلمة المرور الجديدة', 'en' => 'Confirm New Password', 'de' => 'Neues Passwort bestätigen'],
+    'reset_password_submit' => ['ar' => 'تعيين كلمة المرور', 'en' => 'Set Password', 'de' => 'Passwort festlegen'],
+    'password_reset_invalid' => ['ar' => 'رابط إعادة التعيين غير صالح أو منتهي الصلاحية.', 'en' => 'The reset link is invalid or has expired.', 'de' => 'Der Zurücksetzungslink ist ungültig oder abgelaufen.'],
+    'passwords_do_not_match' => ['ar' => 'كلمتا المرور غير متطابقتين.', 'en' => 'Passwords do not match.', 'de' => 'Die Passwörter stimmen nicht überein.'],
+    'password_too_short' => ['ar' => 'كلمة المرور يجب أن تكون 6 أحرف على الأقل.', 'en' => 'Password must be at least 6 characters.', 'de' => 'Das Passwort muss mindestens 6 Zeichen lang sein.'],
+    'back_to_login' => ['ar' => 'العودة لتسجيل الدخول', 'en' => 'Back to Login', 'de' => 'Zurück zur Anmeldung'],
+
     // Profile
     'my_profile' => ['ar' => 'ملفي الشخصي', 'en' => 'My Profile', 'de' => 'Mein Profil'],
     'profile_incomplete' => ['ar' => 'الملف الشخصي غير مكتمل', 'en' => 'Profile Incomplete', 'de' => 'Profil unvollständig'],
@@ -535,7 +551,7 @@ $translations = [
     'confirm_impersonate_professor' => ['ar' => 'الدخول كهذا الدكتور؟', 'en' => 'Login as this professor?', 'de' => 'Als dieser Professor anmelden?'],
     'reset_password' => ['ar' => 'إعادة تعيين كلمة المرور', 'en' => 'Reset Password', 'de' => 'Passwort zurücksetzen'],
     'new_password' => ['ar' => 'كلمة المرور الجديدة', 'en' => 'New Password', 'de' => 'Neues Passwort'],
-    'password_reset_success' => ['ar' => 'تم إعادة تعيين كلمة المرور بنجاح', 'en' => 'Password reset successfully', 'de' => 'Passwort erfolgreich zurückgesetzt'],
+    'password_reset_success' => ['ar' => 'تم تغيير كلمة المرور بنجاح. يمكنك الآن تسجيل الدخول.', 'en' => 'Your password has been changed successfully. You can now log in.', 'de' => 'Ihr Passwort wurde erfolgreich geändert. Sie können sich jetzt anmelden.'],
     'send_new_password_email' => ['ar' => 'إرسال كلمة المرور الجديدة بالبريد', 'en' => 'Send new password via email', 'de' => 'Neues Passwort per E-Mail senden'],
     'demo_admin' => ['ar' => 'مدير النظام', 'en' => 'Admin', 'de' => 'Administrator'],
 

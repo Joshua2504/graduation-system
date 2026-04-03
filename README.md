@@ -9,6 +9,7 @@
 ### Student Flow
 - **Landing page** — one-page login screen with system introduction, feature highlights, and multilingual support
 - **Register & verify** — create account with student code, optionally verify email
+- **Forgot password** — request a password reset link via email; works for both students and professors
 - **Complete profile** — personal info (gender, national ID, birth date, governorate, address, phone, department) + upload 3 documents (institute card, national ID, payment receipt) + optional profile picture shown across the platform
 - **Create project** — become team leader, get a unique 6-character join code
 - **Build a team** — invite members via:
