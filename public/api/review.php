@@ -21,22 +21,22 @@ $doctorNote = trim($input['doctor_note'] ?? '');
 $allowResubmit = isset($input['allow_resubmit']) ? (int)(bool)$input['allow_resubmit'] : 1;
 
 if ($projectId === 0) {
-    jsonResponse(['error' => 'معرف المشروع مطلوب'], 400);
+    jsonResponse(['error' => __('project_id_required')], 400);
 }
 
 if (!in_array($action, ['accept', 'reject'])) {
-    jsonResponse(['error' => 'الإجراء غير صالح'], 400);
+    jsonResponse(['error' => __('invalid_action')], 400);
 }
 
 $pdo = getDB();
 $project = getProject($projectId);
 
 if (!$project) {
-    jsonResponse(['error' => 'المشروع غير موجود'], 404);
+    jsonResponse(['error' => __('project_not_found')], 404);
 }
 
 if ($project['status'] !== 'under_review' && !($action === 'reject' && $project['status'] === 'accepted')) {
-    jsonResponse(['error' => 'لا يمكن تنفيذ هذا الإجراء على المشروع في حالته الحالية'], 400);
+    jsonResponse(['error' => __('cannot_review_project_status')], 400);
 }
 
 if ($action === 'accept') {
@@ -55,7 +55,7 @@ if ($action === 'accept') {
         'success' => true,
         'action' => 'accepted',
         'group_number' => $groupNumber,
-        'message' => 'تم قبول المشروع وتعيين رقم المجموعة: ' . $groupNumber
+        'message' => __('project_accepted_group_assigned') . ': ' . $groupNumber
     ]);
 } else {
     // Reject
@@ -69,6 +69,6 @@ if ($action === 'accept') {
     jsonResponse([
         'success' => true,
         'action' => 'rejected',
-        'message' => 'تم رفض المشروع'
+        'message' => __('project_rejected_success')
     ]);
 }

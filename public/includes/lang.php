@@ -585,6 +585,12 @@ $translations = [
     'invitation_resent' => ['ar' => 'تم إعادة إرسال الدعوة بنجاح', 'en' => 'Invitation resent successfully', 'de' => 'Einladung erfolgreich erneut gesendet'],
     'invitation_not_cancellable' => ['ar' => 'الدعوة غير موجودة أو لا يمكن إلغاؤها', 'en' => 'Invitation not found or cannot be cancelled', 'de' => 'Einladung nicht gefunden oder kann nicht abgebrochen werden'],
     'invitation_cancelled' => ['ar' => 'تم إلغاء الدعوة', 'en' => 'Invitation cancelled', 'de' => 'Einladung abgebrochen'],
+
+    // Review API error/success messages
+    'project_not_found' => ['ar' => 'المشروع غير موجود', 'en' => 'Project not found', 'de' => 'Projekt nicht gefunden'],
+    'cannot_review_project_status' => ['ar' => 'لا يمكن تنفيذ هذا الإجراء على المشروع في حالته الحالية', 'en' => 'Cannot perform this action on the project in its current status', 'de' => 'Diese Aktion kann für das Projekt in seinem aktuellen Status nicht ausgeführt werden'],
+    'project_accepted_group_assigned' => ['ar' => 'تم قبول المشروع وتعيين رقم المجموعة', 'en' => 'Project accepted and group number assigned', 'de' => 'Projekt angenommen und Gruppennummer zugewiesen'],
+    'project_rejected_success' => ['ar' => 'تم رفض المشروع', 'en' => 'Project rejected', 'de' => 'Projekt abgelehnt'],
 ];
 
 /**
