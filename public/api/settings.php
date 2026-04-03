@@ -76,17 +76,15 @@ if ($method === 'POST') {
     }
 
     if (isset($input['enabled_languages'])) {
-        $allLangs = ['ar', 'en', 'de'];
         $requested = is_array($input['enabled_languages']) ? $input['enabled_languages'] : explode(',', $input['enabled_languages']);
         $valid = array_filter($requested, fn($l) => in_array($l, $allLangs));
-        if (empty($valid)) $valid = ['ar'];
+        if (empty($valid)) $valid = [$allLangs[0]];
         $updates[] = "enabled_languages = ?";
         $params[] = implode(',', $valid);
     }
 
     if (isset($input['default_language'])) {
-        $allLangs = ['ar', 'en', 'de'];
-        $val = in_array($input['default_language'], $allLangs) ? $input['default_language'] : 'ar';
+        $val = in_array($input['default_language'], $allLangs) ? $input['default_language'] : $allLangs[0];
         $updates[] = "default_language = ?";
         $params[] = $val;
     }

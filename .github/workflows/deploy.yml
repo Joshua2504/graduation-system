@@ -44,6 +44,7 @@ jobs:
           MAIL_PORT: ${{ secrets.MAIL_PORT }}
           MAIL_USER: ${{ secrets.MAIL_USER }}
           MAIL_PASS: ${{ secrets.MAIL_PASS }}
+          AVAILABLE_LANGUAGES: ${{ vars.AVAILABLE_LANGUAGES }}
         run: |
           set -euo pipefail
           SSH_PATH="${{ vars.SSH_PATH_DEV }}"
@@ -65,6 +66,7 @@ jobs:
           printf 'DEMO_MODE=true\n' >> "$TMP_ENV"
           printf 'APP_PORT=8642\n' >> "$TMP_ENV"
           printf 'COMPOSE_PROJECT_NAME=graduation-system-dev\n' >> "$TMP_ENV"
+          printf 'AVAILABLE_LANGUAGES=%s\n' "${AVAILABLE_LANGUAGES:-ar,en,de}" >> "$TMP_ENV"
 
           cat "$TMP_ENV" | ssh -o StrictHostKeyChecking=no "$REMOTE" "cat > \"$REMOTE_DIR/.env\""
           rm -f "$TMP_ENV"
@@ -109,6 +111,7 @@ jobs:
           MAIL_PORT: ${{ secrets.MAIL_PORT }}
           MAIL_USER: ${{ secrets.MAIL_USER }}
           MAIL_PASS: ${{ secrets.MAIL_PASS }}
+          AVAILABLE_LANGUAGES: ${{ vars.AVAILABLE_LANGUAGES }}
         run: |
           set -euo pipefail
           SSH_PATH="${{ vars.SSH_PATH_PROD }}"
@@ -130,6 +133,7 @@ jobs:
           printf 'DEMO_MODE=false\n' >> "$TMP_ENV"
           printf 'APP_PORT=8643\n' >> "$TMP_ENV"
           printf 'COMPOSE_PROJECT_NAME=graduation-system-prod\n' >> "$TMP_ENV"
+          printf 'AVAILABLE_LANGUAGES=%s\n' "${AVAILABLE_LANGUAGES:-ar,en,de}" >> "$TMP_ENV"
 
           cat "$TMP_ENV" | ssh -o StrictHostKeyChecking=no "$REMOTE" "cat > \"$REMOTE_DIR/.env\""
           rm -f "$TMP_ENV"
