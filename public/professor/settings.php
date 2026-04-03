@@ -23,9 +23,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $profilePicturesEnabled = isset($_POST['profile_pictures_enabled']) ? 1 : 0;
 
     // Enabled languages — at least one must be selected
-    $allLangs = ['ar', 'en', 'de'];
     $selectedLangs = array_filter($allLangs, fn($l) => isset($_POST['lang_' . $l]));
-    if (empty($selectedLangs)) $selectedLangs = ['ar']; // fallback
+    if (empty($selectedLangs)) $selectedLangs = [$allLangs[0]]; // fallback
     $enabledLanguages = implode(',', $selectedLangs);
 
     // Default language — must be one of the enabled languages
@@ -167,12 +166,13 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                 <?= __('enabled_languages_description') ?>
                             </small>
                             <?php
-                            $enabledLangs = explode(',', $settings['enabled_languages'] ?? 'ar');
-                            $langOptions = [
+                            $enabledLangs = explode(',', $settings['enabled_languages'] ?? $allLangs[0]);
+                            $masterLangLabels = [
                                 'ar' => 'العربية (Arabic)',
                                 'en' => 'English',
                                 'de' => 'Deutsch (German)',
                             ];
+                            $langOptions = array_intersect_key($masterLangLabels, array_flip($allLangs));
                             ?>
                             <?php foreach ($langOptions as $code => $label): ?>
                             <div class="form-check mb-2">

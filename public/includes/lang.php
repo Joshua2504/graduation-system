@@ -3,7 +3,16 @@
  * Language / i18n support — Arabic + English + German (Deutsch)
  */
 
-$allLangs = ['ar', 'en', 'de'];
+// Load available languages from environment (e.g., AVAILABLE_LANGUAGES=ar,en,de)
+// Only codes that have translations defined in this app are accepted.
+$_knownLangs = ['ar', 'en', 'de'];
+$_availableLangsEnv = $_ENV['AVAILABLE_LANGUAGES'] ?? getenv('AVAILABLE_LANGUAGES') ?: 'ar,en,de';
+$allLangs = array_values(array_filter(
+    array_map('trim', explode(',', strtolower($_availableLangsEnv))),
+    fn($l) => in_array($l, $_knownLangs)
+));
+if (empty($allLangs)) $allLangs = $_knownLangs;
+unset($_availableLangsEnv, $_knownLangs);
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -31,12 +40,12 @@ try {
     // DB not ready yet, use fallback
 }
 
-// When demo mode is enabled, fall back to all languages; otherwise only Arabic
-$defaultLangs = $_isDemoMode ? $allLangs : ['ar'];
+// When demo mode is enabled, fall back to all languages; otherwise only the first available language
+$defaultLangs = $_isDemoMode ? $allLangs : [$allLangs[0]];
 $supportedLangs = $enabledLangsStr
     ? array_values(array_filter(explode(',', $enabledLangsStr), fn($l) => in_array($l, $allLangs)))
     : $defaultLangs;
-if (empty($supportedLangs)) $supportedLangs = ['ar'];
+if (empty($supportedLangs)) $supportedLangs = [$allLangs[0]];
 
 // Determine default language: use DB setting if enabled, otherwise first enabled language
 $defaultLang = ($defaultLangFromDB && in_array($defaultLangFromDB, $supportedLangs))

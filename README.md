@@ -196,6 +196,7 @@ graduation-system/
 | `DEMO_MODE` | Enable demo mode with quick-login & auto-reset | `false` |
 | `APP_PORT` | Host port mapped to the app container | `8642` |
 | `COMPOSE_PROJECT_NAME` | Docker Compose project name (isolates containers per environment) | `graduation-system` |
+| `AVAILABLE_LANGUAGES` | Comma-separated list of languages available in this deployment (e.g. `ar,en,de`) | `ar,en,de` |
 
 ---
 
