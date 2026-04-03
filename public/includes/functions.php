@@ -75,6 +75,10 @@ function jsonResponse(array $data, int $code = 200): void {
  * Redirect to a URL
  */
 function redirect(string $url): void {
+    // Discard any buffered output (including PHP warnings) so they never reach the browser
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
     header("Location: $url");
     exit;
 }
