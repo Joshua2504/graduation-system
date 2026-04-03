@@ -246,7 +246,7 @@ $translations = [
     'students_count' => ['ar' => 'طالب', 'en' => 'students', 'de' => 'Studenten'],
     'search_placeholder' => ['ar' => 'بحث...', 'en' => 'Search...', 'de' => 'Suchen...'],
     'no_registered_students' => ['ar' => 'لا يوجد طلاب مسجلين', 'en' => 'No registered students', 'de' => 'Keine registrierten Studenten'],
-    'profile' => ['ar' => 'الملف', 'en' => 'Profile', 'de' => 'Profil'],
+    'profile' => ['ar' => 'الملف الشخصي', 'en' => 'Profile', 'de' => 'Profil'],
     'email_col' => ['ar' => 'البريد', 'en' => 'Email', 'de' => 'E-Mail'],
     'account' => ['ar' => 'الحساب', 'en' => 'Account', 'de' => 'Konto'],
     'registered' => ['ar' => 'تاريخ التسجيل', 'en' => 'Registered', 'de' => 'Registriert'],

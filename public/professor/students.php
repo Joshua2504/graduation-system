@@ -79,7 +79,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             </td>
                             <td><small><?= sanitize($s['email']) ?></small></td>
                             <td><code><?= sanitize($s['student_code'] ?? '—') ?></code></td>
-                            <td>
+                            <td data-sort-value="<?= $s['profile_completed'] ? 1 : 0 ?>">
                                 <?php if ($s['profile_completed']): ?>
                                     <span class="badge bg-success"><i class="bi bi-check-circle"></i></span>
                                 <?php else: ?>
