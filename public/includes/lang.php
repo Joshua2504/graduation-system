@@ -142,7 +142,7 @@ $translations = [
     'forgot_password' => ['ar' => 'نسيت كلمة المرور؟', 'en' => 'Forgot password?', 'de' => 'Passwort vergessen?'],
     'forgot_password_title' => ['ar' => 'استعادة كلمة المرور', 'en' => 'Reset Password', 'de' => 'Passwort zurücksetzen'],
     'forgot_password_desc' => ['ar' => 'أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور.', 'en' => 'Enter your email address and we will send you a link to reset your password.', 'de' => 'Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen einen Link zum Zurücksetzen Ihres Passworts.'],
-    'forgot_password_submit' => ['ar' => 'إرسال رابط الاسترداد', 'en' => 'Send Reset Link', 'de' => 'Link senden'],
+    'forgot_password_submit' => ['ar' => 'إرسال رابط إعادة تعيين كلمة المرور', 'en' => 'Send Password Reset Link', 'de' => 'Link zum Zurücksetzen des Passworts senden'],
     'invalid_email_format' => ['ar' => 'يرجى إدخال بريد إلكتروني صحيح.', 'en' => 'Please enter a valid email address.', 'de' => 'Bitte geben Sie eine gültige E-Mail-Adresse ein.'],
     'password_reset_sent' => ['ar' => 'إذا كان البريد الإلكتروني مسجلاً في النظام، ستتلقى رابط إعادة التعيين خلال دقائق.', 'en' => 'If this email is registered in the system, you will receive a reset link within a few minutes.', 'de' => 'Wenn diese E-Mail im System registriert ist, erhalten Sie in wenigen Minuten einen Link zum Zurücksetzen.'],
     'reset_password_title' => ['ar' => 'تعيين كلمة مرور جديدة', 'en' => 'Set New Password', 'de' => 'Neues Passwort festlegen'],
@@ -189,7 +189,7 @@ $translations = [
     'fourth_year' => ['ar' => 'الرابعة', 'en' => '4th', 'de' => '4.'],
 
     // Images
-    'card_image' => ['ar' => 'صورة بطاقة المعهد', 'en' => 'Institute ID Card', 'de' => 'Institutsausweis'],
+    'card_image' => ['ar' => 'صورة كارنية المعهد', 'en' => 'Institute ID Card', 'de' => 'Institutsausweis'],
     'national_id_image' => ['ar' => 'صورة البطاقة الشخصية', 'en' => 'National ID Card', 'de' => 'Personalausweis'],
     'receipt_image' => ['ar' => 'صورة إيصال دفع مشروع التخرج', 'en' => 'Graduation Project Payment Receipt', 'de' => 'Zahlungsbeleg für Abschlussprojekt'],
     'profile_picture' => ['ar' => 'صورة شخصية', 'en' => 'Profile Picture', 'de' => 'Profilbild'],
@@ -237,7 +237,7 @@ $translations = [
 
     // Student dashboard
     'project_submitted' => ['ar' => 'تم تقديم مشروعك بنجاح وهو الآن قيد المراجعة. يرجى التحقق خلال 24 ساعة.', 'en' => 'Your project has been successfully submitted and is under review. Please check back within 24 hours.', 'de' => 'Ihr Projekt wurde erfolgreich eingereicht und wird geprüft. Bitte schauen Sie innerhalb von 24 Stunden wieder vorbei.'],
-    'project_accepted_msg' => ['ar' => 'تم قبول مشروعك. يرجى المتابعة مع مدرس المادة في الجامعة.', 'en' => 'Your project has been accepted. Please continue with the course instructor at the university.', 'de' => 'Ihr Projekt wurde angenommen. Bitte fahren Sie mit dem Kursleiter an der Universität fort.'],
+    'project_accepted_msg' => ['ar' => 'تم قبول مشروعك. يرجى المتابعة مع الدكتور في الجامعة.', 'en' => 'Your project has been accepted. Please continue with the professor at the university.', 'de' => 'Ihr Projekt wurde angenommen. Bitte fahren Sie mit dem Professor an der Universität fort.'],
     'project_rejected_msg' => ['ar' => 'تم رفض مشروعك. يمكنك تعديل البيانات وإعادة التقديم.', 'en' => 'Your project has been rejected. You can edit your data and resubmit.', 'de' => 'Ihr Projekt wurde abgelehnt. Sie können Ihre Daten bearbeiten und erneut einreichen.'],
     'group_number' => ['ar' => 'رقم المجموعة', 'en' => 'Group Number', 'de' => 'Gruppennummer'],
     'doctor_note' => ['ar' => 'ملاحظة الدكتور', 'en' => "Professor's Note", 'de' => 'Anmerkung des Professors'],
@@ -338,7 +338,7 @@ $translations = [
 
     'student_project_creation_disabled' => ['ar' => 'إنشاء المشاريع بواسطة الطلاب معطل حالياً', 'en' => 'Student project creation is currently disabled', 'de' => 'Die Projekterstellung durch Studenten ist derzeit deaktiviert'],
     'toggle_show_reviewer_name' => ['ar' => 'إظهار اسم المراجع', 'en' => 'Show Reviewer Name', 'de' => 'Prüfername anzeigen'],
-    'show_reviewer_name_description' => ['ar' => 'عند التفعيل، سيظهر اسم الدكتور الذي قبل أو رفض المشروع للطلاب', 'en' => 'When enabled, the name of the professor who accepted or declined the project will be shown to students', 'de' => 'Wenn aktiviert, wird den Studenten der Name des Professors angezeigt, der das Projekt angenommen oder abgelehnt hat'],
+    'show_reviewer_name_description' => ['ar' => 'عند التفعيل، سيظهر اسم الدكتور الذي قَبِلَ أو رفض المشروع للطلاب', 'en' => 'When enabled, the name of the professor who accepted or declined the project will be shown to students', 'de' => 'Wenn aktiviert, wird den Studenten der Name des Professors angezeigt, der das Projekt angenommen oder abgelehnt hat'],
 
     'toggle_leader_transfer' => ['ar' => 'نقل القيادة بواسطة القائد', 'en' => 'Leader Transfer by Team Leader', 'de' => 'Leiterübertragung durch Teamleiter'],
     'leader_transfer_description' => ['ar' => 'السماح لقائد الفريق بنقل القيادة لعضو آخر في الفريق', 'en' => 'Allow team leaders to transfer leadership to another team member', 'de' => 'Teamleitern erlauben, die Leitung an ein anderes Teammitglied zu übertragen'],
@@ -475,7 +475,7 @@ $translations = [
 
     // Demo mode
     'demo_quick_login' => ['ar' => 'تسجيل دخول سريع (وضع تجريبي)', 'en' => 'Quick Login (Demo Mode)', 'de' => 'Schnellanmeldung (Demo-Modus)'],
-    'demo_doctor' => ['ar' => 'دكتور', 'en' => 'Doctor', 'de' => 'Professor'],
+    'demo_doctor' => ['ar' => 'دكتور', 'en' => 'Professor', 'de' => 'Professor'],
     'demo_student' => ['ar' => 'طالب', 'en' => 'Student', 'de' => 'Student'],
     'demo_resets_in' => ['ar' => 'إعادة تعيين العرض خلال', 'en' => 'Demo resets in', 'de' => 'Demo wird zurückgesetzt in'],
     'demo_credentials' => ['ar' => 'بيانات الدخول التجريبية', 'en' => 'Demo Credentials', 'de' => 'Demo-Zugangsdaten'],
