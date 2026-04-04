@@ -106,7 +106,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             <div class="col-md-6">
                                 <label class="form-label fw-bold"><?= __('year') ?> <span class="text-danger">*</span></label>
                                 <select class="form-select" name="year" id="year" required>
-                                    <option value=""><?= __('select_option_full') ?></option>
+                                    <option disabled value=""><?= __('select_option_full') ?></option>
                                     <option value="1st" <?= ($user['year'] ?? '') === '1st' ? 'selected' : '' ?>><?= __('first_year') ?></option>
                                     <option value="2nd" <?= ($user['year'] ?? '') === '2nd' ? 'selected' : '' ?>><?= __('second_year') ?></option>
                                     <option value="3rd" <?= ($user['year'] ?? '') === '3rd' ? 'selected' : '' ?>><?= __('third_year') ?></option>
