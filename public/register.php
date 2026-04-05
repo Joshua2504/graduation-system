@@ -218,6 +218,7 @@ require_once __DIR__ . '/includes/header.php';
                             <div class="mb-3">
                                 <label for="year" class="form-label"><?= __('year') ?> <span class="text-danger">*</span></label>
                                 <select class="form-select" id="year" name="year" required>
+                                    <option value="" disabled <?= empty($year) ? 'selected' : '' ?>>--- <?= __('select_option') ?> ---</option>
                                     <option value="1st" <?= ($year ?? '') === '1st' ? 'selected' : '' ?>><?= __('first_year') ?></option>
                                     <option value="2nd" <?= ($year ?? '') === '2nd' ? 'selected' : '' ?>><?= __('second_year') ?></option>
                                     <option value="3rd" <?= ($year ?? '') === '3rd' ? 'selected' : '' ?>><?= __('third_year') ?></option>
