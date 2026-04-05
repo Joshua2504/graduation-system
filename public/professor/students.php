@@ -183,7 +183,6 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                         <div class="col-md-4">
                             <label class="form-label"><?= __('year') ?></label>
                             <select class="form-select" id="edit_year">
-                                <option value=""><?= __('select_option') ?></option>
                                 <option value="1st"><?= __('first_year') ?></option>
                                 <option value="2nd"><?= __('second_year') ?></option>
                                 <option value="3rd"><?= __('third_year') ?></option>
