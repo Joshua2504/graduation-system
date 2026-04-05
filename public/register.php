@@ -222,7 +222,7 @@ require_once __DIR__ . '/includes/header.php';
                                     <option value="1st" <?= ($year ?? '') === '1st' ? 'selected' : '' ?>><?= __('first_year') ?></option>
                                     <option value="2nd" <?= ($year ?? '') === '2nd' ? 'selected' : '' ?>><?= __('second_year') ?></option>
                                     <option value="3rd" <?= ($year ?? '') === '3rd' ? 'selected' : '' ?>><?= __('third_year') ?></option>
-                                    <option value="4th" <?= (($year ?? '4th') === '4th') ? 'selected' : '' ?>><?= __('fourth_year') ?></option>
+                                    <option value="4th" <?= ($year ?? '') === '4th' ? 'selected' : '' ?>><?= __('fourth_year') ?></option>
                                 </select>
                             </div>
                             <button type="submit" class="btn btn-primary w-100">
