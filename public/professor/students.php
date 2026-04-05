@@ -315,10 +315,11 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                     <div class="mb-3">
                         <label class="form-label"><?= __('year') ?></label>
                         <select class="form-select" id="create_year">
+                            <option value="" disabled selected>--- <?= __('select_option') ?> ---</option>
                             <option value="1st"><?= __('first_year') ?></option>
                             <option value="2nd"><?= __('second_year') ?></option>
                             <option value="3rd"><?= __('third_year') ?></option>
-                            <option value="4th" selected><?= __('fourth_year') ?></option>
+                            <option value="4th"><?= __('fourth_year') ?></option>
                         </select>
                     </div>
                     <div class="mb-3">
