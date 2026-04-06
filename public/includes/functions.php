@@ -167,7 +167,7 @@ function getProject(int $id): ?array {
 function getProjectMembers(int $projectId): array {
     $pdo = getDB();
     $stmt = $pdo->prepare("
-        SELECT u.*, pm.role AS member_role, pm.paper_submitted, pm.joined_at
+        SELECT u.*, pm.role AS member_role, pm.joined_at
         FROM project_members pm
         JOIN users u ON u.id = pm.user_id
         WHERE pm.project_id = ?
@@ -230,30 +230,6 @@ function isStudentProjectLocked(int $userId): bool {
     ");
     $stmt->execute([$userId]);
     return (int)$stmt->fetchColumn() > 0;
-}
-
-/**
- * Check if all members of a project have submitted their papers
- */
-function allMembersPapersSubmitted(int $projectId): bool {
-    $pdo = getDB();
-    $stmt = $pdo->prepare("
-        SELECT COUNT(*) FROM project_members
-        WHERE project_id = ? AND paper_submitted = 0
-    ");
-    $stmt->execute([$projectId]);
-    return (int)$stmt->fetchColumn() === 0;
-}
-
-/**
- * Get member's paper submission status for a project
- */
-function getMemberPaperStatus(int $projectId, int $userId): bool {
-    $pdo = getDB();
-    $stmt = $pdo->prepare("SELECT paper_submitted FROM project_members WHERE project_id = ? AND user_id = ?");
-    $stmt->execute([$projectId, $userId]);
-    $row = $stmt->fetch();
-    return $row ? (bool)$row['paper_submitted'] : false;
 }
 
 /**

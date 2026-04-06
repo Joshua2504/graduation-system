@@ -83,7 +83,6 @@ CREATE TABLE IF NOT EXISTS `project_members` (
   `project_id` INT NOT NULL,
   `user_id` INT NOT NULL,
   `role` ENUM('leader','member') NOT NULL DEFAULT 'member',
-  `paper_submitted` TINYINT(1) NOT NULL DEFAULT 0,
   `joined_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_project_user` (`project_id`, `user_id`),
@@ -232,15 +231,6 @@ CREATE TABLE IF NOT EXISTS `departments` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uq_dept_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ─── Migrations: paper_submitted column in project_members ───
-
--- Add paper_submitted column to project_members (tracks whether each student submitted their paper)
-SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'project_members' AND COLUMN_NAME = 'paper_submitted');
-SET @sql = IF(@col_exists = 0, 'ALTER TABLE `project_members` ADD COLUMN `paper_submitted` TINYINT(1) NOT NULL DEFAULT 0 AFTER `role`', 'SELECT 1');
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
 
 -- ─── Migrations: password reset token columns in users ───
 
