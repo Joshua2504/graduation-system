@@ -53,13 +53,15 @@ $isAr = getLang() === 'ar';
 ?>
 
 <div class="container">
-    <div class="d-flex align-items-center gap-2 mb-3">
-        <h3 class="mb-0 me-auto"><i class="bi bi-house-door me-2"></i><?= __('dashboard') ?></h3>
-        <input type="search" id="projectSearch" class="form-control form-control-sm w-auto" style="min-width:220px"
-               placeholder="<?= __('search_projects') ?>" oninput="filterProjects()">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createProjectModal">
-            <i class="bi bi-plus-circle me-1"></i><?= __('create_project_professor') ?>
-        </button>
+    <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+        <h3 class="mb-0"><i class="bi bi-house-door me-2"></i><?= __('dashboard') ?></h3>
+        <div class="ms-auto d-flex gap-2 align-items-center flex-wrap justify-content-end">
+            <input type="search" id="projectSearch" class="form-control form-control-sm" style="min-width:160px; max-width:260px;"
+                   placeholder="<?= __('search_projects') ?>" oninput="filterProjects()">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createProjectModal">
+                <i class="bi bi-plus-circle me-1"></i><?= __('create_project_professor') ?>
+            </button>
+        </div>
     </div>
 
     <!-- Tab Navigation + Sort -->
