@@ -141,6 +141,13 @@ body {
     }
 }
 
+/* Prevent horizontal page overflow on small screens */
+@media (max-width: 576px) {
+    .container {
+        overflow-x: hidden;
+    }
+}
+
 /* ─── Login/Register Card ─── */
 .card.shadow {
     border: none;

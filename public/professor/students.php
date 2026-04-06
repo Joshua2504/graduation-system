@@ -23,15 +23,15 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
 ?>
 
 <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3><i class="bi bi-people me-2"></i><?= __('student_accounts') ?></h3>
-        <div class="d-flex gap-2 align-items-center">
+    <div class="d-flex align-items-center gap-2 mb-4 flex-wrap">
+        <h3 class="mb-0"><i class="bi bi-people me-2"></i><?= __('student_accounts') ?></h3>
+        <div class="ms-auto d-flex gap-2 align-items-center flex-wrap justify-content-end">
             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createStudentModal">
                 <i class="bi bi-person-plus me-1"></i><?= __('add_student') ?>
             </button>
             <span class="badge bg-primary fs-6"><?= count($students) ?> <?= __('students_count') ?></span>
             <input type="text" class="form-control form-control-sm" id="searchInput" 
-                   placeholder="<?= __('search_placeholder') ?>" style="width: 200px;">
+                   placeholder="<?= __('search_placeholder') ?>" style="min-width:140px; max-width:200px;">
         </div>
     </div>
 

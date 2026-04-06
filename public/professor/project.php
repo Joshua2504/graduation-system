@@ -168,10 +168,10 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                         <tr>
                             <th>#</th>
                             <th data-sortable><?= __('name') ?></th>
-                            <th data-sortable><?= __('student_code') ?></th>
+                            <th data-sortable class="d-none d-md-table-cell"><?= __('student_code') ?></th>
                             <th data-sortable><?= __('role') ?></th>
-                            <th data-sortable><?= __('profile') ?></th>
-                            <th data-sortable><?= __('documents') ?></th>
+                            <th data-sortable class="d-none d-md-table-cell"><?= __('profile') ?></th>
+                            <th data-sortable class="d-none d-md-table-cell"><?= __('documents') ?></th>
                             <th></th>
                         </tr>
                     </thead>
@@ -202,20 +202,20 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                         <?= sanitize($member['name']) ?>
                                     </div>
                                 </td>
-                                <td><code><?= sanitize($member['student_code'] ?? '-') ?></code></td>
+                                <td class="d-none d-md-table-cell"><code><?= sanitize($member['student_code'] ?? '-') ?></code></td>
                                 <td>
                                     <span class="badge bg-<?= $member['member_role'] === 'leader' ? 'primary' : 'info' ?>">
                                         <?= $member['member_role'] === 'leader' ? __('leader') : __('member') ?>
                                     </span>
                                 </td>
-                                <td data-sort-value="<?= $complete ? 1 : 0 ?>">
+                                <td class="d-none d-md-table-cell" data-sort-value="<?= $complete ? 1 : 0 ?>">
                                     <?php if ($complete): ?>
                                         <span class="text-success"><i class="bi bi-check-circle-fill"></i></span>
                                     <?php else: ?>
                                         <span class="text-warning"><i class="bi bi-exclamation-circle-fill"></i></span>
                                     <?php endif; ?>
                                 </td>
-                                <td>
+                                <td class="d-none d-md-table-cell">
                                     <span class="badge bg-<?= $docsCount === $docsTotal ? 'success' : ($docsCount > 0 ? 'warning text-dark' : 'danger') ?>">
                                         <?= $docsCount ?>/<?= $docsTotal ?>
                                     </span>
@@ -238,8 +238,21 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             </tr>
                             <tr class="collapse" id="memberDetail<?= $member['id'] ?>">
                                 <td colspan="7" class="bg-light p-3">
+                                    <!-- Mobile-only: show student code and status badges -->
+                                    <div class="d-flex d-md-none gap-2 flex-wrap mb-3 align-items-center">
+                                        <small class="text-muted fw-semibold"><?= __('student_code') ?>:</small>
+                                        <code><?= sanitize($member['student_code'] ?? '-') ?></code>
+                                        <?php if ($complete): ?>
+                                            <span class="badge bg-success"><i class="bi bi-check-circle-fill me-1"></i><?= __('profile') ?></span>
+                                        <?php else: ?>
+                                            <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-circle-fill me-1"></i><?= __('profile') ?></span>
+                                        <?php endif; ?>
+                                        <span class="badge bg-<?= $docsCount === $docsTotal ? 'success' : ($docsCount > 0 ? 'warning text-dark' : 'danger') ?>">
+                                            <?= __('documents') ?>: <?= $docsCount ?>/<?= $docsTotal ?>
+                                        </span>
+                                    </div>
                                     <div class="row mb-3">
-                                        <div class="col-md-3 mb-2">
+                                        <div class="col-6 col-md-3 mb-2">
                                             <small class="text-muted"><?= __('gender') ?></small><br>
                                             <?php if ($member['gender']): ?>
                                                 <?= $member['gender'] === 'male' ? __('male') : __('female') ?>
@@ -247,27 +260,27 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                                 <span class="text-muted">-</span>
                                             <?php endif; ?>
                                         </div>
-                                        <div class="col-md-3 mb-2">
+                                        <div class="col-6 col-md-3 mb-2">
                                             <small class="text-muted"><?= __('national_id') ?></small><br>
                                             <?= sanitize($member['national_id'] ?? '-') ?>
                                         </div>
-                                        <div class="col-md-3 mb-2">
+                                        <div class="col-6 col-md-3 mb-2">
                                             <small class="text-muted"><?= __('birth_date') ?></small><br>
                                             <?= $member['birth_date'] ?? '-' ?>
                                         </div>
-                                        <div class="col-md-3 mb-2">
+                                        <div class="col-6 col-md-3 mb-2">
                                             <small class="text-muted"><?= __('governorate') ?></small><br>
                                             <?= sanitize($member['governorate'] ?? '-') ?>
                                         </div>
-                                        <div class="col-md-4 mb-2">
+                                        <div class="col-12 col-md-4 mb-2">
                                             <small class="text-muted"><?= __('address') ?></small><br>
                                             <?= sanitize($member['address'] ?? '-') ?>
                                         </div>
-                                        <div class="col-md-4 mb-2">
+                                        <div class="col-6 col-md-4 mb-2">
                                             <small class="text-muted"><?= __('phone') ?></small><br>
                                             <?= sanitize($member['phone'] ?? '-') ?>
                                         </div>
-                                        <div class="col-md-4 mb-2">
+                                        <div class="col-6 col-md-4 mb-2">
                                             <small class="text-muted"><?= __('section') ?></small><br>
                                             <?= sanitize($member['section'] ?? '-') ?>
                                         </div>
@@ -284,7 +297,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                             $imgFile = $member[$field] ?? '';
                                             $imgPath = secureFileUrl($memberId, $imgFile);
                                         ?>
-                                            <div class="col-md-4 text-center mb-2">
+                                            <div class="col-4 col-md-4 text-center mb-2">
                                                 <small class="text-muted d-block mb-1"><?= $label ?></small>
                                                 <?php if ($imgFile): ?>
                                                     <img src="<?= $imgPath ?>" class="img-thumbnail student-image" 
