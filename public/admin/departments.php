@@ -28,7 +28,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
 <div class="container">
     <div class="d-flex align-items-center gap-2 mb-4 flex-wrap">
         <h3 class="mb-0"><i class="bi bi-diagram-3 me-2"></i><?= __('departments') ?></h3>
-        <div class="ms-auto d-flex gap-2 align-items-center">
+        <div class="ms-auto d-flex gap-2 align-items-center flex-wrap justify-content-end">
             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addDeptModal">
                 <i class="bi bi-plus-lg me-1"></i><?= __('add_department') ?>
             </button>
