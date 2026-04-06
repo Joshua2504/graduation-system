@@ -116,12 +116,6 @@ if ($method === 'POST') {
             jsonResponse(['error' => __('pending_invitation_exists')], 400);
         }
 
-        // Check year and department match with project leader
-        $mismatch = checkYearDepartmentMatch($projectId, $invitee['id']);
-        if ($mismatch !== null) {
-            jsonResponse(['error' => __($mismatch)], 403);
-        }
-
         $stmt = $pdo->prepare("INSERT INTO invitations (project_id, invited_by, invited_user_id, token, expires_at) VALUES (?, ?, ?, ?, ?)");
         $stmt->execute([$projectId, $userId, $invitee['id'], $token, $expiresAt]);
 
@@ -276,13 +270,6 @@ if ($method === 'PUT') {
 
     $settings = getSettings();
     $memberCount = countProjectMembers($projectId);
-
-    // Check year and department match with project leader (permanent condition — check first)
-    $mismatch = checkYearDepartmentMatch($projectId, $userId);
-    if ($mismatch !== null) {
-        jsonResponse(['error' => __($mismatch)], 403);
-    }
-
     if ($memberCount >= (int)$settings['max_team_size']) {
         jsonResponse(['error' => __('team_full')], 400);
     }
