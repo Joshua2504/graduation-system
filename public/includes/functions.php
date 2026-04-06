@@ -267,6 +267,42 @@ function isProjectLeader(int $projectId, int $userId): bool {
 }
 
 /**
+ * Check if a joining student's year and department match the project leader's.
+ * Returns a translation key string on mismatch, or null if the student can join.
+ */
+function checkYearDepartmentMatch(int $projectId, int $userId): ?string {
+    $pdo = getDB();
+
+    $stmt = $pdo->prepare("SELECT year, section FROM users WHERE id = ?");
+    $stmt->execute([$userId]);
+    $student = $stmt->fetch();
+    if (!$student || empty($student['year']) || empty($student['section'])) {
+        return null;
+    }
+
+    $stmt = $pdo->prepare("
+        SELECT u.year, u.section
+        FROM project_members pm
+        JOIN users u ON u.id = pm.user_id
+        WHERE pm.project_id = ? AND pm.role = 'leader'
+        LIMIT 1
+    ");
+    $stmt->execute([$projectId]);
+    $leader = $stmt->fetch();
+    if (!$leader || empty($leader['year']) || empty($leader['section'])) {
+        return null;
+    }
+
+    if ($student['year'] !== $leader['year']) {
+        return 'different_year_error';
+    }
+    if ($student['section'] !== $leader['section']) {
+        return 'different_department_error';
+    }
+    return null;
+}
+
+/**
  * Check if user is a member of a project
  */
 function isProjectMember(int $projectId, int $userId): bool {

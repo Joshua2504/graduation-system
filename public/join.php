@@ -60,6 +60,12 @@ if (!$error && $token) {
         $settings = getSettings();
         $memberCount = countProjectMembers($invitation['project_id']);
         $isFull = $memberCount >= (int)$settings['max_team_size'];
+        if (!$alreadyMember && !$isFull) {
+            $yearDeptMismatch = checkYearDepartmentMatch($invitation['project_id'], $userId);
+            if ($yearDeptMismatch !== null) {
+                $error = __($yearDeptMismatch);
+            }
+        }
     }
 } elseif (!$error && $code) {
     // Code-based join
@@ -88,6 +94,12 @@ if (!$error && $token) {
         $settings = getSettings();
         $memberCount = countProjectMembers($result['id']);
         $isFull = $memberCount >= (int)$settings['max_team_size'];
+        if (!$alreadyMember && !$isFull) {
+            $yearDeptMismatch = checkYearDepartmentMatch($result['id'], $userId);
+            if ($yearDeptMismatch !== null) {
+                $error = __($yearDeptMismatch);
+            }
+        }
     }
 } elseif (!$error) {
     redirect('/student/dashboard');
