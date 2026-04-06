@@ -602,6 +602,8 @@ $translations = [
     'invitation_resent' => ['ar' => 'تم إعادة إرسال الدعوة بنجاح', 'en' => 'Invitation resent successfully', 'de' => 'Einladung erfolgreich erneut gesendet'],
     'invitation_not_cancellable' => ['ar' => 'الدعوة غير موجودة أو لا يمكن إلغاؤها', 'en' => 'Invitation not found or cannot be cancelled', 'de' => 'Einladung nicht gefunden oder kann nicht abgebrochen werden'],
     'invitation_cancelled' => ['ar' => 'تم إلغاء الدعوة', 'en' => 'Invitation cancelled', 'de' => 'Einladung abgebrochen'],
+    'different_year_error' => ['ar' => 'لا يمكنك الانضمام لهذا المشروع لأن أعضاءه من سنة دراسية مختلفة.', 'en' => 'You cannot join this project because its members are from a different academic year.', 'de' => 'Sie können diesem Projekt nicht beitreten, da seine Mitglieder aus einem anderen Studienjahr stammen.'],
+    'different_department_error' => ['ar' => 'لا يمكنك الانضمام لهذا المشروع لأن أعضاءه من قسم مختلف.', 'en' => 'You cannot join this project because its members are from a different department.', 'de' => 'Sie können diesem Projekt nicht beitreten, da seine Mitglieder aus einer anderen Abteilung stammen.'],
 
     // Review API messages
     'project_not_found' => ['ar' => 'المشروع غير موجود', 'en' => 'Project not found', 'de' => 'Projekt nicht gefunden'],
