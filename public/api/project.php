@@ -186,7 +186,7 @@ if ($method === 'DELETE') {
     }
     
     $project = getProject($projectId);
-    if (!$project || $project['status'] !== 'draft') {
+    if (!$project || !in_array($project['status'], ['draft', 'rejected'])) {
         jsonResponse(['error' => 'لا يمكن تعديل الفريق في حالة المشروع الحالية'], 400);
     }
     
@@ -194,6 +194,11 @@ if ($method === 'DELETE') {
         // Leader removing a member
         if (!isProjectLeader($projectId, $userId)) {
             jsonResponse(['error' => 'فقط قائد الفريق يمكنه إزالة الأعضاء'], 403);
+        }
+        
+        // For rejected projects, member removal requires allow_resubmit
+        if ($project['status'] === 'rejected' && empty($project['allow_resubmit'])) {
+            jsonResponse(['error' => 'لا يمكن تعديل الفريق في حالة المشروع الحالية'], 400);
         }
         
         // Can't remove yourself as leader this way

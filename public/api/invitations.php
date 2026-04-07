@@ -71,9 +71,9 @@ if ($method === 'POST') {
         jsonResponse(['error' => __('leader_only_invite')], 403);
     }
 
-    // Project must be in draft
+    // Project must be in draft or rejected with resubmit allowed
     $project = getProject($projectId);
-    if (!$project || $project['status'] !== 'draft') {
+    if (!$project || !projectAcceptsInvitations($project)) {
         jsonResponse(['error' => __('project_status_no_invite')], 400);
     }
 
@@ -309,10 +309,10 @@ if ($method === 'PATCH') {
 
     // Doctors/admins can resend any invitation, students can only resend their own
     if ($role === 'doctor' || $role === 'admin') {
-        $stmt = $pdo->prepare("SELECT i.*, p.status AS project_status FROM invitations i JOIN projects p ON p.id = i.project_id WHERE i.id = ? AND i.status = 'pending'");
+        $stmt = $pdo->prepare("SELECT i.*, p.status AS project_status, p.allow_resubmit FROM invitations i JOIN projects p ON p.id = i.project_id WHERE i.id = ? AND i.status = 'pending'");
         $stmt->execute([$invitationId]);
     } else {
-        $stmt = $pdo->prepare("SELECT i.*, p.status AS project_status FROM invitations i JOIN projects p ON p.id = i.project_id WHERE i.id = ? AND i.invited_by = ? AND i.status = 'pending'");
+        $stmt = $pdo->prepare("SELECT i.*, p.status AS project_status, p.allow_resubmit FROM invitations i JOIN projects p ON p.id = i.project_id WHERE i.id = ? AND i.invited_by = ? AND i.status = 'pending'");
         $stmt->execute([$invitationId, $userId]);
     }
     $invitation = $stmt->fetch();
@@ -320,7 +320,7 @@ if ($method === 'PATCH') {
     if (!$invitation) {
         jsonResponse(['error' => __('invitation_not_resendable')], 404);
     }
-    if ($invitation['project_status'] !== 'draft') {
+    if (!projectAcceptsInvitations(['status' => $invitation['project_status'], 'allow_resubmit' => $invitation['allow_resubmit']])) {
         jsonResponse(['error' => __('project_not_accepting')], 400);
     }
 
