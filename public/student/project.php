@@ -201,7 +201,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
 
     <div class="row">
         <!-- Team Members -->
-        <div class="col-lg-<?= ($isLeader && $project['status'] === 'draft') ? '7' : '12' ?>">
+        <div class="col-lg-<?= ($isLeader && $projectEditable) ? '7' : '12' ?>">
             <div class="card shadow mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i><?= __('team_members') ?> (<?= $memberCount ?>/<?= $maxSize ?>)</h5>
@@ -223,7 +223,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                     <th data-sortable><?= __('student_code') ?></th>
                                     <th data-sortable><?= __('role') ?></th>
                                     <th data-sortable><?= __('profile') ?></th>
-                                    <?php if (($isLeader && $project['status'] === 'draft') || $canTransferLeadership): ?>
+                                    <?php if (($isLeader && $projectEditable) || $canTransferLeadership): ?>
                                         <th></th>
                                     <?php endif; ?>
                                 </tr>
@@ -262,7 +262,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                         <span class="text-warning"><i class="bi bi-exclamation-circle-fill"></i></span>
                                     <?php endif; ?>
                                 </td>
-                                        <?php if (($isLeader && $project['status'] === 'draft') || $canTransferLeadership): ?>
+                                        <?php if (($isLeader && $projectEditable) || $canTransferLeadership): ?>
                                             <td>
                                                 <?php if ($m['member_role'] !== 'leader'): ?>
                                                     <div class="d-flex align-items-center gap-1">
@@ -271,7 +271,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                                                 <i class="bi bi-star"></i>
                                                             </button>
                                                         <?php endif; ?>
-                                                        <?php if ($isLeader && $project['status'] === 'draft'): ?>
+                                                        <?php if ($isLeader && $projectEditable): ?>
                                                             <button class="btn btn-sm btn-outline-danger" onclick="removeMember(<?= $m['id'] ?>, <?= htmlspecialchars(json_encode($m['name']), ENT_QUOTES, 'UTF-8') ?>)">
                                                                 <i class="bi bi-x-lg"></i>
                                                             </button>
@@ -298,9 +298,9 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                             <span class="badge bg-warning text-dark"><?= __('invited') ?></span>
                                         </td>
                                         <td>—</td>
-                                        <?php if (($isLeader && $project['status'] === 'draft') || $canTransferLeadership): ?>
+                                        <?php if (($isLeader && $projectEditable) || $canTransferLeadership): ?>
                                             <td>
-                                                <?php if ($isLeader && $project['status'] === 'draft'): ?>
+                                                <?php if ($isLeader && $projectEditable): ?>
                                                 <div class="btn-group btn-group-sm">
                                                     <button class="btn btn-outline-primary" onclick="resendInvitation(<?= $inv['id'] ?>)" title="<?= __('resend_invitation') ?>">
                                                         <i class="bi bi-arrow-repeat"></i>
@@ -321,8 +321,8 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
             </div>
         </div>
 
-        <!-- Invite Section (leader only, draft) -->
-        <?php if ($isLeader && $project['status'] === 'draft'): ?>
+        <!-- Invite Section (leader only, draft or rejected-resubmittable) -->
+        <?php if ($isLeader && $projectEditable): ?>
             <div class="col-lg-5">
                 <div class="card shadow mb-4">
                     <div class="card-header bg-primary text-white">
@@ -423,16 +423,16 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                 </small>
             <?php endif; ?>
 
-            <?php if ($project['status'] === 'draft'): ?>
-                <?php if (!$isLeader): ?>
-                    <button class="btn btn-outline-danger" onclick="leaveProject()">
-                        <i class="bi bi-box-arrow-right me-2"></i><?= __('leave_project') ?>
-                    </button>
-                <?php else: ?>
-                    <button class="btn btn-outline-danger" onclick="deleteProject()">
-                        <i class="bi bi-trash me-2"></i><?= __('delete_project') ?>
-                    </button>
-                <?php endif; ?>
+            <?php if ($project['status'] === 'draft' && !$isLeader): ?>
+                <button class="btn btn-outline-danger" onclick="leaveProject()">
+                    <i class="bi bi-box-arrow-right me-2"></i><?= __('leave_project') ?>
+                </button>
+            <?php endif; ?>
+
+            <?php if ($isLeader && ($project['status'] === 'draft' || $project['status'] === 'rejected')): ?>
+                <button class="btn btn-outline-danger" onclick="deleteProject()">
+                    <i class="bi bi-trash me-2"></i><?= __('delete_project') ?>
+                </button>
             <?php endif; ?>
         </div>
     </div>

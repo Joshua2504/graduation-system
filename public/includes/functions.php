@@ -411,6 +411,15 @@ function getProjectReviews(int $projectId): array {
 }
 
 /**
+ * Check whether a project is in a state that allows invitation management.
+ * Returns true for draft projects and for rejected projects where resubmission is allowed.
+ */
+function projectAcceptsInvitations(array $project): bool {
+    return $project['status'] === 'draft' ||
+           ($project['status'] === 'rejected' && !empty($project['allow_resubmit']));
+}
+
+/**
  * Validate phone number (11 digits)
  * Returns error string or null if valid
  */
