@@ -9,7 +9,8 @@ require_once __DIR__ . '/demo.php';
 $isLoggedIn = is_logged_in();
 $role = current_role();
 $userName = $_SESSION['name'] ?? '';
-$langLabels = ['ar' => 'العربية', 'en' => 'English', 'de' => 'Deutsch'];
+// $langLabels = ['ar' => 'العربية', 'en' => 'English', 'de' => 'Deutsch'];
+$langLabels = ['ar' => 'العربية'];
 $currentLangLabel = $langLabels[getLang()] ?? 'العربية';
 
 // Load profile picture for logged-in users
