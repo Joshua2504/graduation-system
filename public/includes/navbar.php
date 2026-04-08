@@ -10,7 +10,6 @@ $isLoggedIn = is_logged_in();
 $role = current_role();
 $userName = $_SESSION['name'] ?? '';
 // $langLabels = ['ar' => 'العربية', 'en' => 'English', 'de' => 'Deutsch'];
-$langLabels = ['ar' => 'العربية'];
 $currentLangLabel = $langLabels[getLang()] ?? 'العربية';
 
 // Load profile picture for logged-in users
@@ -160,7 +159,7 @@ if ($demoActive) {
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-translate me-1"></i><?= $currentLangLabel ?>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
+<!--                <ul class="dropdown-menu dropdown-menu-end">
                         <?php foreach ($langLabels as $code => $label): ?>
                             <li>
                                 <a class="dropdown-item <?= getLang() === $code ? 'active' : '' ?>" href="?lang=<?= $code ?>">
@@ -168,7 +167,7 @@ if ($demoActive) {
                                 </a>
                             </li>
                         <?php endforeach; ?>
-                    </ul>
+                    </ul> -->
                 </li>
                 <?php if ($isLoggedIn): ?>
                     <li class="nav-item dropdown">
