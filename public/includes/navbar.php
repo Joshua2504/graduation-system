@@ -155,11 +155,11 @@ if ($demoActive) {
                         <i class="bi bi-moon-fill" id="themeIcon"></i>
                     </button>
                 </li>
-                <li class="nav-item dropdown">
+<!--            <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-translate me-1"></i><?= $currentLangLabel ?>
                     </a>
-<!--                <ul class="dropdown-menu dropdown-menu-end">
+                <ul class="dropdown-menu dropdown-menu-end">
                         <?php foreach ($langLabels as $code => $label): ?>
                             <li>
                                 <a class="dropdown-item <?= getLang() === $code ? 'active' : '' ?>" href="?lang=<?= $code ?>">
@@ -167,8 +167,8 @@ if ($demoActive) {
                                 </a>
                             </li>
                         <?php endforeach; ?>
-                    </ul> -->
-                </li>
+                    </ul>
+                </li> -->
                 <?php if ($isLoggedIn): ?>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center gap-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
