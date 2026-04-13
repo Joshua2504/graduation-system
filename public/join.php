@@ -33,7 +33,7 @@ if (countUserProjects($userId) >= 1) {
 if (!$error && $token) {
     // Token-based invite
     $pdo = getDB();
-    $stmt = $pdo->prepare("SELECT i.*, p.title, p.type, p.status AS project_status, p.join_code,
+    $stmt = $pdo->prepare("SELECT i.*, p.title, p.type, p.status AS project_status, p.join_code, p.allow_resubmit,
                                   u.name AS invited_by_name
                            FROM invitations i
                            JOIN projects p ON p.id = i.project_id
@@ -46,7 +46,7 @@ if (!$error && $token) {
         $error = __('invalid_invitation_link');
     } elseif ($invitation['expires_at'] && strtotime($invitation['expires_at']) < time()) {
         $error = __('invitation_expired');
-    } elseif ($invitation['project_status'] !== 'draft') {
+    } elseif (!projectAcceptsInvitations(['status' => $invitation['project_status'], 'allow_resubmit' => $invitation['allow_resubmit']])) {
         $error = __('project_not_accepting');
     } else {
         $project = [
@@ -82,7 +82,7 @@ if (!$error && $token) {
 
     if (!$result) {
         $error = __('invalid_join_code');
-    } elseif ($result['status'] !== 'draft') {
+    } elseif (!projectAcceptsInvitations($result)) {
         $error = __('project_not_accepting');
     } else {
         $project = [

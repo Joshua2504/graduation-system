@@ -194,7 +194,7 @@ if ($method === 'PUT') {
     
     if (!empty($token)) {
         // Join via token link
-        $stmt = $pdo->prepare("SELECT i.*, p.status AS project_status FROM invitations i JOIN projects p ON p.id = i.project_id WHERE i.token = ?");
+        $stmt = $pdo->prepare("SELECT i.*, p.status AS project_status, p.allow_resubmit FROM invitations i JOIN projects p ON p.id = i.project_id WHERE i.token = ?");
         $stmt->execute([$token]);
         $invitation = $stmt->fetch();
         
@@ -207,7 +207,7 @@ if ($method === 'PUT') {
         if (strtotime($invitation['expires_at']) < time()) {
             jsonResponse(['error' => __('invitation_token_expired')], 400);
         }
-        if ($invitation['project_status'] !== 'draft') {
+        if (!projectAcceptsInvitations(['status' => $invitation['project_status'], 'allow_resubmit' => $invitation['allow_resubmit']])) {
             jsonResponse(['error' => __('project_not_accepting')], 400);
         }
         // If it's a direct invite, ensure it's for this user
@@ -225,7 +225,7 @@ if ($method === 'PUT') {
         if (!$project) {
             jsonResponse(['error' => __('invalid_join_code')], 404);
         }
-        if ($project['status'] !== 'draft') {
+        if (!projectAcceptsInvitations($project)) {
             jsonResponse(['error' => __('project_not_accepting')], 400);
         }
         $projectId = (int)$project['id'];
@@ -236,7 +236,7 @@ if ($method === 'PUT') {
         
     } elseif ($invitationId > 0) {
         // Accept/decline by invitation ID (direct invite)
-        $stmt = $pdo->prepare("SELECT i.*, p.status AS project_status FROM invitations i JOIN projects p ON p.id = i.project_id WHERE i.id = ? AND i.invited_user_id = ?");
+        $stmt = $pdo->prepare("SELECT i.*, p.status AS project_status, p.allow_resubmit FROM invitations i JOIN projects p ON p.id = i.project_id WHERE i.id = ? AND i.invited_user_id = ?");
         $stmt->execute([$invitationId, $userId]);
         $invitation = $stmt->fetch();
         
@@ -246,7 +246,7 @@ if ($method === 'PUT') {
         if ($invitation['status'] !== 'pending') {
             jsonResponse(['error' => __('invitation_already_responded')], 400);
         }
-        if ($invitation['project_status'] !== 'draft') {
+        if (!projectAcceptsInvitations(['status' => $invitation['project_status'], 'allow_resubmit' => $invitation['allow_resubmit']])) {
             jsonResponse(['error' => __('project_not_accepting')], 400);
         }
         $projectId = (int)$invitation['project_id'];
