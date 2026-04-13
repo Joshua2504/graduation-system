@@ -116,6 +116,12 @@ if ($method === 'POST') {
             jsonResponse(['error' => __('pending_invitation_exists')], 400);
         }
 
+        // Check year and department compatibility with existing team members
+        $compatError = checkStudentProjectCompatibility((int)$invitee['id'], $projectId);
+        if ($compatError) {
+            jsonResponse(['error' => $compatError], 400);
+        }
+
         $stmt = $pdo->prepare("INSERT INTO invitations (project_id, invited_by, invited_user_id, token, expires_at) VALUES (?, ?, ?, ?, ?)");
         $stmt->execute([$projectId, $userId, $invitee['id'], $token, $expiresAt]);
 
@@ -272,6 +278,12 @@ if ($method === 'PUT') {
     $memberCount = countProjectMembers($projectId);
     if ($memberCount >= (int)$settings['max_team_size']) {
         jsonResponse(['error' => __('team_full')], 400);
+    }
+
+    // Check year and department compatibility with existing team members
+    $compatError = checkStudentProjectCompatibility($userId, $projectId);
+    if ($compatError) {
+        jsonResponse(['error' => $compatError], 400);
     }
 
     // Add as member

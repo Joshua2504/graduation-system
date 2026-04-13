@@ -85,6 +85,8 @@ if ($method === 'POST') {
             $sid = (int)$sid;
             if ($sid === 0) continue;
             if (countUserProjects($sid) >= 1 || isStudentProjectLocked($sid)) continue;
+            // Check year and department compatibility with existing team members
+            if (checkStudentProjectCompatibility($sid, $projectId) !== null) continue;
             $memberRole = ($sid === $leaderId) ? 'leader' : 'member';
             $stmt = $pdo->prepare("INSERT IGNORE INTO project_members (project_id, user_id, role) VALUES (?, ?, ?)");
             $stmt->execute([$projectId, $sid, $memberRole]);
@@ -324,6 +326,12 @@ if ($method === 'PATCH') {
         }
         if (isStudentProjectLocked($studentId)) {
             jsonResponse(['error' => 'تم قبول مشروع الطالب ولا يمكن إضافته لمشروع آخر'], 403);
+        }
+
+        // Check year and department compatibility with existing team members
+        $compatError = checkStudentProjectCompatibility($studentId, $projectId);
+        if ($compatError) {
+            jsonResponse(['error' => $compatError], 400);
         }
 
         $role = 'member';

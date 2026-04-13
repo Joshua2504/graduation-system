@@ -17,6 +17,7 @@
   - 📱 QR code (auto-generated from invite link)
   - 🔑 Join code (6-char alphanumeric)
   - 👤 Direct invite (search by email or student code)
+  - ⚠️ Students can only join teams where all members share the same academic year and department
 - **Submit for review** — once team meets size requirements and all member profiles are complete
 - **Rich description editor** — bold, italic, underline, lists, links, and image uploads (click, paste, or drag & drop)
 - **Track status** — view doctor feedback, review history timeline, resubmit if rejected (when allowed by professor)

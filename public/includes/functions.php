@@ -420,6 +420,54 @@ function projectAcceptsInvitations(array $project): bool {
 }
 
 /**
+ * Check if a student is compatible with the existing members of a project
+ * (same academic year and department/section).
+ * Returns null if compatible, or a translated error string if not.
+ */
+function checkStudentProjectCompatibility(int $studentId, int $projectId): ?string {
+    $pdo = getDB();
+
+    // Get the joining student's year and section
+    $stmt = $pdo->prepare("SELECT year, section FROM users WHERE id = ?");
+    $stmt->execute([$studentId]);
+    $student = $stmt->fetch();
+    if (!$student) return null; // student not found — other checks will catch this
+
+    // Get year and section of existing project members
+    $stmt = $pdo->prepare("
+        SELECT DISTINCT u.year, u.section
+        FROM project_members pm
+        JOIN users u ON u.id = pm.user_id
+        WHERE pm.project_id = ?
+    ");
+    $stmt->execute([$projectId]);
+    $members = $stmt->fetchAll();
+
+    // If the project has no members yet, any student can join
+    if (empty($members)) return null;
+
+    $studentYear = $student['year'] ?? '';
+    $studentSection = $student['section'] ?? '';
+
+    foreach ($members as $member) {
+        $memberYear = $member['year'] ?? '';
+        $memberSection = $member['section'] ?? '';
+
+        // Check year mismatch (only when both are set)
+        if ($studentYear !== '' && $memberYear !== '' && $studentYear !== $memberYear) {
+            return __('year_mismatch');
+        }
+
+        // Check department/section mismatch (only when both are set)
+        if ($studentSection !== '' && $memberSection !== '' && $studentSection !== $memberSection) {
+            return __('department_mismatch');
+        }
+    }
+
+    return null;
+}
+
+/**
  * Validate phone number (11 digits)
  * Returns error string or null if valid
  */
