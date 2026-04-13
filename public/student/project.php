@@ -423,7 +423,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                 </small>
             <?php endif; ?>
 
-            <?php if ($project['status'] === 'draft' && !$isLeader): ?>
+            <?php if (in_array($project['status'], ['draft', 'rejected']) && !$isLeader): ?>
                 <button class="btn btn-outline-danger" onclick="leaveProject()">
                     <i class="bi bi-box-arrow-right me-2"></i><?= __('leave_project') ?>
                 </button>
