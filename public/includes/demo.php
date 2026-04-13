@@ -23,6 +23,9 @@ define('DEMO_RESET_INTERVAL', 30 * 60);
 /** Permanent admin email — excluded from all demo mode operations */
 define('PERMANENT_ADMIN_EMAIL', 'it@admin.com');
 
+/** File that stores the permanent admin credentials as JSON */
+define('PERMANENT_ADMIN_CREDENTIALS_FILE', sys_get_temp_dir() . '/permanent_admin_credentials.json');
+
 /** Demo seed accounts — email => [name, role, student_code] */
 define('DEMO_SEED_ACCOUNTS', [
     'admin@treudler.net'    => ['name' => 'Admin',       'role' => 'admin',   'student_code' => null],
@@ -465,9 +468,8 @@ function ensurePermanentAdmin(PDO $pdo): void {
     $stmt->execute(['IT Admin', PERMANENT_ADMIN_EMAIL, $hash]);
 
     // Store the password so it can be displayed on the login page
-    $permAdminCredsFile = sys_get_temp_dir() . '/permanent_admin_credentials.json';
-    file_put_contents($permAdminCredsFile, json_encode([PERMANENT_ADMIN_EMAIL => $plain], JSON_UNESCAPED_UNICODE));
-    chmod($permAdminCredsFile, 0600);
+    file_put_contents(PERMANENT_ADMIN_CREDENTIALS_FILE, json_encode([PERMANENT_ADMIN_EMAIL => $plain], JSON_UNESCAPED_UNICODE));
+    chmod(PERMANENT_ADMIN_CREDENTIALS_FILE, 0600);
 }
 
 /**
@@ -475,10 +477,9 @@ function ensurePermanentAdmin(PDO $pdo): void {
  * Returns array with email => password or empty array if file doesn't exist.
  */
 function getPermanentAdminCredentials(): array {
-    $permAdminCredsFile = sys_get_temp_dir() . '/permanent_admin_credentials.json';
-    if (file_exists($permAdminCredsFile)) {
-        $data = json_decode(file_get_contents($permAdminCredsFile), true);
-        if (is_array($data)) return $data;
-    }
-    return [];
+    if (!file_exists(PERMANENT_ADMIN_CREDENTIALS_FILE)) return [];
+    $contents = @file_get_contents(PERMANENT_ADMIN_CREDENTIALS_FILE);
+    if ($contents === false) return [];
+    $data = @json_decode($contents, true);
+    return is_array($data) ? $data : [];
 }
