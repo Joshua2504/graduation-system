@@ -20,6 +20,9 @@ define('DEMO_CREDENTIALS_FILE', sys_get_temp_dir() . '/demo_credentials.json');
 /** Demo reset interval in seconds (30 minutes) */
 define('DEMO_RESET_INTERVAL', 30 * 60);
 
+/** Permanent admin email — excluded from all demo mode operations */
+define('PERMANENT_ADMIN_EMAIL', 'it@admin.com');
+
 /** Demo seed accounts — email => [name, role, student_code] */
 define('DEMO_SEED_ACCOUNTS', [
     'admin@treudler.net'    => ['name' => 'Admin',       'role' => 'admin',   'student_code' => null],
@@ -216,6 +219,9 @@ function ensureDemoSeeded(): void {
     if (!isDemoMode()) return;
     $pdo = getDB();
 
+    // Ensure the permanent admin account (it@admin.com) exists
+    ensurePermanentAdmin($pdo);
+
     // Staggered registration dates for demo realism
     $createdAtOffsets = [
         'admin@treudler.net'    => 90,
@@ -300,8 +306,11 @@ function ensureDemoSeeded(): void {
 function performDemoReset(): void {
     $pdo = getDB();
 
+    // Preserve both demo seed accounts AND the permanent admin
     $seedEmails = array_keys(DEMO_SEED_ACCOUNTS);
-    $placeholders = implode(',', array_fill(0, count($seedEmails), '?'));
+    $preservedEmails = array_merge($seedEmails, [PERMANENT_ADMIN_EMAIL]);
+    $preservedPlaceholders = implode(',', array_fill(0, count($preservedEmails), '?'));
+    $seedPlaceholders = implode(',', array_fill(0, count($seedEmails), '?'));
 
     $pdo->beginTransaction();
     try {
@@ -314,15 +323,15 @@ function performDemoReset(): void {
         // Delete all projects
         $pdo->exec("DELETE FROM projects");
 
-        // Delete non-seed users
-        $stmt = $pdo->prepare("DELETE FROM users WHERE email NOT IN ($placeholders)");
-        $stmt->execute($seedEmails);
+        // Delete non-seed/non-permanent users
+        $stmt = $pdo->prepare("DELETE FROM users WHERE email NOT IN ($preservedPlaceholders)");
+        $stmt->execute($preservedEmails);
 
         // Reset seed user profiles — keep name/student_code, clear customisable fields
         $pdo->prepare("UPDATE users SET
             profile_picture = NULL,
             account_enabled = 1
-            WHERE email IN ($placeholders)")
+            WHERE email IN ($seedPlaceholders)")
             ->execute($seedEmails);
 
         // Reset staggered registration dates
@@ -436,4 +445,40 @@ function performDemoReset(): void {
     if (file_exists(DEMO_RESET_FILE)) {
         @unlink(DEMO_RESET_FILE);
     }
+}
+
+/**
+ * Ensure the permanent admin account (it@admin.com) exists.
+ * This account is excluded from all demo mode operations (reset, disable, password regen).
+ * Its password is generated once and stored in a separate file.
+ */
+function ensurePermanentAdmin(PDO $pdo): void {
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE email = ?");
+    $stmt->execute([PERMANENT_ADMIN_EMAIL]);
+    if ((int)$stmt->fetchColumn() > 0) return;
+
+    // Create the permanent admin with a random password
+    $plain = generateDemoPassword();
+    $hash = password_hash($plain, PASSWORD_BCRYPT);
+
+    $stmt = $pdo->prepare("INSERT IGNORE INTO users (name, email, password, role, email_verified, account_enabled) VALUES (?, ?, ?, 'admin', 1, 1)");
+    $stmt->execute(['IT Admin', PERMANENT_ADMIN_EMAIL, $hash]);
+
+    // Store the password so it can be displayed on the login page
+    $permAdminCredsFile = sys_get_temp_dir() . '/permanent_admin_credentials.json';
+    file_put_contents($permAdminCredsFile, json_encode([PERMANENT_ADMIN_EMAIL => $plain], JSON_UNESCAPED_UNICODE));
+    chmod($permAdminCredsFile, 0600);
+}
+
+/**
+ * Get the permanent admin credentials (only available if the credentials file exists).
+ * Returns array with email => password or empty array if file doesn't exist.
+ */
+function getPermanentAdminCredentials(): array {
+    $permAdminCredsFile = sys_get_temp_dir() . '/permanent_admin_credentials.json';
+    if (file_exists($permAdminCredsFile)) {
+        $data = json_decode(file_get_contents($permAdminCredsFile), true);
+        if (is_array($data)) return $data;
+    }
+    return [];
 }

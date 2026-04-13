@@ -359,6 +359,7 @@ require_once __DIR__ . '/includes/header.php';
 
                             <?php if (isDemoMode()): ?>
                             <?php $demoCreds = getDemoCredentials(); ?>
+                            <?php $permAdminCreds = getPermanentAdminCredentials(); ?>
                             <hr>
                             <div class="demo-credentials-box small">
                                 <div class="fw-semibold mb-1"><i class="bi bi-key me-1"></i><?= __('demo_credentials') ?></div>
@@ -366,6 +367,18 @@ require_once __DIR__ . '/includes/header.php';
                                     <?php foreach ($demoCreds as $email => $pass): ?>
                                     <tr>
                                         <td class="text-muted py-0"><?= sanitize($email) ?></td>
+                                        <td class="py-0"><code><?= sanitize($pass) ?></code></td>
+                                        <td class="py-0 text-end">
+                                            <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 demo-login-btn"
+                                                    data-email="<?= sanitize($email) ?>" data-password="<?= sanitize($pass) ?>">
+                                                <i class="bi bi-box-arrow-in-right me-1"></i><?= __('login') ?>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                    <?php foreach ($permAdminCreds as $email => $pass): ?>
+                                    <tr class="table-info">
+                                        <td class="text-muted py-0"><?= sanitize($email) ?> <span class="badge bg-info text-dark"><?= __('permanent_admin') ?></span></td>
                                         <td class="py-0"><code><?= sanitize($pass) ?></code></td>
                                         <td class="py-0 text-end">
                                             <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 demo-login-btn"

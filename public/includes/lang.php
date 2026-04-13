@@ -479,6 +479,7 @@ $translations = [
     'demo_student' => ['ar' => 'طالب', 'en' => 'Student', 'de' => 'Student'],
     'demo_resets_in' => ['ar' => 'إعادة تعيين العرض خلال', 'en' => 'Demo resets in', 'de' => 'Demo wird zurückgesetzt in'],
     'demo_credentials' => ['ar' => 'بيانات الدخول التجريبية', 'en' => 'Demo Credentials', 'de' => 'Demo-Zugangsdaten'],
+    'permanent_admin' => ['ar' => 'مدير دائم', 'en' => 'Permanent Admin', 'de' => 'Permanenter Admin'],
 
     // Landing page
     'landing_hero_title' => ['ar' => 'نظام إدارة مشاريع التخرج', 'en' => 'Graduation Project Management System', 'de' => 'Abschlussprojekt-Verwaltungssystem'],

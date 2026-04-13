@@ -52,6 +52,7 @@
   - 📚 *نظام إدارة المكتبات* (Library Management System) — accepted, 3 members (students 1-3)
   - 🏋️ *تطبيق تتبع اللياقة البدنية* (Fitness Tracking App) — under review, 2 members (students 4-5)
 - **All languages enabled** — Arabic, English, and German are all available in demo mode
+- **Permanent admin** — `it@admin.com` is a permanent admin account created alongside demo accounts; it is excluded from demo resets (never deleted, password never regenerated) and survives the 30-minute auto-reset cycle
 - Enable with `DEMO_MODE=true` in `.env`
 - No demo accounts or content exist when demo mode is disabled
 
