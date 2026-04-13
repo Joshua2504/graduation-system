@@ -141,6 +141,13 @@ body {
     }
 }
 
+/* Prevent horizontal page overflow on small screens */
+@media (max-width: 576px) {
+    .container {
+        overflow-x: hidden;
+    }
+}
+
 /* ─── Login/Register Card ─── */
 .card.shadow {
     border: none;
@@ -174,6 +181,15 @@ body {
 
 .card:hover {
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+}
+
+.card-hover {
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+    cursor: pointer;
+}
+
+.card-hover:hover {
+    transform: translateY(-2px);
 }
 
 /* ─── Theme Toggle Button ─── */

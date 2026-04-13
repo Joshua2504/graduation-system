@@ -22,22 +22,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $leaderTransfer = isset($_POST['leader_transfer']) ? 1 : 0;
     $profilePicturesEnabled = isset($_POST['profile_pictures_enabled']) ? 1 : 0;
 
-    // Enabled languages — at least one must be selected
-    $allLangs = ['ar', 'en', 'de'];
-    $selectedLangs = array_filter($allLangs, fn($l) => isset($_POST['lang_' . $l]));
-    if (empty($selectedLangs)) $selectedLangs = ['ar'];
-    $enabledLanguages = implode(',', $selectedLangs);
-
-    // Default language — must be one of the enabled languages
-    $defaultLanguage = $_POST['default_language'] ?? 'ar';
-    if (!in_array($defaultLanguage, $selectedLangs)) $defaultLanguage = $selectedLangs[0];
-
     // Login methods
     $loginMethods = $_POST['login_methods'] ?? 'both';
     if (!in_array($loginMethods, ['both', 'email_only', 'student_code_only'])) $loginMethods = 'both';
 
-    $stmt = $pdo->prepare("UPDATE settings SET registration_open = ?, email_verification_required = ?, min_team_size = ?, max_team_size = ?, student_project_creation = ?, show_reviewer_name = ?, leader_transfer = ?, enabled_languages = ?, default_language = ?, login_methods = ?, profile_pictures_enabled = ? WHERE id = 1");
-    $stmt->execute([$regOpen, $emailVerReq, $minTeam, $maxTeam, $studentCreation, $showReviewerName, $leaderTransfer, $enabledLanguages, $defaultLanguage, $loginMethods, $profilePicturesEnabled]);
+    $stmt = $pdo->prepare("UPDATE settings SET registration_open = ?, email_verification_required = ?, min_team_size = ?, max_team_size = ?, student_project_creation = ?, show_reviewer_name = ?, leader_transfer = ?, login_methods = ?, profile_pictures_enabled = ? WHERE id = 1");
+    $stmt->execute([$regOpen, $emailVerReq, $minTeam, $maxTeam, $studentCreation, $showReviewerName, $leaderTransfer, $loginMethods, $profilePicturesEnabled]);
     $settings = array_merge($settings, [
         'registration_open' => $regOpen,
         'email_verification_required' => $emailVerReq,
@@ -46,8 +36,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'student_project_creation' => $studentCreation,
         'show_reviewer_name' => $showReviewerName,
         'leader_transfer' => $leaderTransfer,
-        'enabled_languages' => $enabledLanguages,
-        'default_language' => $defaultLanguage,
         'login_methods' => $loginMethods,
         'profile_pictures_enabled' => $profilePicturesEnabled,
     ]);
@@ -150,45 +138,6 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             </div>
                         </div>
 
-                        <!-- Enabled Languages -->
-                        <div class="p-3 bg-light rounded mb-3">
-                            <h6 class="mb-2"><i class="bi bi-translate me-1"></i><?= __('enabled_languages') ?></h6>
-                            <small class="text-muted d-block mb-3"><?= __('enabled_languages_description') ?></small>
-                            <?php
-                            $enabledLangs = explode(',', $settings['enabled_languages'] ?? 'ar');
-                            $langOptions = [
-                                'ar' => 'العربية (Arabic)',
-                                'en' => 'English',
-                                'de' => 'Deutsch (German)',
-                            ];
-                            ?>
-                            <?php foreach ($langOptions as $code => $label): ?>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="lang_<?= $code ?>" name="lang_<?= $code ?>"
-                                       <?= in_array($code, $enabledLangs) ? 'checked' : '' ?>>
-                                <label class="form-check-label" for="lang_<?= $code ?>"><?= $label ?></label>
-                            </div>
-                            <?php endforeach; ?>
-                            <small class="text-muted"><i class="bi bi-info-circle me-1"></i><?= __('enabled_languages_hint') ?></small>
-
-                            <!-- Default Language -->
-                            <div class="mt-3 pt-3 border-top">
-                                <label class="form-label small fw-bold" for="default_language">
-                                    <i class="bi bi-star me-1"></i><?= __('default_language') ?>
-                                </label>
-                                <small class="text-muted d-block mb-2"><?= __('default_language_description') ?></small>
-                                <?php $currentDefault = $settings['default_language'] ?? 'ar'; ?>
-                                <select class="form-select" id="default_language" name="default_language">
-                                    <?php foreach ($langOptions as $code => $label): ?>
-                                    <option value="<?= $code ?>" <?= $currentDefault === $code ? 'selected' : '' ?>
-                                            <?= !in_array($code, $enabledLangs) ? 'disabled' : '' ?>>
-                                        <?= $label ?>
-                                    </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                        </div>
-
                         <!-- Login Methods -->
                         <div class="p-3 bg-light rounded mb-3">
                             <h6 class="mb-2"><i class="bi bi-box-arrow-in-right me-1"></i><?= __('login_methods') ?></h6>
@@ -269,21 +218,6 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
 <?php require_once dirname(__DIR__) . '/includes/footer.php'; ?>
 
 <script>
-// Sync default language dropdown with enabled language checkboxes
-document.querySelectorAll('input[id^="lang_"]').forEach(cb => {
-    cb.addEventListener('change', () => {
-        const sel = document.getElementById('default_language');
-        const enabledCodes = [...document.querySelectorAll('input[id^="lang_"]:checked')].map(c => c.id.replace('lang_', ''));
-        [...sel.options].forEach(opt => {
-            opt.disabled = !enabledCodes.includes(opt.value);
-        });
-        if (sel.selectedOptions[0]?.disabled) {
-            const first = [...sel.options].find(o => !o.disabled);
-            if (first) first.selected = true;
-        }
-    });
-});
-
 // ─── Departments CRUD ─── 
 const deptAlert = document.getElementById('deptAlert');
 
@@ -296,7 +230,7 @@ function showDeptAlert(msg, type = 'success') {
 
 async function loadDepartments() {
     try {
-        const res = await fetch('/api/departments.php');
+        const res = await fetch('/api/departments');
         const data = await res.json();
         const list = document.getElementById('departmentsList');
         if (!data.departments || data.departments.length === 0) {
@@ -333,7 +267,7 @@ async function addDepartment() {
     if (!name) return;
 
     try {
-        const res = await fetch('/api/departments.php', {
+        const res = await fetch('/api/departments', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name })
@@ -356,7 +290,7 @@ async function editDepartment(id, currentName) {
     if (!newName || newName.trim() === currentName) return;
 
     try {
-        const res = await fetch('/api/departments.php', {
+        const res = await fetch('/api/departments', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id, name: newName.trim() })
@@ -377,7 +311,7 @@ async function deleteDepartment(id, name) {
     if (!confirm(<?= json_encode(__('confirm_delete_department')) ?>)) return;
 
     try {
-        const res = await fetch('/api/departments.php', {
+        const res = await fetch('/api/departments', {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id })

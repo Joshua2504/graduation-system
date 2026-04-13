@@ -3,7 +3,16 @@
  * Language / i18n support — Arabic + English + German (Deutsch)
  */
 
-$allLangs = ['ar', 'en', 'de'];
+// Load available languages from environment (e.g., AVAILABLE_LANGUAGES=ar,en,de)
+// Only codes that have translations defined in this app are accepted.
+$_knownLangs = ['ar', 'en', 'de'];
+$_availableLangsEnv = $_ENV['AVAILABLE_LANGUAGES'] ?? getenv('AVAILABLE_LANGUAGES') ?: 'ar,en,de';
+$allLangs = array_values(array_filter(
+    array_map('trim', explode(',', strtolower($_availableLangsEnv))),
+    fn($l) => in_array($l, $_knownLangs)
+));
+if (empty($allLangs)) $allLangs = $_knownLangs;
+unset($_availableLangsEnv, $_knownLangs);
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -31,12 +40,12 @@ try {
     // DB not ready yet, use fallback
 }
 
-// When demo mode is enabled, fall back to all languages; otherwise only Arabic
-$defaultLangs = $_isDemoMode ? $allLangs : ['ar'];
+// When demo mode is enabled, fall back to all languages; otherwise only the first available language
+$defaultLangs = $_isDemoMode ? $allLangs : [$allLangs[0]];
 $supportedLangs = $enabledLangsStr
     ? array_values(array_filter(explode(',', $enabledLangsStr), fn($l) => in_array($l, $allLangs)))
     : $defaultLangs;
-if (empty($supportedLangs)) $supportedLangs = ['ar'];
+if (empty($supportedLangs)) $supportedLangs = [$allLangs[0]];
 
 // Determine default language: use DB setting if enabled, otherwise first enabled language
 $defaultLang = ($defaultLangFromDB && in_array($defaultLangFromDB, $supportedLangs))
@@ -90,6 +99,7 @@ $translations = [
     'loading' => ['ar' => 'جاري التحميل...', 'en' => 'Loading...', 'de' => 'Wird geladen...'],
     'error' => ['ar' => 'خطأ', 'en' => 'Error', 'de' => 'Fehler'],
     'success' => ['ar' => 'نجاح', 'en' => 'Success', 'de' => 'Erfolg'],
+    'internal_error' => ['ar' => 'حدث خطأ داخلي، يرجى المحاولة مرة أخرى', 'en' => 'An internal error occurred, please try again', 'de' => 'Ein interner Fehler ist aufgetreten, bitte versuchen Sie es erneut'],
     'required_field' => ['ar' => 'هذا الحقل مطلوب', 'en' => 'This field is required', 'de' => 'Dieses Feld ist erforderlich'],
     'settings' => ['ar' => 'الإعدادات', 'en' => 'Settings', 'de' => 'Einstellungen'],
     'actions' => ['ar' => 'الإجراءات', 'en' => 'Actions', 'de' => 'Aktionen'],
@@ -128,6 +138,22 @@ $translations = [
     'verification_invalid' => ['ar' => 'رابط التأكيد غير صالح أو منتهي الصلاحية.', 'en' => 'Verification link is invalid or has expired.', 'de' => 'Der Bestätigungslink ist ungültig oder abgelaufen.'],
     'verification_already' => ['ar' => 'تم تأكيد بريدك الإلكتروني مسبقاً.', 'en' => 'Your email has already been verified.', 'de' => 'Ihre E-Mail wurde bereits bestätigt.'],
 
+    // Password reset
+    'forgot_password' => ['ar' => 'نسيت كلمة المرور؟', 'en' => 'Forgot password?', 'de' => 'Passwort vergessen?'],
+    'forgot_password_title' => ['ar' => 'استعادة كلمة المرور', 'en' => 'Reset Password', 'de' => 'Passwort zurücksetzen'],
+    'forgot_password_desc' => ['ar' => 'أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور.', 'en' => 'Enter your email address and we will send you a link to reset your password.', 'de' => 'Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen einen Link zum Zurücksetzen Ihres Passworts.'],
+    'forgot_password_submit' => ['ar' => 'إرسال رابط إعادة تعيين كلمة المرور', 'en' => 'Send Password Reset Link', 'de' => 'Link zum Zurücksetzen des Passworts senden'],
+    'invalid_email_format' => ['ar' => 'يرجى إدخال بريد إلكتروني صحيح.', 'en' => 'Please enter a valid email address.', 'de' => 'Bitte geben Sie eine gültige E-Mail-Adresse ein.'],
+    'password_reset_sent' => ['ar' => 'إذا كان البريد الإلكتروني مسجلاً في النظام، ستتلقى رابط إعادة التعيين خلال دقائق.', 'en' => 'If this email is registered in the system, you will receive a reset link within a few minutes.', 'de' => 'Wenn diese E-Mail im System registriert ist, erhalten Sie in wenigen Minuten einen Link zum Zurücksetzen.'],
+    'reset_password_title' => ['ar' => 'تعيين كلمة مرور جديدة', 'en' => 'Set New Password', 'de' => 'Neues Passwort festlegen'],
+    'reset_password_desc' => ['ar' => 'أدخل كلمة المرور الجديدة أدناه.', 'en' => 'Enter your new password below.', 'de' => 'Geben Sie unten Ihr neues Passwort ein.'],
+    'confirm_new_password' => ['ar' => 'تأكيد كلمة المرور الجديدة', 'en' => 'Confirm New Password', 'de' => 'Neues Passwort bestätigen'],
+    'reset_password_submit' => ['ar' => 'تعيين كلمة المرور', 'en' => 'Set Password', 'de' => 'Passwort festlegen'],
+    'password_reset_invalid' => ['ar' => 'رابط إعادة التعيين غير صالح أو منتهي الصلاحية.', 'en' => 'The reset link is invalid or has expired.', 'de' => 'Der Zurücksetzungslink ist ungültig oder abgelaufen.'],
+    'passwords_do_not_match' => ['ar' => 'كلمتا المرور غير متطابقتين.', 'en' => 'Passwords do not match.', 'de' => 'Die Passwörter stimmen nicht überein.'],
+    'password_too_short' => ['ar' => 'كلمة المرور يجب أن تكون 6 أحرف على الأقل.', 'en' => 'Password must be at least 6 characters.', 'de' => 'Das Passwort muss mindestens 6 Zeichen lang sein.'],
+    'back_to_login' => ['ar' => 'العودة لتسجيل الدخول', 'en' => 'Back to Login', 'de' => 'Zurück zur Anmeldung'],
+
     // Profile
     'my_profile' => ['ar' => 'ملفي الشخصي', 'en' => 'My Profile', 'de' => 'Mein Profil'],
     'profile_incomplete' => ['ar' => 'الملف الشخصي غير مكتمل', 'en' => 'Profile Incomplete', 'de' => 'Profil unvollständig'],
@@ -163,7 +189,7 @@ $translations = [
     'fourth_year' => ['ar' => 'الرابعة', 'en' => '4th', 'de' => '4.'],
 
     // Images
-    'card_image' => ['ar' => 'صورة بطاقة المعهد', 'en' => 'Institute ID Card', 'de' => 'Institutsausweis'],
+    'card_image' => ['ar' => 'صورة كارنية المعهد', 'en' => 'Institute ID Card', 'de' => 'Institutsausweis'],
     'national_id_image' => ['ar' => 'صورة البطاقة الشخصية', 'en' => 'National ID Card', 'de' => 'Personalausweis'],
     'receipt_image' => ['ar' => 'صورة إيصال دفع مشروع التخرج', 'en' => 'Graduation Project Payment Receipt', 'de' => 'Zahlungsbeleg für Abschlussprojekt'],
     'profile_picture' => ['ar' => 'صورة شخصية', 'en' => 'Profile Picture', 'de' => 'Profilbild'],
@@ -211,7 +237,7 @@ $translations = [
 
     // Student dashboard
     'project_submitted' => ['ar' => 'تم تقديم مشروعك بنجاح وهو الآن قيد المراجعة. يرجى التحقق خلال 24 ساعة.', 'en' => 'Your project has been successfully submitted and is under review. Please check back within 24 hours.', 'de' => 'Ihr Projekt wurde erfolgreich eingereicht und wird geprüft. Bitte schauen Sie innerhalb von 24 Stunden wieder vorbei.'],
-    'project_accepted_msg' => ['ar' => 'تم قبول مشروعك. يرجى المتابعة مع مدرس المادة في الجامعة.', 'en' => 'Your project has been accepted. Please continue with the course instructor at the university.', 'de' => 'Ihr Projekt wurde angenommen. Bitte fahren Sie mit dem Kursleiter an der Universität fort.'],
+    'project_accepted_msg' => ['ar' => 'تم قبول مشروعك. يرجى المتابعة مع الدكتور في الجامعة.', 'en' => 'Your project has been accepted. Please continue with the professor at the university.', 'de' => 'Ihr Projekt wurde angenommen. Bitte fahren Sie mit dem Professor an der Universität fort.'],
     'project_rejected_msg' => ['ar' => 'تم رفض مشروعك. يمكنك تعديل البيانات وإعادة التقديم.', 'en' => 'Your project has been rejected. You can edit your data and resubmit.', 'de' => 'Ihr Projekt wurde abgelehnt. Sie können Ihre Daten bearbeiten und erneut einreichen.'],
     'group_number' => ['ar' => 'رقم المجموعة', 'en' => 'Group Number', 'de' => 'Gruppennummer'],
     'doctor_note' => ['ar' => 'ملاحظة الدكتور', 'en' => "Professor's Note", 'de' => 'Anmerkung des Professors'],
@@ -235,7 +261,7 @@ $translations = [
 
     'toggle_registration' => ['ar' => 'تبديل حالة التسجيل', 'en' => 'Toggle Registration', 'de' => 'Registrierung umschalten'],
     'toggle_email_verification' => ['ar' => 'تأكيد البريد الإلكتروني', 'en' => 'Email Verification', 'de' => 'E-Mail-Bestätigung'],
-    'student_accounts' => ['ar' => 'حسابات الطلاب', 'en' => 'Student Accounts', 'de' => 'Studentenkonten'],
+    'student_accounts' => ['ar' => 'الطلاب', 'en' => 'Students', 'de' => 'Studenten'],
     'account_disabled' => ['ar' => 'تم تعطيل حسابك. يرجى التواصل مع المسؤول.', 'en' => 'Your account has been disabled. Please contact the administrator.', 'de' => 'Ihr Konto wurde deaktiviert. Bitte kontaktieren Sie den Administrator.'],
     'no_projects' => ['ar' => 'لا توجد مشاريع', 'en' => 'No projects found', 'de' => 'Keine Projekte gefunden'],
     'team_leader' => ['ar' => 'قائد الفريق', 'en' => 'Team Leader', 'de' => 'Teamleiter'],
@@ -246,7 +272,7 @@ $translations = [
     'students_count' => ['ar' => 'طالب', 'en' => 'students', 'de' => 'Studenten'],
     'search_placeholder' => ['ar' => 'بحث...', 'en' => 'Search...', 'de' => 'Suchen...'],
     'no_registered_students' => ['ar' => 'لا يوجد طلاب مسجلين', 'en' => 'No registered students', 'de' => 'Keine registrierten Studenten'],
-    'profile' => ['ar' => 'الملف', 'en' => 'Profile', 'de' => 'Profil'],
+    'profile' => ['ar' => 'الملف الشخصي', 'en' => 'Profile', 'de' => 'Profil'],
     'email_col' => ['ar' => 'البريد', 'en' => 'Email', 'de' => 'E-Mail'],
     'account' => ['ar' => 'الحساب', 'en' => 'Account', 'de' => 'Konto'],
     'registered' => ['ar' => 'تاريخ التسجيل', 'en' => 'Registered', 'de' => 'Registriert'],
@@ -312,7 +338,7 @@ $translations = [
 
     'student_project_creation_disabled' => ['ar' => 'إنشاء المشاريع بواسطة الطلاب معطل حالياً', 'en' => 'Student project creation is currently disabled', 'de' => 'Die Projekterstellung durch Studenten ist derzeit deaktiviert'],
     'toggle_show_reviewer_name' => ['ar' => 'إظهار اسم المراجع', 'en' => 'Show Reviewer Name', 'de' => 'Prüfername anzeigen'],
-    'show_reviewer_name_description' => ['ar' => 'عند التفعيل، سيظهر اسم الدكتور الذي قبل أو رفض المشروع للطلاب', 'en' => 'When enabled, the name of the professor who accepted or declined the project will be shown to students', 'de' => 'Wenn aktiviert, wird den Studenten der Name des Professors angezeigt, der das Projekt angenommen oder abgelehnt hat'],
+    'show_reviewer_name_description' => ['ar' => 'عند التفعيل، سيظهر اسم الدكتور الذي قَبِلَ أو رفض المشروع للطلاب', 'en' => 'When enabled, the name of the professor who accepted or declined the project will be shown to students', 'de' => 'Wenn aktiviert, wird den Studenten der Name des Professors angezeigt, der das Projekt angenommen oder abgelehnt hat'],
 
     'toggle_leader_transfer' => ['ar' => 'نقل القيادة بواسطة القائد', 'en' => 'Leader Transfer by Team Leader', 'de' => 'Leiterübertragung durch Teamleiter'],
     'leader_transfer_description' => ['ar' => 'السماح لقائد الفريق بنقل القيادة لعضو آخر في الفريق', 'en' => 'Allow team leaders to transfer leadership to another team member', 'de' => 'Teamleitern erlauben, die Leitung an ein anderes Teammitglied zu übertragen'],
@@ -361,7 +387,6 @@ $translations = [
     'invited' => ['ar' => 'مدعو', 'en' => 'Invited', 'de' => 'Eingeladen'],
     'resend_invitation' => ['ar' => 'إعادة إرسال الدعوة', 'en' => 'Resend Invitation', 'de' => 'Einladung erneut senden'],
     'cancel_invitation' => ['ar' => 'إلغاء الدعوة', 'en' => 'Cancel Invitation', 'de' => 'Einladung abbrechen'],
-    'email_or_code_placeholder' => ['ar' => 'بريد إلكتروني أو كود طالب', 'en' => 'Email or student code', 'de' => 'E-Mail oder Matrikelnummer'],
     'team_min_size_msg' => ['ar' => 'يجب أن يكون الفريق %d أعضاء على الأقل', 'en' => 'Team needs at least %d members', 'de' => 'Das Team benötigt mindestens %d Mitglieder'],
     'delete_project' => ['ar' => 'حذف المشروع', 'en' => 'Delete Project', 'de' => 'Projekt löschen'],
     'project_description' => ['ar' => 'وصف المشروع', 'en' => 'Project Description', 'de' => 'Projektbeschreibung'],
@@ -427,6 +452,7 @@ $translations = [
     'assign_students' => ['ar' => 'تعيين طلاب', 'en' => 'Assign Students', 'de' => 'Studenten zuweisen'],
     'assign_student' => ['ar' => 'تعيين طالب', 'en' => 'Assign Student', 'de' => 'Student zuweisen'],
     'search_students' => ['ar' => 'بحث عن طالب (بالاسم أو البريد أو الكود)', 'en' => 'Search student (by name, email or code)', 'de' => 'Student suchen (nach Name, E-Mail oder Code)'],
+    'search_projects' => ['ar' => 'بحث عن مشروع...', 'en' => 'Search projects...', 'de' => 'Projekte suchen...'],
     'search_add_students' => ['ar' => 'بحث وإضافة طلاب', 'en' => 'Search & Add Students', 'de' => 'Studenten suchen & hinzufügen'],
     'no_results' => ['ar' => 'لا توجد نتائج', 'en' => 'No results found', 'de' => 'Keine Ergebnisse gefunden'],
     'student_already_in_project' => ['ar' => 'الطالب عضو بالفعل في هذا المشروع', 'en' => 'Student is already a member of this project', 'de' => 'Student ist bereits Mitglied dieses Projekts'],
@@ -449,7 +475,7 @@ $translations = [
 
     // Demo mode
     'demo_quick_login' => ['ar' => 'تسجيل دخول سريع (وضع تجريبي)', 'en' => 'Quick Login (Demo Mode)', 'de' => 'Schnellanmeldung (Demo-Modus)'],
-    'demo_doctor' => ['ar' => 'دكتور', 'en' => 'Doctor', 'de' => 'Professor'],
+    'demo_doctor' => ['ar' => 'دكتور', 'en' => 'Professor', 'de' => 'Professor'],
     'demo_student' => ['ar' => 'طالب', 'en' => 'Student', 'de' => 'Student'],
     'demo_resets_in' => ['ar' => 'إعادة تعيين العرض خلال', 'en' => 'Demo resets in', 'de' => 'Demo wird zurückgesetzt in'],
     'demo_credentials' => ['ar' => 'بيانات الدخول التجريبية', 'en' => 'Demo Credentials', 'de' => 'Demo-Zugangsdaten'],
@@ -508,33 +534,33 @@ $translations = [
     // Admin
     'admin_dashboard' => ['ar' => 'لوحة تحكم المدير', 'en' => 'Admin Dashboard', 'de' => 'Admin-Dashboard'],
     'admin_profile_info' => ['ar' => 'يمكنك تعديل بياناتك الشخصية وصورتك من هنا', 'en' => 'You can edit your personal information and photo here', 'de' => 'Hier können Sie Ihre persönlichen Daten und Ihr Foto bearbeiten'],
-    'professor_accounts' => ['ar' => 'حسابات الأساتذة', 'en' => 'Professor Accounts', 'de' => 'Professorenkonten'],
-    'professors' => ['ar' => 'الأساتذة', 'en' => 'Professors', 'de' => 'Professoren'],
-    'professors_count' => ['ar' => 'أستاذ', 'en' => 'professors', 'de' => 'Professoren'],
+    'professor_accounts' => ['ar' => 'الدكاترة', 'en' => 'Professors', 'de' => 'Professoren'],
+    'professors' => ['ar' => 'الدكاترة', 'en' => 'Professors', 'de' => 'Professoren'],
+    'professors_count' => ['ar' => 'دكتور', 'en' => 'professors', 'de' => 'Professoren'],
     'students' => ['ar' => 'الطلاب', 'en' => 'Students', 'de' => 'Studenten'],
     'total_projects' => ['ar' => 'إجمالي المشاريع', 'en' => 'Total Projects', 'de' => 'Gesamtprojekte'],
-    'all_projects' => ['ar' => 'جميع المشاريع', 'en' => 'All Projects', 'de' => 'Alle Projekte'],
+    'all_projects' => ['ar' => 'المشاريع', 'en' => 'Projects', 'de' => 'Projekte'],
     'all' => ['ar' => 'الكل', 'en' => 'All', 'de' => 'Alle'],
-    'recent_professors' => ['ar' => 'آخر الأساتذة', 'en' => 'Recent Professors', 'de' => 'Neueste Professoren'],
+    'recent_professors' => ['ar' => 'آخر الدكاترة', 'en' => 'Recent Professors', 'de' => 'Neueste Professoren'],
     'recent_projects' => ['ar' => 'آخر المشاريع', 'en' => 'Recent Projects', 'de' => 'Neueste Projekte'],
     'view_all' => ['ar' => 'عرض الكل', 'en' => 'View All', 'de' => 'Alle anzeigen'],
-    'no_professors' => ['ar' => 'لا يوجد أساتذة مسجلين', 'en' => 'No professors registered', 'de' => 'Keine Professoren registriert'],
-    'add_professor' => ['ar' => 'إضافة أستاذ', 'en' => 'Add Professor', 'de' => 'Professor hinzufügen'],
-    'add_new_professor' => ['ar' => 'إضافة أستاذ جديد', 'en' => 'Add New Professor', 'de' => 'Neuen Professor hinzufügen'],
-    'professor_created' => ['ar' => 'تم إنشاء حساب الأستاذ بنجاح', 'en' => 'Professor account created successfully', 'de' => 'Professorenkonto erfolgreich erstellt'],
-    'professor_deleted' => ['ar' => 'تم حذف حساب الأستاذ', 'en' => 'Professor account deleted', 'de' => 'Professorenkonto gelöscht'],
+    'no_professors' => ['ar' => 'لا يوجد دكاترة مسجلين', 'en' => 'No professors registered', 'de' => 'Keine Professoren registriert'],
+    'add_professor' => ['ar' => 'إضافة دكتور', 'en' => 'Add Professor', 'de' => 'Professor hinzufügen'],
+    'add_new_professor' => ['ar' => 'إضافة دكتور جديد', 'en' => 'Add New Professor', 'de' => 'Neuen Professor hinzufügen'],
+    'professor_created' => ['ar' => 'تم إنشاء حساب الدكتور بنجاح', 'en' => 'Professor account created successfully', 'de' => 'Professorenkonto erfolgreich erstellt'],
+    'professor_deleted' => ['ar' => 'تم حذف حساب الدكتور', 'en' => 'Professor account deleted', 'de' => 'Professorenkonto gelöscht'],
     'account_enabled_msg' => ['ar' => 'تم تفعيل الحساب', 'en' => 'Account enabled', 'de' => 'Konto aktiviert'],
     'account_disabled_msg' => ['ar' => 'تم تعطيل الحساب', 'en' => 'Account disabled', 'de' => 'Konto deaktiviert'],
-    'login_as_professor' => ['ar' => 'الدخول كأستاذ', 'en' => 'Login as Professor', 'de' => 'Als Professor anmelden'],
-    'impersonating_professor' => ['ar' => 'تم الدخول كأستاذ', 'en' => 'Now viewing as professor', 'de' => 'Jetzt als Professor angemeldet'],
+    'login_as_professor' => ['ar' => 'الدخول كدكتور', 'en' => 'Login as Professor', 'de' => 'Als Professor anmelden'],
+    'impersonating_professor' => ['ar' => 'تم الدخول كدكتور', 'en' => 'Now viewing as professor', 'de' => 'Jetzt als Professor angemeldet'],
     'back_to_admin' => ['ar' => 'العودة للمدير', 'en' => 'Back to Admin', 'de' => 'Zurück zum Admin'],
-    'confirm_disable_professor' => ['ar' => 'تعطيل حساب هذا الأستاذ؟', 'en' => "Disable this professor's account?", 'de' => 'Konto dieses Professors deaktivieren?'],
-    'confirm_enable_professor' => ['ar' => 'تفعيل حساب هذا الأستاذ؟', 'en' => "Enable this professor's account?", 'de' => 'Konto dieses Professors aktivieren?'],
+    'confirm_disable_professor' => ['ar' => 'تعطيل حساب هذا الدكتور؟', 'en' => "Disable this professor's account?", 'de' => 'Konto dieses Professors deaktivieren?'],
+    'confirm_enable_professor' => ['ar' => 'تفعيل حساب هذا الدكتور؟', 'en' => "Enable this professor's account?", 'de' => 'Konto dieses Professors aktivieren?'],
     'confirm_delete_professor' => ['ar' => 'حذف هذا الحساب نهائياً؟ سيتم حذف جميع بياناته.', 'en' => 'Permanently delete this account? All data will be removed.', 'de' => 'Dieses Konto endgültig löschen? Alle Daten werden entfernt.'],
-    'confirm_impersonate_professor' => ['ar' => 'الدخول كهذا الأستاذ؟', 'en' => 'Login as this professor?', 'de' => 'Als dieser Professor anmelden?'],
+    'confirm_impersonate_professor' => ['ar' => 'الدخول كهذا الدكتور؟', 'en' => 'Login as this professor?', 'de' => 'Als dieser Professor anmelden?'],
     'reset_password' => ['ar' => 'إعادة تعيين كلمة المرور', 'en' => 'Reset Password', 'de' => 'Passwort zurücksetzen'],
     'new_password' => ['ar' => 'كلمة المرور الجديدة', 'en' => 'New Password', 'de' => 'Neues Passwort'],
-    'password_reset_success' => ['ar' => 'تم إعادة تعيين كلمة المرور بنجاح', 'en' => 'Password reset successfully', 'de' => 'Passwort erfolgreich zurückgesetzt'],
+    'password_reset_success' => ['ar' => 'تم تغيير كلمة المرور بنجاح. يمكنك الآن تسجيل الدخول.', 'en' => 'Your password has been changed successfully. You can now log in.', 'de' => 'Ihr Passwort wurde erfolgreich geändert. Sie können sich jetzt anmelden.'],
     'send_new_password_email' => ['ar' => 'إرسال كلمة المرور الجديدة بالبريد', 'en' => 'Send new password via email', 'de' => 'Neues Passwort per E-Mail senden'],
     'demo_admin' => ['ar' => 'مدير النظام', 'en' => 'Admin', 'de' => 'Administrator'],
 
@@ -543,20 +569,49 @@ $translations = [
     'landing_stat_fast' => ['ar' => 'سريع وفعّال', 'en' => 'Fast & Efficient', 'de' => 'Schnell & Effizient'],
     'landing_stat_complete' => ['ar' => 'نظام متكامل', 'en' => 'All-in-One', 'de' => 'Alles-in-Einem'],
 
-    // Paper submission
-    'paper' => ['ar' => 'الورقة', 'en' => 'Paper', 'de' => 'Arbeit'],
-    'paper_submitted_label' => ['ar' => 'تم تقديم الورقة', 'en' => 'Paper submitted', 'de' => 'Arbeit eingereicht'],
-    'paper_not_submitted' => ['ar' => 'لم تقدم الورقة بعد', 'en' => 'Paper not submitted', 'de' => 'Arbeit noch nicht eingereicht'],
-    'submit_paper' => ['ar' => 'تأكيد تقديم ورقتي', 'en' => 'Mark my paper as submitted', 'de' => 'Meine Arbeit als eingereicht markieren'],
-    'withdraw_paper' => ['ar' => 'إلغاء تقديم ورقتي', 'en' => 'Withdraw my paper submission', 'de' => 'Einreichung meiner Arbeit zurückziehen'],
-    'all_papers_submitted' => ['ar' => 'جميع الأوراق مقدمة', 'en' => 'All papers submitted', 'de' => 'Alle Arbeiten eingereicht'],
-    'papers_pending' => ['ar' => 'بعض الأوراق لم تقدم بعد', 'en' => 'Some papers not submitted yet', 'de' => 'Einige Arbeiten noch nicht eingereicht'],
-
     // Student project limit
     'project_limit_reached' => ['ar' => 'تم الوصول للحد الأقصى', 'en' => 'Project Limit Reached', 'de' => 'Projektlimit erreicht'],
     'project_limit_reached_msg' => ['ar' => 'أنت بالفعل عضو في مشروع. لا يمكنك الانضمام لمشروع آخر.', 'en' => 'You are already in a project. You cannot join another one.', 'de' => 'Sie sind bereits in einem Projekt. Sie können keinem anderen beitreten.'],
     'project_accepted_locked' => ['ar' => 'المشروع مقبول', 'en' => 'Project Accepted', 'de' => 'Projekt angenommen'],
     'project_accepted_locked_msg' => ['ar' => 'تم قبول مشروعك. لا يمكنك الانضمام لمشروع آخر.', 'en' => 'Your project has been accepted. You cannot join another project.', 'de' => 'Ihr Projekt wurde angenommen. Sie können keinem anderen Projekt beitreten.'],
+
+    // Invitation API error/success messages
+    'unauthorized' => ['ar' => 'غير مصرح', 'en' => 'Unauthorized', 'de' => 'Nicht autorisiert'],
+    'project_id_required' => ['ar' => 'معرف المشروع مطلوب', 'en' => 'Project ID is required', 'de' => 'Projekt-ID ist erforderlich'],
+    'leader_only_invite' => ['ar' => 'فقط قائد الفريق يمكنه إرسال الدعوات', 'en' => 'Only the team leader can send invitations', 'de' => 'Nur der Teamleiter kann Einladungen senden'],
+    'project_status_no_invite' => ['ar' => 'لا يمكن إرسال دعوات للمشروع في حالته الحالية', 'en' => 'Cannot send invitations for a project in its current status', 'de' => 'Einladungen können für ein Projekt in diesem Status nicht gesendet werden'],
+    'team_full' => ['ar' => 'الفريق مكتمل العدد', 'en' => 'The team is full', 'de' => 'Das Team ist voll'],
+    'email_or_code_required' => ['ar' => 'البريد الإلكتروني أو كود الطالب مطلوب', 'en' => 'Email or student code is required', 'de' => 'E-Mail oder Studentencode ist erforderlich'],
+    'student_not_found' => ['ar' => 'الطالب غير موجود', 'en' => 'Student not found', 'de' => 'Student nicht gefunden'],
+    'pending_invitation_exists' => ['ar' => 'يوجد دعوة معلقة لهذا الطالب بالفعل', 'en' => 'A pending invitation already exists for this student', 'de' => 'Es gibt bereits eine ausstehende Einladung für diesen Studenten'],
+    'invitation_sent_success' => ['ar' => 'تم إرسال الدعوة بنجاح', 'en' => 'Invitation sent successfully', 'de' => 'Einladung erfolgreich gesendet'],
+    'invite_link_created' => ['ar' => 'تم إنشاء رابط الدعوة', 'en' => 'Invite link created', 'de' => 'Einladungslink erstellt'],
+    'invalid_action' => ['ar' => 'الإجراء غير صالح', 'en' => 'Invalid action', 'de' => 'Ungültige Aktion'],
+    'invalid_invitation_token' => ['ar' => 'رابط الدعوة غير صالح', 'en' => 'Invalid invitation link', 'de' => 'Ungültiger Einladungslink'],
+    'invitation_already_used' => ['ar' => 'هذه الدعوة تم استخدامها بالفعل', 'en' => 'This invitation has already been used', 'de' => 'Diese Einladung wurde bereits verwendet'],
+    'invitation_token_expired' => ['ar' => 'رابط الدعوة منتهي الصلاحية', 'en' => 'Invitation link has expired', 'de' => 'Einladungslink ist abgelaufen'],
+    'invitation_not_for_you' => ['ar' => 'هذه الدعوة ليست موجهة لك', 'en' => 'This invitation is not meant for you', 'de' => 'Diese Einladung ist nicht für Sie bestimmt'],
+    'cannot_decline_join_code' => ['ar' => 'لا يمكن رفض الانضمام بالكود', 'en' => 'Cannot decline a join-code membership', 'de' => 'Beitrittscode-Mitgliedschaft kann nicht abgelehnt werden'],
+    'invitation_not_found' => ['ar' => 'الدعوة غير موجودة', 'en' => 'Invitation not found', 'de' => 'Einladung nicht gefunden'],
+    'invitation_already_responded' => ['ar' => 'هذه الدعوة تم الرد عليها بالفعل', 'en' => 'This invitation has already been responded to', 'de' => 'Diese Einladung wurde bereits beantwortet'],
+    'token_or_code_required' => ['ar' => 'يجب تحديد رمز الدعوة أو كود الانضمام', 'en' => 'A token or join code must be provided', 'de' => 'Ein Token oder Beitrittscode muss angegeben werden'],
+    'invitation_declined' => ['ar' => 'تم رفض الدعوة', 'en' => 'Invitation declined', 'de' => 'Einladung abgelehnt'],
+    'joined_project_success' => ['ar' => 'تم الانضمام للمشروع بنجاح', 'en' => 'Successfully joined the project', 'de' => 'Erfolgreich dem Projekt beigetreten'],
+    'invitation_id_required' => ['ar' => 'معرف الدعوة مطلوب', 'en' => 'Invitation ID is required', 'de' => 'Einladungs-ID ist erforderlich'],
+    'invitation_not_resendable' => ['ar' => 'الدعوة غير موجودة أو لا يمكن إعادة إرسالها', 'en' => 'Invitation not found or cannot be resent', 'de' => 'Einladung nicht gefunden oder kann nicht erneut gesendet werden'],
+    'invitation_resent' => ['ar' => 'تم إعادة إرسال الدعوة بنجاح', 'en' => 'Invitation resent successfully', 'de' => 'Einladung erfolgreich erneut gesendet'],
+    'invitation_not_cancellable' => ['ar' => 'الدعوة غير موجودة أو لا يمكن إلغاؤها', 'en' => 'Invitation not found or cannot be cancelled', 'de' => 'Einladung nicht gefunden oder kann nicht abgebrochen werden'],
+    'invitation_cancelled' => ['ar' => 'تم إلغاء الدعوة', 'en' => 'Invitation cancelled', 'de' => 'Einladung abgebrochen'],
+
+    // Year/Department mismatch messages
+    'year_mismatch' => ['ar' => 'لا يمكن الانضمام لهذا المشروع لأن أعضاء الفريق في سنة دراسية مختلفة', 'en' => 'Cannot join this project because the team members are in a different academic year', 'de' => 'Kann diesem Projekt nicht beitreten, da die Teammitglieder in einem anderen Studienjahr sind'],
+    'department_mismatch' => ['ar' => 'لا يمكن الانضمام لهذا المشروع لأن أعضاء الفريق في قسم مختلف', 'en' => 'Cannot join this project because the team members are in a different department', 'de' => 'Kann diesem Projekt nicht beitreten, da die Teammitglieder in einer anderen Abteilung sind'],
+
+    // Review API messages
+    'project_not_found' => ['ar' => 'المشروع غير موجود', 'en' => 'Project not found', 'de' => 'Projekt nicht gefunden'],
+    'invalid_project_state' => ['ar' => 'لا يمكن تنفيذ هذا الإجراء على المشروع في حالته الحالية', 'en' => 'This action cannot be performed on the project in its current state', 'de' => 'Diese Aktion kann nicht für das Projekt in seinem aktuellen Status ausgeführt werden'],
+    'review_project_accepted' => ['ar' => 'تم قبول المشروع وتعيين رقم المجموعة: %d', 'en' => 'Project accepted and assigned to group: %d', 'de' => 'Projekt angenommen und der Gruppe zugewiesen: %d'],
+    'review_project_rejected' => ['ar' => 'تم رفض المشروع', 'en' => 'Project has been rejected', 'de' => 'Projekt wurde abgelehnt'],
 ];
 
 /**

@@ -145,6 +145,98 @@ function smtpCmd($socket, string $cmd, string $expectedCode): string {
 }
 
 /**
+ * Generate a secure password reset token and store it in the DB
+ *
+ * @param int $userId User ID
+ * @return string The generated token
+ */
+function generatePasswordResetToken(int $userId): string {
+    try {
+        $token = bin2hex(random_bytes(32)); // 64 hex chars
+    } catch (\Exception $e) {
+        error_log('[Mailer] Failed to generate password reset token: ' . $e->getMessage());
+        throw $e;
+    }
+    $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
+
+    $pdo = getDB();
+    $stmt = $pdo->prepare("UPDATE users SET reset_token = ?, reset_token_expires_at = ? WHERE id = ?");
+    $stmt->execute([$token, $expires, $userId]);
+
+    return $token;
+}
+
+/**
+ * Send password reset email to a user
+ *
+ * @param string $email     User email
+ * @param string $name      User name
+ * @param string $token     Password reset token
+ * @param string $lang      Language code (ar/en/de)
+ * @return bool
+ */
+function sendPasswordResetEmail(string $email, string $name, string $token, string $lang = 'ar'): bool {
+    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost:8642';
+    $resetUrl = "$protocol://$host/reset-password?token=$token";
+
+    if ($lang === 'de') {
+        $subject = 'Passwort zurücksetzen - Abschlussprojekt-System';
+        $heading = 'Passwort zurücksetzen';
+        $greeting = "Hallo $name,";
+        $message = 'Sie haben eine Anfrage zum Zurücksetzen Ihres Passworts erhalten. Klicken Sie auf die Schaltfläche unten, um ein neues Passwort festzulegen.';
+        $btnText = 'Passwort zurücksetzen';
+        $expiry = 'Dieser Link ist 1 Stunde lang gültig.';
+        $ignore = 'Wenn Sie diese Anfrage nicht gestellt haben, ignorieren Sie bitte diese E-Mail.';
+        $dir = 'ltr';
+    } elseif ($lang === 'en') {
+        $subject = 'Password Reset - Graduation Project System';
+        $heading = 'Reset Your Password';
+        $greeting = "Hello $name,";
+        $message = 'We received a request to reset your password. Click the button below to set a new password.';
+        $btnText = 'Reset Password';
+        $expiry = 'This link is valid for 1 hour.';
+        $ignore = 'If you did not request this, please ignore this email.';
+        $dir = 'ltr';
+    } else {
+        $subject = 'إعادة تعيين كلمة المرور - نظام مشاريع التخرج';
+        $heading = 'إعادة تعيين كلمة المرور';
+        $greeting = "مرحباً {$name}،";
+        $message = 'تلقينا طلباً لإعادة تعيين كلمة مرورك. اضغط على الزر أدناه لتعيين كلمة مرور جديدة.';
+        $btnText = 'إعادة تعيين كلمة المرور';
+        $expiry = 'هذا الرابط صالح لمدة ساعة واحدة.';
+        $ignore = 'إذا لم تطلب ذلك، يرجى تجاهل هذا البريد.';
+        $dir = 'rtl';
+    }
+
+    $body = <<<HTML
+<!DOCTYPE html>
+<html dir="$dir" lang="$lang">
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background:#f4f6f9;">
+    <div style="max-width:520px;margin:40px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);">
+        <div style="background:#dc3545;padding:24px;text-align:center;">
+            <h1 style="margin:0;color:#fff;font-size:22px;">🔑 $heading</h1>
+        </div>
+        <div style="padding:28px 32px;">
+            <p style="font-size:16px;color:#333;">$greeting</p>
+            <p style="font-size:15px;color:#555;line-height:1.6;">$message</p>
+            <div style="text-align:center;margin:32px 0;">
+                <a href="$resetUrl" style="display:inline-block;background:#dc3545;color:#fff;padding:14px 36px;border-radius:8px;text-decoration:none;font-size:16px;font-weight:bold;">$btnText</a>
+            </div>
+            <p style="font-size:13px;color:#888;text-align:center;">$expiry</p>
+            <hr style="border:none;border-top:1px solid #eee;margin:20px 0;">
+            <p style="font-size:12px;color:#999;text-align:center;">$ignore</p>
+        </div>
+    </div>
+</body>
+</html>
+HTML;
+
+    return sendMail($email, $subject, $body);
+}
+
+/**
  * Generate a secure verification token and store it in the DB
  *
  * @param int $userId User ID
@@ -179,7 +271,7 @@ function sendVerificationEmail(string $email, string $name, string $token, strin
     if ($lang === 'ar') {
         $subject = 'تأكيد البريد الإلكتروني - نظام مشاريع التخرج';
         $heading = 'تأكيد البريد الإلكتروني';
-        $greeting = "مرحباً $name،";
+        $greeting = "مرحباً {$name}،";
         $message = 'شكراً لتسجيلك في نظام إدارة مشاريع التخرج. يرجى الضغط على الزر أدناه لتأكيد بريدك الإلكتروني.';
         $btnText = 'تأكيد البريد الإلكتروني';
         $expiry = 'هذا الرابط صالح لمدة 24 ساعة.';
@@ -242,7 +334,7 @@ function sendInvitationEmail(string $email, string $inviteeName, string $inviter
     if ($lang === 'ar') {
         $subject = 'دعوة للانضمام لمشروع تخرج - ' . $projectTitle;
         $heading = 'دعوة للانضمام لمشروع تخرج';
-        $greeting = "مرحباً $inviteeName،";
+        $greeting = "مرحباً {$inviteeName}،";
         $message = "قام <strong>$inviterName</strong> بدعوتك للانضمام لمشروع التخرج <strong>$projectTitle</strong>. اضغط على الزر أدناه لقبول الدعوة.";
         $btnText = 'قبول الدعوة';
         $expiry = 'هذه الدعوة صالحة لمدة 7 أيام.';
@@ -303,7 +395,7 @@ function sendWelcomeEmail(string $email, string $name, string $password, string 
     if ($lang === 'ar') {
         $subject = 'حساب جديد - نظام مشاريع التخرج';
         $heading = 'مرحباً بك في نظام مشاريع التخرج';
-        $greeting = "مرحباً $name،";
+        $greeting = "مرحباً {$name}،";
         $message = 'تم إنشاء حساب لك في نظام إدارة مشاريع التخرج. يمكنك تسجيل الدخول باستخدام البيانات التالية:';
         $emailLabel = 'البريد الإلكتروني';
         $passLabel = 'كلمة المرور';
@@ -391,7 +483,7 @@ function sendProfessorWelcomeEmail(string $email, string $name, string $password
     } else {
         $subject = 'حساب أستاذ جديد - نظام مشاريع التخرج';
         $heading = 'مرحباً بك في نظام مشاريع التخرج';
-        $greeting = "مرحباً $name،";
+        $greeting = "مرحباً {$name}،";
         $message = 'تم إنشاء حساب أستاذ لك في نظام إدارة مشاريع التخرج. يمكنك تسجيل الدخول باستخدام البيانات التالية:';
         $emailLabel = 'البريد الإلكتروني';
         $passLabel = 'كلمة المرور';

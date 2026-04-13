@@ -216,22 +216,37 @@ function ensureDemoSeeded(): void {
     if (!isDemoMode()) return;
     $pdo = getDB();
 
+    // Staggered registration dates for demo realism
+    $createdAtOffsets = [
+        'admin@treudler.net'    => 90,
+        'doctor@treudler.net'   => 85,
+        'student1@treudler.net' => 60,
+        'student2@treudler.net' => 45,
+        'student3@treudler.net' => 30,
+        'student4@treudler.net' => 20,
+        'student5@treudler.net' => 10,
+    ];
+
     // Check if the admin seed account already exists
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE email = ?");
     $stmt->execute(['admin@treudler.net']);
     if ((int)$stmt->fetchColumn() > 0) {
-        // Already seeded — but still ensure student profiles are complete
-        // (handles the case where uploads were wiped without a full reset)
+        // Already seeded — apply staggered dates so existing deployments are fixed
+        $offsetStmt = $pdo->prepare("UPDATE users SET created_at = NOW() - INTERVAL ? DAY WHERE email = ?");
+        foreach ($createdAtOffsets as $email => $daysAgo) {
+            $offsetStmt->execute([$daysAgo, $email]);
+        }
         seedDemoStudentProfiles();
         return;
     }
 
-    // Seed demo user accounts with random passwords
+    // Seed demo user accounts with random passwords and staggered created_at
     foreach (DEMO_SEED_ACCOUNTS as $email => $meta) {
         $plain = generateDemoPassword();
         $hash = password_hash($plain, PASSWORD_BCRYPT);
-        $stmt = $pdo->prepare("INSERT IGNORE INTO users (name, email, password, student_code, role, email_verified) VALUES (?, ?, ?, ?, ?, 1)");
-        $stmt->execute([$meta['name'], $email, $hash, $meta['student_code'], $meta['role']]);
+        $daysAgo = $createdAtOffsets[$email] ?? 30;
+        $stmt = $pdo->prepare("INSERT IGNORE INTO users (name, email, password, student_code, role, email_verified, created_at) VALUES (?, ?, ?, ?, ?, 1, NOW() - INTERVAL ? DAY)");
+        $stmt->execute([$meta['name'], $email, $hash, $meta['student_code'], $meta['role'], $daysAgo]);
     }
 
     // Save generated credentials
@@ -309,6 +324,21 @@ function performDemoReset(): void {
             account_enabled = 1
             WHERE email IN ($placeholders)")
             ->execute($seedEmails);
+
+        // Reset staggered registration dates
+        $resetOffsets = [
+            'admin@treudler.net'    => 90,
+            'doctor@treudler.net'   => 85,
+            'student1@treudler.net' => 60,
+            'student2@treudler.net' => 45,
+            'student3@treudler.net' => 30,
+            'student4@treudler.net' => 20,
+            'student5@treudler.net' => 10,
+        ];
+        $updateTs = $pdo->prepare("UPDATE users SET created_at = NOW() - INTERVAL ? DAY WHERE email = ?");
+        foreach ($resetOffsets as $resetEmail => $daysAgo) {
+            $updateTs->execute([$daysAgo, $resetEmail]);
+        }
 
         // Reset settings to defaults (demo mode enables all languages)
         $pdo->exec("UPDATE settings SET

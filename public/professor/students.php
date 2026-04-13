@@ -23,15 +23,15 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
 ?>
 
 <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3><i class="bi bi-people me-2"></i><?= __('student_accounts') ?></h3>
-        <div class="d-flex gap-2 align-items-center">
+    <div class="d-flex align-items-center gap-2 mb-4 flex-wrap">
+        <h3 class="mb-0"><i class="bi bi-people me-2"></i><?= __('student_accounts') ?></h3>
+        <div class="ms-auto d-flex gap-2 align-items-center flex-wrap justify-content-end">
             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createStudentModal">
                 <i class="bi bi-person-plus me-1"></i><?= __('add_student') ?>
             </button>
             <span class="badge bg-primary fs-6"><?= count($students) ?> <?= __('students_count') ?></span>
             <input type="text" class="form-control form-control-sm" id="searchInput" 
-                   placeholder="<?= __('search_placeholder') ?>" style="width: 200px;">
+                   placeholder="<?= __('search_placeholder') ?>" style="min-width:140px; max-width:200px;">
         </div>
     </div>
 
@@ -46,13 +46,13 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                     <thead class="table-dark">
                         <tr>
                             <th>#</th>
-                            <th><?= __('name') ?></th>
-                            <th><?= __('email') ?></th>
-                            <th><?= __('student_code') ?></th>
-                            <th><?= __('profile') ?></th>
-                            <th><?= __('email_col') ?></th>
-                            <th><?= __('account') ?></th>
-                            <th><?= __('registered') ?></th>
+                            <th data-sortable><?= __('name') ?></th>
+                            <th data-sortable><?= __('email') ?></th>
+                            <th data-sortable><?= __('student_code') ?></th>
+                            <th data-sortable><?= __('profile') ?></th>
+                            <th data-sortable><?= __('email_col') ?></th>
+                            <th data-sortable><?= __('account') ?></th>
+                            <th data-sortable><?= __('registered') ?></th>
                             <th><?= __('actions') ?></th>
                         </tr>
                     </thead>
@@ -79,7 +79,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             </td>
                             <td><small><?= sanitize($s['email']) ?></small></td>
                             <td><code><?= sanitize($s['student_code'] ?? '—') ?></code></td>
-                            <td>
+                            <td data-sort-value="<?= $s['profile_completed'] ? 1 : 0 ?>">
                                 <?php if ($s['profile_completed']): ?>
                                     <span class="badge bg-success"><i class="bi bi-check-circle"></i></span>
                                 <?php else: ?>
@@ -135,6 +135,9 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                     <button class="btn btn-outline-secondary" onclick="userAction(<?= $s['id'] ?>, 'impersonate')" title="<?= __('login_as_student') ?>">
                                         <i class="bi bi-incognito"></i>
                                     </button>
+                                    <button class="btn btn-outline-warning" onclick="openResetPasswordModal(<?= $s['id'] ?>)" title="<?= __('reset_password') ?>">
+                                        <i class="bi bi-key"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -180,7 +183,6 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                         <div class="col-md-4">
                             <label class="form-label"><?= __('year') ?></label>
                             <select class="form-select" id="edit_year">
-                                <option value=""><?= __('select_option') ?></option>
                                 <option value="1st"><?= __('first_year') ?></option>
                                 <option value="2nd"><?= __('second_year') ?></option>
                                 <option value="3rd"><?= __('third_year') ?></option>
@@ -312,10 +314,11 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                     <div class="mb-3">
                         <label class="form-label"><?= __('year') ?></label>
                         <select class="form-select" id="create_year">
+                            <option value="" disabled selected>--- <?= __('select_option') ?> ---</option>
                             <option value="1st"><?= __('first_year') ?></option>
                             <option value="2nd"><?= __('second_year') ?></option>
                             <option value="3rd"><?= __('third_year') ?></option>
-                            <option value="4th" selected><?= __('fourth_year') ?></option>
+                            <option value="4th"><?= __('fourth_year') ?></option>
                         </select>
                     </div>
                     <div class="mb-3">
@@ -339,6 +342,44 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= __('close') ?></button>
                 <button type="button" class="btn btn-primary" id="createStudentBtn" onclick="createStudent()">
                     <i class="bi bi-person-plus me-1"></i><?= __('create_account') ?>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reset Student Password Modal -->
+<div class="modal fade" id="resetStudentPasswordModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title"><i class="bi bi-key me-2"></i><?= __('reset_password') ?></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="resetStudentPassError" class="alert alert-danger d-none"></div>
+                <div id="resetStudentPassSuccess" class="alert alert-success d-none"></div>
+                <input type="hidden" id="resetStudentPassUserId">
+                <div class="mb-3">
+                    <label class="form-label"><?= __('new_password') ?></label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="resetStudentPassValue" minlength="6">
+                        <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('resetStudentPassValue').value = generateRandomPassword()">
+                            <i class="bi bi-shuffle"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="resetStudentPassSendEmail" checked>
+                    <label class="form-check-label" for="resetStudentPassSendEmail">
+                        <i class="bi bi-envelope me-1"></i><?= __('send_new_password_email') ?>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?= __('cancel') ?></button>
+                <button type="button" class="btn btn-warning" onclick="resetStudentPassword()">
+                    <i class="bi bi-key me-1"></i><?= __('reset_password') ?>
                 </button>
             </div>
         </div>
@@ -554,10 +595,60 @@ async function userAction(userId, action) {
 
 // Generate random password
 function generatePassword() {
-    const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    document.getElementById('create_password').value = generateRandomPassword();
+}
+
+function generateRandomPassword() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
     let pass = '';
     for (let i = 0; i < 10; i++) pass += chars.charAt(Math.floor(Math.random() * chars.length));
-    document.getElementById('create_password').value = pass;
+    return pass;
+}
+
+function openResetPasswordModal(userId) {
+    document.getElementById('resetStudentPassUserId').value = userId;
+    document.getElementById('resetStudentPassValue').value = generateRandomPassword();
+    document.getElementById('resetStudentPassError').classList.add('d-none');
+    document.getElementById('resetStudentPassSuccess').classList.add('d-none');
+    new bootstrap.Modal(document.getElementById('resetStudentPasswordModal')).show();
+}
+
+async function resetStudentPassword() {
+    const userId = document.getElementById('resetStudentPassUserId').value;
+    const password = document.getElementById('resetStudentPassValue').value;
+    const sendEmail = document.getElementById('resetStudentPassSendEmail').checked;
+    const errEl = document.getElementById('resetStudentPassError');
+    const successEl = document.getElementById('resetStudentPassSuccess');
+    errEl.classList.add('d-none');
+    successEl.classList.add('d-none');
+
+    if (!password || password.length < 6) {
+        errEl.textContent = <?= json_encode(__('password_min_length')) ?>;
+        errEl.classList.remove('d-none');
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/users', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({user_id: parseInt(userId), action: 'reset_password', password, send_email: sendEmail})
+        });
+        const json = await res.json();
+        if (json.success) {
+            successEl.textContent = json.message || <?= json_encode(__('success')) ?>;
+            successEl.classList.remove('d-none');
+            setTimeout(() => {
+                bootstrap.Modal.getInstance(document.getElementById('resetStudentPasswordModal')).hide();
+            }, 1500);
+        } else {
+            errEl.textContent = json.error || <?= json_encode(__('error')) ?>;
+            errEl.classList.remove('d-none');
+        }
+    } catch (e) {
+        errEl.textContent = <?= json_encode(__('error')) ?>;
+        errEl.classList.remove('d-none');
+    }
 }
 
 // Create student account

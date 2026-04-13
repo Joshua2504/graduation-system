@@ -343,6 +343,9 @@ require_once __DIR__ . '/includes/header.php';
                                         <span class="input-group-text"><i class="bi bi-lock"></i></span>
                                         <input type="password" class="form-control" id="password" name="password" required>
                                     </div>
+                                    <div class="text-end mt-1">
+                                        <a href="/forgot-password" class="small text-muted"><?= __('forgot_password') ?></a>
+                                    </div>
                                 </div>
                                 <button type="submit" class="btn btn-primary w-100 py-2">
                                     <i class="bi bi-box-arrow-in-right me-1"></i><?= __('login') ?>

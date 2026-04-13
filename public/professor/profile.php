@@ -111,7 +111,9 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                             <!-- Section/Department -->
                             <div class="col-md-6">
                                 <label class="form-label fw-bold"><?= __('section') ?></label>
-                                <select class="form-select" name="section" id="section">
+                                <select class="form-select" name="section" id="section"
+                                        oninvalid="this.setCustomValidity('<?= __('select_department') ?>')"
+                                        oninput="this.setCustomValidity('')">
                                     <option value=""><?= __('select_department') ?></option>
                                     <?php foreach ($departments as $dept): ?>
                                         <option value="<?= sanitize($dept['name']) ?>" <?= ($user['section'] ?? '') === $dept['name'] ? 'selected' : '' ?>><?= sanitize($dept['name']) ?></option>

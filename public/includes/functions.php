@@ -64,6 +64,7 @@ function sanitizeHtml(?string $html): string {
  * Send JSON response and exit
  */
 function jsonResponse(array $data, int $code = 200): void {
+    while (ob_get_level() > 0) ob_end_clean();
     http_response_code($code);
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode($data, JSON_UNESCAPED_UNICODE);
@@ -74,6 +75,10 @@ function jsonResponse(array $data, int $code = 200): void {
  * Redirect to a URL
  */
 function redirect(string $url): void {
+    // Discard any buffered output (including PHP warnings) so they never reach the browser
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
     header("Location: $url");
     exit;
 }
@@ -162,7 +167,7 @@ function getProject(int $id): ?array {
 function getProjectMembers(int $projectId): array {
     $pdo = getDB();
     $stmt = $pdo->prepare("
-        SELECT u.*, pm.role AS member_role, pm.paper_submitted, pm.joined_at
+        SELECT u.*, pm.role AS member_role, pm.joined_at
         FROM project_members pm
         JOIN users u ON u.id = pm.user_id
         WHERE pm.project_id = ?
@@ -225,30 +230,6 @@ function isStudentProjectLocked(int $userId): bool {
     ");
     $stmt->execute([$userId]);
     return (int)$stmt->fetchColumn() > 0;
-}
-
-/**
- * Check if all members of a project have submitted their papers
- */
-function allMembersPapersSubmitted(int $projectId): bool {
-    $pdo = getDB();
-    $stmt = $pdo->prepare("
-        SELECT COUNT(*) FROM project_members
-        WHERE project_id = ? AND paper_submitted = 0
-    ");
-    $stmt->execute([$projectId]);
-    return (int)$stmt->fetchColumn() === 0;
-}
-
-/**
- * Get member's paper submission status for a project
- */
-function getMemberPaperStatus(int $projectId, int $userId): bool {
-    $pdo = getDB();
-    $stmt = $pdo->prepare("SELECT paper_submitted FROM project_members WHERE project_id = ? AND user_id = ?");
-    $stmt->execute([$projectId, $userId]);
-    $row = $stmt->fetch();
-    return $row ? (bool)$row['paper_submitted'] : false;
 }
 
 /**
@@ -322,7 +303,8 @@ function getPendingInvitations(int $userId): array {
     $pdo = getDB();
     $stmt = $pdo->prepare("
         SELECT i.*, p.title AS project_title, p.type AS project_type,
-               u.name AS invited_by_name
+               u.name AS invited_by_name,
+               (SELECT COUNT(*) FROM project_members pm WHERE pm.project_id = p.id) AS member_count
         FROM invitations i
         JOIN projects p ON p.id = i.project_id
         JOIN users u ON u.id = i.invited_by
@@ -426,6 +408,63 @@ function getProjectReviews(int $projectId): array {
     ");
     $stmt->execute([$projectId]);
     return $stmt->fetchAll();
+}
+
+/**
+ * Check whether a project is in a state that allows invitation management.
+ * Returns true for draft projects and for rejected projects where resubmission is allowed.
+ */
+function projectAcceptsInvitations(array $project): bool {
+    return $project['status'] === 'draft' ||
+           ($project['status'] === 'rejected' && !empty($project['allow_resubmit']));
+}
+
+/**
+ * Check if a student is compatible with the existing members of a project
+ * (same academic year and department/section).
+ * Returns null if compatible, or a translated error string if not.
+ */
+function checkStudentProjectCompatibility(int $studentId, int $projectId): ?string {
+    $pdo = getDB();
+
+    // Get the joining student's year and section
+    $stmt = $pdo->prepare("SELECT year, section FROM users WHERE id = ?");
+    $stmt->execute([$studentId]);
+    $student = $stmt->fetch();
+    if (!$student) return null; // student not found — other checks will catch this
+
+    // Get year and section of existing project members
+    $stmt = $pdo->prepare("
+        SELECT DISTINCT u.year, u.section
+        FROM project_members pm
+        JOIN users u ON u.id = pm.user_id
+        WHERE pm.project_id = ?
+    ");
+    $stmt->execute([$projectId]);
+    $members = $stmt->fetchAll();
+
+    // If the project has no members yet, any student can join
+    if (empty($members)) return null;
+
+    $studentYear = $student['year'] ?? '';
+    $studentSection = $student['section'] ?? '';
+
+    foreach ($members as $member) {
+        $memberYear = $member['year'] ?? '';
+        $memberSection = $member['section'] ?? '';
+
+        // Check year mismatch (only when both are set)
+        if ($studentYear !== '' && $memberYear !== '' && $studentYear !== $memberYear) {
+            return __('year_mismatch');
+        }
+
+        // Check department/section mismatch (only when both are set)
+        if ($studentSection !== '' && $memberSection !== '' && $studentSection !== $memberSection) {
+            return __('department_mismatch');
+        }
+    }
+
+    return null;
 }
 
 /**

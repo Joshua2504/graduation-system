@@ -70,7 +70,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                 </div>
             <?php else: ?>
                 <?php foreach ($projects as $p): ?>
-                    <div class="card shadow-sm mb-3">
+                    <div class="card shadow-sm mb-3 card-hover">
                         <div class="card-body">
                             <div class="d-flex align-items-start justify-content-between">
                                 <div>
@@ -114,7 +114,7 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                                         </small>
                                     <?php endif; ?>
                                     <br>
-                                    <a href="/student/project?id=<?= $p['id'] ?>" class="btn btn-sm btn-outline-primary">
+                                    <a href="/student/project?id=<?= $p['id'] ?>" class="btn btn-sm btn-outline-primary stretched-link">
                                         <i class="bi bi-eye me-1"></i><?= __('view_project') ?>
                                     </a>
                                 </div>

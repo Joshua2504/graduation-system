@@ -9,7 +9,7 @@ require_once __DIR__ . '/demo.php';
 $isLoggedIn = is_logged_in();
 $role = current_role();
 $userName = $_SESSION['name'] ?? '';
-$langLabels = ['ar' => 'العربية', 'en' => 'English', 'de' => 'Deutsch'];
+// $langLabels = ['ar' => 'العربية', 'en' => 'English', 'de' => 'Deutsch'];
 $currentLangLabel = $langLabels[getLang()] ?? 'العربية';
 
 // Load profile picture for logged-in users
@@ -112,6 +112,11 @@ if ($demoActive) {
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link <?= $currentPage === 'departments' ? 'active' : '' ?>" href="/admin/departments">
+                            <i class="bi bi-diagram-3 me-1"></i><?= __('departments') ?>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link <?= $currentPage === 'students' && strpos($_SERVER['PHP_SELF'], '/admin/') !== false ? 'active' : '' ?>" href="/admin/students">
                             <i class="bi bi-people me-1"></i><?= __('student_accounts') ?>
                         </a>
@@ -150,11 +155,11 @@ if ($demoActive) {
                         <i class="bi bi-moon-fill" id="themeIcon"></i>
                     </button>
                 </li>
-                <li class="nav-item dropdown">
+<!--            <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-translate me-1"></i><?= $currentLangLabel ?>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
+                <ul class="dropdown-menu dropdown-menu-end">
                         <?php foreach ($langLabels as $code => $label): ?>
                             <li>
                                 <a class="dropdown-item <?= getLang() === $code ? 'active' : '' ?>" href="?lang=<?= $code ?>">
@@ -163,7 +168,7 @@ if ($demoActive) {
                             </li>
                         <?php endforeach; ?>
                     </ul>
-                </li>
+                </li> -->
                 <?php if ($isLoggedIn): ?>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center gap-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">

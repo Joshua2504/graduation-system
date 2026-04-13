@@ -80,21 +80,6 @@ if (!empty($incompleteMembers)) {
     ], 400);
 }
 
-// Verify all members have submitted their papers
-$papersNotSubmitted = [];
-foreach ($members as $member) {
-    if (empty($member['paper_submitted'])) {
-        $papersNotSubmitted[] = $member['name'];
-    }
-}
-
-if (!empty($papersNotSubmitted)) {
-    jsonResponse([
-        'error' => 'لم يقم جميع أعضاء الفريق بتقديم أوراقهم بعد',
-        'members_not_submitted' => $papersNotSubmitted
-    ], 400);
-}
-
 // If rejected, reset status (keep doctor_note for history)
 if ($project['status'] === 'rejected') {
     $stmt = $pdo->prepare("UPDATE projects SET status = 'under_review', submission_date = NOW(), allow_resubmit = 0 WHERE id = ?");

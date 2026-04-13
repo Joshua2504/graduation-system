@@ -9,6 +9,7 @@
 ### Student Flow
 - **Landing page** — one-page login screen with system introduction, feature highlights, and multilingual support
 - **Register & verify** — create account with student code, optionally verify email
+- **Forgot password** — request a password reset link via email; works for both students and professors
 - **Complete profile** — personal info (gender, national ID, birth date, governorate, address, phone, department) + upload 3 documents (institute card, national ID, payment receipt) + optional profile picture shown across the platform
 - **Create project** — become team leader, get a unique 6-character join code
 - **Build a team** — invite members via:
@@ -16,6 +17,7 @@
   - 📱 QR code (auto-generated from invite link)
   - 🔑 Join code (6-char alphanumeric)
   - 👤 Direct invite (search by email or student code)
+  - ⚠️ Students can only join teams where all members share the same academic year and department
 - **Submit for review** — once team meets size requirements and all member profiles are complete
 - **Rich description editor** — bold, italic, underline, lists, links, and image uploads (click, paste, or drag & drop)
 - **Track status** — view doctor feedback, review history timeline, resubmit if rejected (when allowed by professor)
@@ -196,6 +198,7 @@ graduation-system/
 | `DEMO_MODE` | Enable demo mode with quick-login & auto-reset | `false` |
 | `APP_PORT` | Host port mapped to the app container | `8642` |
 | `COMPOSE_PROJECT_NAME` | Docker Compose project name (isolates containers per environment) | `graduation-system` |
+| `AVAILABLE_LANGUAGES` | Comma-separated list of languages available in this deployment (e.g. `ar,en,de`) | `ar,en,de` |
 
 ---
 

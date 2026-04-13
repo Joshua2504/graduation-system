@@ -21,16 +21,22 @@ foreach (['draft', 'under_review', 'accepted', 'rejected'] as $s) {
     $stats[$s] = (int)$stmt->fetchColumn();
 }
 
-// Projects for active tab
-$stmt = $pdo->prepare("SELECT p.*, u.name AS leader_name, u.email AS leader_email,
-                              (SELECT COUNT(*) FROM project_members WHERE project_id = p.id) AS member_count
-                       FROM projects p 
-                       LEFT JOIN project_members pm ON pm.project_id = p.id AND pm.role = 'leader'
-                       LEFT JOIN users u ON u.id = pm.user_id 
-                       WHERE p.status = ? 
-                       ORDER BY p.created_at $sort");
-$stmt->execute([$activeTab]);
-$projects = $stmt->fetchAll();
+// Load all projects grouped by status
+$allProjects = [];
+$totalProjects = 0;
+foreach (['draft', 'under_review', 'accepted', 'rejected'] as $s) {
+    $stmt = $pdo->prepare("SELECT p.*, u.name AS leader_name, u.email AS leader_email,
+                                  (SELECT COUNT(*) FROM project_members WHERE project_id = p.id) AS member_count
+                           FROM projects p
+                           LEFT JOIN project_members pm ON pm.project_id = p.id AND pm.role = 'leader'
+                           LEFT JOIN users u ON u.id = pm.user_id
+                           WHERE p.status = ?
+                           ORDER BY p.created_at $sort");
+    $stmt->execute([$s]);
+    $allProjects[$s] = $stmt->fetchAll();
+    $stats[$s] = count($allProjects[$s]);
+    $totalProjects += $stats[$s];
+}
 
 // Duplicate detection: find titles that appear more than once
 $dupeStmt = $pdo->query("SELECT LOWER(title) AS ltitle, COUNT(*) AS cnt FROM projects GROUP BY LOWER(title) HAVING cnt > 1");
@@ -47,12 +53,15 @@ $isAr = getLang() === 'ar';
 ?>
 
 <div class="container">
-    <!-- Create Project Button -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
         <h3 class="mb-0"><i class="bi bi-house-door me-2"></i><?= __('dashboard') ?></h3>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createProjectModal">
-            <i class="bi bi-plus-circle me-1"></i><?= __('create_project_professor') ?>
-        </button>
+        <div class="ms-auto d-flex gap-2 align-items-center flex-wrap justify-content-end">
+            <input type="search" id="projectSearch" class="form-control form-control-sm" style="min-width:160px; max-width:260px;"
+                   placeholder="<?= __('search_projects') ?>" oninput="filterProjects()">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createProjectModal">
+                <i class="bi bi-plus-circle me-1"></i><?= __('create_project_professor') ?>
+            </button>
+        </div>
     </div>
 
     <!-- Tab Navigation + Sort -->
@@ -69,8 +78,10 @@ $isAr = getLang() === 'ar';
                     ];
                     foreach ($tabs as $key => $tab): ?>
                         <li class="nav-item">
-                            <a class="nav-link <?= $activeTab === $key ? 'active' : '' ?>" 
-                               href="?tab=<?= $key ?>&sort=<?= sanitize($sortParam) ?>">
+                            <a class="nav-link <?= $activeTab === $key ? 'active' : '' ?>"
+                               href="?tab=<?= $key ?>&sort=<?= sanitize($sortParam) ?>"
+                               data-tab="<?= $key ?>"
+                               onclick="showTab('<?= $key ?>', event)">
                                 <i class="bi bi-<?= $tab['icon'] ?> text-<?= $tab['color'] ?> me-1"></i>
                                 <?= $tab['label'] ?>
                                 <span class="badge bg-<?= $tab['color'] ?> ms-1"><?= $stats[$key] ?></span>
@@ -93,7 +104,7 @@ $isAr = getLang() === 'ar';
             </div>
         </div>
         <div class="card-body p-0">
-            <?php if (empty($projects)): ?>
+            <?php if ($totalProjects === 0): ?>
                 <div class="text-center py-5 text-muted">
                     <i class="bi bi-inbox fs-1"></i>
                     <p class="mt-2"><?= __('no_projects') ?></p>
@@ -108,53 +119,62 @@ $isAr = getLang() === 'ar';
                                 <th><?= __('team_leader') ?></th>
                                 <th><?= __('member_count') ?></th>
                                 <th><?= __('submission_date') ?></th>
-                                <?php if ($activeTab === 'accepted'): ?>
-                                    <th><?= __('group_number') ?></th>
-                                <?php endif; ?>
+                                <th><?= __('group_number') ?></th>
                                 <th></th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <?php foreach ($projects as $i => $p): 
-                                $isDupe = in_array(strtolower($p['title']), $duplicateTitles);
-                                // Find the other duplicate project
-                                $dupeLink = '';
-                                if ($isDupe) {
-                                    $dupeStmt2 = $pdo->prepare("SELECT id FROM projects WHERE LOWER(title) = LOWER(?) AND id != ? LIMIT 1");
-                                    $dupeStmt2->execute([$p['title'], $p['id']]);
-                                    $dupeProject = $dupeStmt2->fetch();
-                                    if ($dupeProject) {
-                                        $dupeLink = '/professor/project?id=' . $dupeProject['id'];
-                                    }
-                                }
+                        <tbody id="projectTableBody">
+                            <?php foreach ($tabs as $key => $tab):
+                                $groupProjects = $allProjects[$key];
                             ?>
-                                <tr>
-                                    <td><?= $i + 1 ?></td>
-                                    <td>
-                                        <strong><?= sanitize($p['title']) ?></strong>
-                                        <?php if ($isDupe): ?>
-                                            <br>
-                                            <span class="badge bg-warning text-dark">
-                                                <i class="bi bi-exclamation-triangle me-1"></i><?= __('duplicate_warning') ?>
-                                            </span>
-                                            <?php if ($dupeLink): ?>
-                                                <a href="<?= $dupeLink ?>" class="small"><?= __('view_similar') ?></a>
-                                            <?php endif; ?>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td><?= $p['leader_name'] ? sanitize($p['leader_name']) : '<span class="text-muted fst-italic">' . __('no_leader_assigned') . '</span>' ?></td>
-                                    <td><span class="badge bg-info"><?= $p['member_count'] ?></span></td>
-                                    <td><?= $p['submission_date'] ? date('Y-m-d H:i', strtotime($p['submission_date'])) : '-' ?></td>
-                                    <?php if ($activeTab === 'accepted'): ?>
-                                        <td><span class="badge bg-success fs-6"><?= $p['group_number'] ?></span></td>
-                                    <?php endif; ?>
-                                    <td>
-                                        <a href="/professor/project?id=<?= $p['id'] ?>" class="btn btn-sm btn-outline-primary">
-                                            <i class="bi bi-eye me-1"></i><?= __('view_project') ?>
-                                        </a>
+                                <tr class="status-group-header table-light d-none" data-status="<?= $key ?>">
+                                    <td colspan="7" class="py-2">
+                                        <i class="bi bi-<?= $tab['icon'] ?> text-<?= $tab['color'] ?> me-1"></i>
+                                        <strong><?= $tab['label'] ?></strong>
+                                        <span class="badge bg-<?= $tab['color'] ?> ms-1"><?= count($groupProjects) ?></span>
                                     </td>
                                 </tr>
+                                <?php foreach ($groupProjects as $i => $p):
+                                    $isDupe = in_array(strtolower($p['title']), $duplicateTitles);
+                                    $dupeLink = '';
+                                    if ($isDupe) {
+                                        $dupeStmt2 = $pdo->prepare("SELECT id FROM projects WHERE LOWER(title) = LOWER(?) AND id != ? LIMIT 1");
+                                        $dupeStmt2->execute([$p['title'], $p['id']]);
+                                        $dupeProject = $dupeStmt2->fetch();
+                                        if ($dupeProject) $dupeLink = '/professor/project?id=' . $dupeProject['id'];
+                                    }
+                                ?>
+                                    <tr data-status="<?= $key ?>" style="cursor:pointer" onclick="location.href='/professor/project?id=<?= $p['id'] ?>'">
+                                        <td><?= $i + 1 ?></td>
+                                        <td>
+                                            <strong><?= sanitize($p['title']) ?></strong>
+                                            <?php if ($isDupe): ?>
+                                                <br>
+                                                <span class="badge bg-warning text-dark">
+                                                    <i class="bi bi-exclamation-triangle me-1"></i><?= __('duplicate_warning') ?>
+                                                </span>
+                                                <?php if ($dupeLink): ?>
+                                                    <a href="<?= $dupeLink ?>" class="small" onclick="event.stopPropagation()"><?= __('view_similar') ?></a>
+                                                <?php endif; ?>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td><?= $p['leader_name'] ? sanitize($p['leader_name']) : '<span class="text-muted fst-italic">' . __('no_leader_assigned') . '</span>' ?></td>
+                                        <td><span class="badge bg-info"><?= $p['member_count'] ?></span></td>
+                                        <td><?= $p['submission_date'] ? date('Y-m-d H:i', strtotime($p['submission_date'])) : '-' ?></td>
+                                        <td><?= $p['group_number'] ? '<span class="badge bg-success fs-6">' . $p['group_number'] . '</span>' : '<span class="text-muted">—</span>' ?></td>
+                                        <td>
+                                            <a href="/professor/project?id=<?= $p['id'] ?>" class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation()">
+                                                <i class="bi bi-eye me-1"></i><?= __('view_project') ?>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
                             <?php endforeach; ?>
+                            <tr id="noSearchResults" class="d-none">
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    <i class="bi bi-search me-1"></i><?= __('no_results') ?>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -347,6 +367,55 @@ async function profCreateProject() {
         alertEl.classList.remove('d-none');
     }
 }
+
+let currentTab = '<?= $activeTab ?>';
+
+function showTab(tab, event) {
+    event?.preventDefault();
+    currentTab = tab;
+    history.replaceState(null, '', '?tab=' + tab + '&sort=<?= $sortParam ?>');
+    document.querySelectorAll('.card-header-tabs .nav-link').forEach(a => {
+        a.classList.toggle('active', a.dataset.tab === tab);
+    });
+    document.getElementById('projectSearch').value = '';
+    applyTabFilter();
+}
+
+function applyTabFilter() {
+    document.querySelectorAll('.status-group-header').forEach(r => r.classList.add('d-none'));
+    const rows = document.querySelectorAll('#projectTableBody tr[data-status]:not(.status-group-header)');
+    let visible = 0;
+    rows.forEach(row => {
+        const show = row.dataset.status === currentTab;
+        row.classList.toggle('d-none', !show);
+        if (show) visible++;
+    });
+    document.getElementById('noSearchResults').classList.toggle('d-none', visible > 0);
+}
+
+function filterProjects() {
+    const q = document.getElementById('projectSearch').value.toLowerCase().trim();
+    if (!q) { applyTabFilter(); return; }
+
+    document.querySelectorAll('#projectTableBody tr[data-status]:not(.status-group-header)').forEach(r => r.classList.add('d-none'));
+    const statuses = ['draft', 'under_review', 'accepted', 'rejected'];
+    let totalVisible = 0;
+    statuses.forEach(status => {
+        const header = document.querySelector(`.status-group-header[data-status="${status}"]`);
+        const rows = document.querySelectorAll(`#projectTableBody tr[data-status="${status}"]:not(.status-group-header)`);
+        let groupVisible = 0;
+        rows.forEach(row => {
+            const match = row.textContent.toLowerCase().includes(q);
+            row.classList.toggle('d-none', !match);
+            if (match) groupVisible++;
+        });
+        if (header) header.classList.toggle('d-none', groupVisible === 0);
+        totalVisible += groupVisible;
+    });
+    document.getElementById('noSearchResults').classList.toggle('d-none', totalVisible > 0);
+}
+
+document.addEventListener('DOMContentLoaded', applyTabFilter);
 
 function escHtml(str) {
     const d = document.createElement('div');

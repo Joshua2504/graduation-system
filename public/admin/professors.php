@@ -20,15 +20,15 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
 ?>
 
 <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3><i class="bi bi-person-workspace me-2"></i><?= __('professor_accounts') ?></h3>
-        <div class="d-flex gap-2 align-items-center">
+    <div class="d-flex align-items-center gap-2 mb-4 flex-wrap">
+        <h3 class="mb-0"><i class="bi bi-person-workspace me-2"></i><?= __('professor_accounts') ?></h3>
+        <div class="ms-auto d-flex gap-2 align-items-center flex-wrap justify-content-end">
             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createProfessorModal">
                 <i class="bi bi-person-plus me-1"></i><?= __('add_professor') ?>
             </button>
             <span class="badge bg-primary fs-6"><?= count($professors) ?> <?= __('professors_count') ?></span>
             <input type="text" class="form-control form-control-sm" id="searchInput" 
-                   placeholder="<?= __('search_placeholder') ?>" style="width: 200px;">
+                   placeholder="<?= __('search_placeholder') ?>" style="min-width:140px; max-width:200px;">
         </div>
     </div>
 
@@ -43,11 +43,11 @@ require_once dirname(__DIR__) . '/includes/navbar.php';
                     <thead class="table-dark">
                         <tr>
                             <th>#</th>
-                            <th><?= __('name') ?></th>
-                            <th><?= __('email') ?></th>
-                            <th><?= __('section') ?></th>
-                            <th><?= __('account') ?></th>
-                            <th><?= __('registered') ?></th>
+                            <th data-sortable><?= __('name') ?></th>
+                            <th data-sortable><?= __('email') ?></th>
+                            <th data-sortable><?= __('section') ?></th>
+                            <th data-sortable><?= __('account') ?></th>
+                            <th data-sortable><?= __('registered') ?></th>
                             <th><?= __('actions') ?></th>
                         </tr>
                     </thead>
@@ -349,13 +349,13 @@ async function resetPassword() {
 </script>
 
 <script>
-// Fix dropdown clipping inside .table-responsive
-document.querySelectorAll('.table-responsive .dropdown').forEach(function(dd) {
-    dd.addEventListener('show.bs.dropdown', function() {
-        this.closest('.table-responsive').style.overflow = 'visible';
-    });
-    dd.addEventListener('hide.bs.dropdown', function() {
-        this.closest('.table-responsive').style.overflow = '';
+// Initialize dropdowns inside .table-responsive with strategy: fixed
+// This prevents clipping from overflow:auto without causing horizontal page overflow
+document.querySelectorAll('.table-responsive .dropdown-toggle').forEach(function(toggle) {
+    new bootstrap.Dropdown(toggle, {
+        popperConfig: function(defaultConfig) {
+            return Object.assign({}, defaultConfig, { strategy: 'fixed' });
+        }
     });
 });
 </script>
