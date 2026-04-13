@@ -603,6 +603,10 @@ $translations = [
     'invitation_not_cancellable' => ['ar' => 'الدعوة غير موجودة أو لا يمكن إلغاؤها', 'en' => 'Invitation not found or cannot be cancelled', 'de' => 'Einladung nicht gefunden oder kann nicht abgebrochen werden'],
     'invitation_cancelled' => ['ar' => 'تم إلغاء الدعوة', 'en' => 'Invitation cancelled', 'de' => 'Einladung abgebrochen'],
 
+    // Year/Department mismatch messages
+    'year_mismatch' => ['ar' => 'لا يمكن الانضمام لهذا المشروع لأن أعضاء الفريق في سنة دراسية مختلفة', 'en' => 'Cannot join this project because the team members are in a different academic year', 'de' => 'Kann diesem Projekt nicht beitreten, da die Teammitglieder in einem anderen Studienjahr sind'],
+    'department_mismatch' => ['ar' => 'لا يمكن الانضمام لهذا المشروع لأن أعضاء الفريق في قسم مختلف', 'en' => 'Cannot join this project because the team members are in a different department', 'de' => 'Kann diesem Projekt nicht beitreten, da die Teammitglieder in einer anderen Abteilung sind'],
+
     // Review API messages
     'project_not_found' => ['ar' => 'المشروع غير موجود', 'en' => 'Project not found', 'de' => 'Projekt nicht gefunden'],
     'invalid_project_state' => ['ar' => 'لا يمكن تنفيذ هذا الإجراء على المشروع في حالته الحالية', 'en' => 'This action cannot be performed on the project in its current state', 'de' => 'Diese Aktion kann nicht für das Projekt in seinem aktuellen Status ausgeführt werden'],

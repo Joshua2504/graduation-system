@@ -60,6 +60,14 @@ if (!$error && $token) {
         $settings = getSettings();
         $memberCount = countProjectMembers($invitation['project_id']);
         $isFull = $memberCount >= (int)$settings['max_team_size'];
+        // Check year/department compatibility
+        if (!$alreadyMember && !$isFull) {
+            $compatError = checkStudentProjectCompatibility($userId, (int)$invitation['project_id']);
+            if ($compatError) {
+                $error = $compatError;
+                $project = null;
+            }
+        }
     }
 } elseif (!$error && $code) {
     // Code-based join
@@ -88,6 +96,14 @@ if (!$error && $token) {
         $settings = getSettings();
         $memberCount = countProjectMembers($result['id']);
         $isFull = $memberCount >= (int)$settings['max_team_size'];
+        // Check year/department compatibility
+        if (!$alreadyMember && !$isFull) {
+            $compatError = checkStudentProjectCompatibility($userId, (int)$result['id']);
+            if ($compatError) {
+                $error = $compatError;
+                $project = null;
+            }
+        }
     }
 } elseif (!$error) {
     redirect('/student/dashboard');
