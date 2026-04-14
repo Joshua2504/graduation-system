@@ -161,6 +161,7 @@ require_once __DIR__ . '/includes/header.php';
                                 <p><?= __('landing_feature_review_desc') ?></p>
                             </div>
                         </div>
+                        <?php if (count($supportedLangs) > 1): ?>
                         <div class="col-sm-6">
                             <div class="landing-feature-card">
                                 <div class="landing-feature-icon"><i class="bi bi-translate"></i></div>
@@ -168,6 +169,7 @@ require_once __DIR__ . '/includes/header.php';
                                 <p><?= __('landing_feature_bilingual_desc') ?></p>
                             </div>
                         </div>
+                        <?php endif; ?>
                         <div class="col-sm-6">
                             <div class="landing-feature-card">
                                 <div class="landing-feature-icon"><i class="bi bi-shield-lock-fill"></i></div>
@@ -277,10 +279,12 @@ require_once __DIR__ . '/includes/header.php';
                                 <i class="bi bi-clipboard2-check-fill text-info"></i>
                                 <span><?= __('landing_feature_review') ?></span>
                             </div>
+                            <?php if (count($supportedLangs) > 1): ?>
                             <div class="landing-mobile-feature">
                                 <i class="bi bi-translate text-warning"></i>
                                 <span><?= __('landing_feature_bilingual') ?></span>
                             </div>
+                            <?php endif; ?>
                         </div>
                     </div>
 
