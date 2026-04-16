@@ -232,6 +232,22 @@ CREATE TABLE IF NOT EXISTS `departments` (
   UNIQUE KEY `uq_dept_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ─── Shared Files ───
+CREATE TABLE IF NOT EXISTS `shared_files` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,
+  `year` VARCHAR(10) NOT NULL DEFAULT '',
+  `department` VARCHAR(255) NOT NULL DEFAULT '',
+  `note` TEXT DEFAULT NULL,
+  `filename` VARCHAR(255) NOT NULL,
+  `original_name` VARCHAR(255) NOT NULL,
+  `uploaded_by` INT DEFAULT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_shared_file_name_year_dept` (`name`, `year`, `department`),
+  CONSTRAINT `fk_sf_uploader` FOREIGN KEY (`uploaded_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ─── Migrations: password reset token columns in users ───
 
 -- Add reset_token column to users (for password reset flow)

@@ -100,6 +100,11 @@ if ($demoActive) {
                             <i class="bi bi-house-door me-1"></i><?= __('dashboard') ?>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= $currentPage === 'files' ? 'active' : '' ?>" href="/student/files">
+                            <i class="bi bi-folder2-open me-1"></i><?= __('files') ?>
+                        </a>
+                    </li>
                 <?php elseif ($isLoggedIn && $role === 'admin'): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= $currentPage === 'dashboard' && strpos($_SERVER['PHP_SELF'], '/admin/') !== false ? 'active' : '' ?>" href="/admin/dashboard">
@@ -131,6 +136,11 @@ if ($demoActive) {
                             <i class="bi bi-gear me-1"></i><?= __('settings') ?>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= $currentPage === 'files' && strpos($_SERVER['PHP_SELF'], '/admin/') !== false ? 'active' : '' ?>" href="/admin/files">
+                            <i class="bi bi-folder2-open me-1"></i><?= __('files') ?>
+                        </a>
+                    </li>
                 <?php elseif ($isLoggedIn && $role === 'doctor'): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= $currentPage === 'dashboard' ? 'active' : '' ?>" href="/professor/dashboard">
@@ -145,6 +155,11 @@ if ($demoActive) {
                     <li class="nav-item">
                         <a class="nav-link <?= $currentPage === 'students' ? 'active' : '' ?>" href="/professor/students">
                             <i class="bi bi-people me-1"></i><?= __('student_accounts') ?>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= $currentPage === 'files' && strpos($_SERVER['PHP_SELF'], '/professor/') !== false ? 'active' : '' ?>" href="/professor/files">
+                            <i class="bi bi-folder2-open me-1"></i><?= __('files') ?>
                         </a>
                     </li>
                 <?php endif; ?>
