@@ -20,6 +20,8 @@ function ensureLiveAdminSeeded(): void {
     $password = $_ENV['ADMIN_PASSWORD'] ?? getenv('ADMIN_PASSWORD') ?: '';
 
     if ($email === '' || $password === '') return;
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) return;
+    if (strlen($password) < 6) return;
 
     $name = $_ENV['ADMIN_NAME'] ?? getenv('ADMIN_NAME') ?: 'Admin';
 
