@@ -23,3 +23,6 @@ require_once __DIR__ . '/lang.php';
 
 // Ensure demo seed data exists when demo mode is active
 ensureDemoSeeded();
+
+// Ensure live-mode admin is seeded from env vars (when DEMO_MODE is off)
+ensureLiveAdminSeeded();

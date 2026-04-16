@@ -112,6 +112,9 @@ jobs:
           MAIL_USER: ${{ secrets.MAIL_USER }}
           MAIL_PASS: ${{ secrets.MAIL_PASS }}
           AVAILABLE_LANGUAGES: ${{ vars.AVAILABLE_LANGUAGES }}
+          ADMIN_NAME: ${{ secrets.ADMIN_NAME }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
         run: |
           set -euo pipefail
           SSH_PATH="${{ vars.SSH_PATH_PROD }}"
@@ -134,6 +137,9 @@ jobs:
           printf 'APP_PORT=8643\n' >> "$TMP_ENV"
           printf 'COMPOSE_PROJECT_NAME=graduation-system-prod\n' >> "$TMP_ENV"
           printf 'AVAILABLE_LANGUAGES=%s\n' "${AVAILABLE_LANGUAGES:-ar,en,de}" >> "$TMP_ENV"
+          printf 'ADMIN_NAME=%s\n' "${ADMIN_NAME:-}" >> "$TMP_ENV"
+          printf 'ADMIN_EMAIL=%s\n' "${ADMIN_EMAIL:-}" >> "$TMP_ENV"
+          printf 'ADMIN_PASSWORD=%s\n' "${ADMIN_PASSWORD:-}" >> "$TMP_ENV"
 
           cat "$TMP_ENV" | ssh -o StrictHostKeyChecking=no "$REMOTE" "cat > \"$REMOTE_DIR/.env\""
           rm -f "$TMP_ENV"
