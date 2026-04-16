@@ -629,6 +629,10 @@ $translations = [
     'confirm_delete_file' => ['ar' => 'هل أنت متأكد من حذف هذا الملف نهائياً؟', 'en' => 'Are you sure you want to permanently delete this file?', 'de' => 'Sind Sie sicher, dass Sie diese Datei endgültig löschen möchten?'],
     'uploaded_by' => ['ar' => 'رُفع بواسطة', 'en' => 'Uploaded by', 'de' => 'Hochgeladen von'],
     'optional_replace' => ['ar' => 'اختياري - استبدال الملف الحالي', 'en' => 'optional – replace current file', 'de' => 'optional – aktuelle Datei ersetzen'],
+    'file_size_exceeded' => ['ar' => 'حجم الملف يتجاوز 20 ميجابايت', 'en' => 'File size exceeds 20 MB', 'de' => 'Dateigröße überschreitet 20 MB'],
+    'invalid_file_extension' => ['ar' => 'امتداد الملف غير صالح', 'en' => 'Invalid file extension', 'de' => 'Ungültige Dateierweiterung'],
+    'file_save_failed' => ['ar' => 'فشل في حفظ الملف', 'en' => 'Failed to save file', 'de' => 'Datei konnte nicht gespeichert werden'],
+    'file_id_required' => ['ar' => 'معرف الملف مطلوب', 'en' => 'File ID is required', 'de' => 'Datei-ID ist erforderlich'],
 
     // Review API messages
     'project_not_found' => ['ar' => 'المشروع غير موجود', 'en' => 'Project not found', 'de' => 'Projekt nicht gefunden'],

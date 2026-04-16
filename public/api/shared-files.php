@@ -69,7 +69,7 @@ if ($method === 'GET') {
 
 // ─── Only admins and professors may modify files ──────────────────────────────
 if (!in_array($role, ['admin', 'doctor'])) {
-    jsonResponse(['error' => 'غير مصرح بالوصول'], 403);
+    jsonResponse(['error' => __('unauthorized')], 403);
 }
 
 // ─── Create (upload) ─────────────────────────────────────────────────────────
@@ -96,13 +96,13 @@ if ($method === 'POST') {
 
     $uploadedFile = $_FILES['file'];
     if ($uploadedFile['size'] > 20 * 1024 * 1024) {
-        jsonResponse(['error' => 'حجم الملف يتجاوز 20 ميجابايت'], 400);
+        jsonResponse(['error' => __('file_size_exceeded')], 400);
     }
 
     $originalName = basename($uploadedFile['name']);
     $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
     if (empty($ext)) {
-        jsonResponse(['error' => 'امتداد الملف غير صالح'], 400);
+        jsonResponse(['error' => __('invalid_file_extension')], 400);
     }
 
     $uploadDir = dirname(__DIR__) . '/uploads/shared';
@@ -114,7 +114,7 @@ if ($method === 'POST') {
     $destPath = $uploadDir . '/' . $filename;
 
     if (!move_uploaded_file($uploadedFile['tmp_name'], $destPath)) {
-        jsonResponse(['error' => 'فشل في حفظ الملف'], 500);
+        jsonResponse(['error' => __('file_save_failed')], 500);
     }
     chmod($destPath, 0644);
 
@@ -139,7 +139,7 @@ if ($method === 'PUT') {
     $note       = trim($_POST['note']       ?? '');
 
     if ($fileId === 0) {
-        jsonResponse(['error' => 'معرف الملف مطلوب'], 400);
+        jsonResponse(['error' => __('file_id_required')], 400);
     }
     if ($name === '') {
         jsonResponse(['error' => __('file_name_required')], 400);
@@ -166,12 +166,12 @@ if ($method === 'PUT') {
     if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
         $newFile = $_FILES['file'];
         if ($newFile['size'] > 20 * 1024 * 1024) {
-            jsonResponse(['error' => 'حجم الملف يتجاوز 20 ميجابايت'], 400);
+            jsonResponse(['error' => __('file_size_exceeded')], 400);
         }
         $originalName = basename($newFile['name']);
         $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
         if (empty($ext)) {
-            jsonResponse(['error' => 'امتداد الملف غير صالح'], 400);
+            jsonResponse(['error' => __('invalid_file_extension')], 400);
         }
 
         $uploadDir = dirname(__DIR__) . '/uploads/shared';
@@ -183,7 +183,7 @@ if ($method === 'PUT') {
         $destPath = $uploadDir . '/' . $filename;
 
         if (!move_uploaded_file($newFile['tmp_name'], $destPath)) {
-            jsonResponse(['error' => 'فشل في حفظ الملف'], 500);
+            jsonResponse(['error' => __('file_save_failed')], 500);
         }
         chmod($destPath, 0644);
 
@@ -210,7 +210,7 @@ if ($method === 'DELETE') {
     $fileId = (int)($_GET['id'] ?? 0);
 
     if ($fileId === 0) {
-        jsonResponse(['error' => 'معرف الملف مطلوب'], 400);
+        jsonResponse(['error' => __('file_id_required')], 400);
     }
 
     $stmtExist = $pdo->prepare("SELECT * FROM shared_files WHERE id = ?");
