@@ -22,6 +22,7 @@
 - **Rich description editor** — bold, italic, underline, lists, links, and image uploads (click, paste, or drag & drop)
 - **Track status** — view doctor feedback, review history timeline, resubmit if rejected (when allowed by professor)
 - **Transfer leadership** — team leaders can transfer leadership to another team member (when enabled by professor, only while project is in draft status)
+- **Browse files** — view and download supporting materials uploaded by professors/admins (filtered by name, year, or department)
 
 ### Admin (Super Admin) Flow
 - **Dashboard** — overview with professor/student counts, project stats by status, recent professors and projects
@@ -41,9 +42,9 @@
 - **Duplicate detection** — automatic warning when project titles match
 - **System settings** — toggle registration, email verification, min/max team size (2–10), student project creation, show reviewer name, leader transfer by team leader, login methods (email & student code / email only / student code only)
 - **Manage students** — list all student accounts, verify emails manually, enable/disable accounts
+- **Shared files** — upload, edit, and delete supporting files (materials, documents) for students; specify file name, year, department, and notes; duplicate names are prevented per year/department combination
 
 ### Demo Mode
-- **Quick login** — one-click login buttons for admin, doctor, and student on the login page
 - **Random passwords** — generated on first boot and regenerated on each reset; displayed on the login page
 - **Auto-reset** — 30-minute countdown timer starts after any login; resets all data to seed state
 - **Countdown banner** — live timer above the navbar shows remaining time before reset
