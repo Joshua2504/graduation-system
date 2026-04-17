@@ -4,6 +4,40 @@
  */
 
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/demo.php';
+
+/**
+ * Seed a live-mode admin account from environment variables.
+ *
+ * When DEMO_MODE is off and ADMIN_EMAIL + ADMIN_PASSWORD are set in .env,
+ * this creates the admin account automatically on first boot (idempotent).
+ * If an admin already exists the function is a no-op.
+ */
+function ensureLiveAdminSeeded(): void {
+    if (isDemoMode()) return;
+
+    $email    = $_ENV['ADMIN_EMAIL']    ?? getenv('ADMIN_EMAIL')    ?: '';
+    $password = $_ENV['ADMIN_PASSWORD'] ?? getenv('ADMIN_PASSWORD') ?: '';
+
+    if ($email === '' || $password === '') return;
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) return;
+    if (strlen($password) < 6) return;
+
+    $name = $_ENV['ADMIN_NAME'] ?? getenv('ADMIN_NAME') ?: 'Admin';
+
+    $pdo = getDB();
+
+    // Only seed when no admin account exists yet
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE role = 'admin'");
+    $stmt->execute();
+    if ((int)$stmt->fetchColumn() > 0) return;
+
+    $hash = password_hash($password, PASSWORD_BCRYPT);
+    $stmt = $pdo->prepare(
+        "INSERT IGNORE INTO users (name, email, password, role, email_verified) VALUES (?, ?, ?, 'admin', 1)"
+    );
+    $stmt->execute([$name, $email, $hash]);
+}
 
 /**
  * Sanitize input string

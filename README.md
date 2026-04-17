@@ -104,7 +104,12 @@ The database schema is applied automatically on first run.
 
 ### Initial Setup (Production)
 
-When `DEMO_MODE=false` (default), the first user to register becomes the **admin**. Navigate to the app after starting it and you will be guided through the initial setup wizard to create the admin account. The admin can then create professor accounts from the admin dashboard.
+When `DEMO_MODE=false` (default), there are two ways to create the initial admin account:
+
+1. **Environment variables (recommended for automated deployments)** — set `ADMIN_EMAIL` and `ADMIN_PASSWORD` (and optionally `ADMIN_NAME`) in `.env`. The admin account is created automatically on first request when no admin exists yet.
+2. **Setup wizard** — if the env vars are not set, the first visitor to the app is guided through a setup wizard to create the admin account.
+
+The admin can then create professor accounts from the admin dashboard.
 
 ### Demo Mode
 
@@ -196,6 +201,9 @@ graduation-system/
 | `MAIL_USER` | SMTP username / sender email | — |
 | `MAIL_PASS` | SMTP password | — |
 | `DEMO_MODE` | Enable demo mode with quick-login & auto-reset | `false` |
+| `ADMIN_NAME` | Admin display name (live mode auto-seed) | `Admin` |
+| `ADMIN_EMAIL` | Admin email (live mode auto-seed, required with `ADMIN_PASSWORD`) | — |
+| `ADMIN_PASSWORD` | Admin password (live mode auto-seed, required with `ADMIN_EMAIL`) | — |
 | `APP_PORT` | Host port mapped to the app container | `8642` |
 | `COMPOSE_PROJECT_NAME` | Docker Compose project name (isolates containers per environment) | `graduation-system` |
 | `AVAILABLE_LANGUAGES` | Comma-separated list of languages available in this deployment (e.g. `ar,en,de`) | `ar,en,de` |
