@@ -112,13 +112,13 @@ if ($demoActive) {
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <?= $currentPage === 'students' && strpos($_SERVER['PHP_SELF'], '/admin/') !== false ? 'active' : '' ?>" href="/admin/students">
-                            <i class="bi bi-people me-1"></i><?= __('student_accounts') ?>
+                        <a class="nav-link <?= $currentPage === 'professors' ? 'active' : '' ?>" href="/admin/professors">
+                            <i class="bi bi-person-workspace me-1"></i><?= __('professor_accounts') ?>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <?= $currentPage === 'professors' ? 'active' : '' ?>" href="/admin/professors">
-                            <i class="bi bi-person-workspace me-1"></i><?= __('professor_accounts') ?>
+                        <a class="nav-link <?= $currentPage === 'students' && strpos($_SERVER['PHP_SELF'], '/admin/') !== false ? 'active' : '' ?>" href="/admin/students">
+                            <i class="bi bi-people me-1"></i><?= __('student_accounts') ?>
                         </a>
                     </li>
                     <li class="nav-item">
