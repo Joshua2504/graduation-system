@@ -182,7 +182,7 @@ $translations = [
     'address' => ['ar' => 'العنوان', 'en' => 'Address', 'de' => 'Adresse'],
     'phone' => ['ar' => 'رقم الهاتف', 'en' => 'Phone Number', 'de' => 'Telefonnummer'],
     'year' => ['ar' => 'السنة الدراسية', 'en' => 'Year', 'de' => 'Studienjahr'],
-    'department' => ['ar' => 'القسم', 'en' => 'Department', 'de' => 'Abteilung'],
+    'section' => ['ar' => 'القسم', 'en' => 'Department', 'de' => 'Abteilung'],
     'first_year' => ['ar' => 'الأولى', 'en' => '1st', 'de' => '1.'],
     'second_year' => ['ar' => 'الثانية', 'en' => '2nd', 'de' => '2.'],
     'third_year' => ['ar' => 'الثالثة', 'en' => '3rd', 'de' => '3.'],
