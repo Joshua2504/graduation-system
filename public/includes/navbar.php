@@ -112,6 +112,11 @@ if ($demoActive) {
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link <?= $currentPage === 'students' && strpos($_SERVER['PHP_SELF'], '/admin/') !== false ? 'active' : '' ?>" href="/admin/students">
+                            <i class="bi bi-people me-1"></i><?= __('student_accounts') ?>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link <?= $currentPage === 'professors' ? 'active' : '' ?>" href="/admin/professors">
                             <i class="bi bi-person-workspace me-1"></i><?= __('professor_accounts') ?>
                         </a>
@@ -122,18 +127,8 @@ if ($demoActive) {
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link <?= $currentPage === 'students' && strpos($_SERVER['PHP_SELF'], '/admin/') !== false ? 'active' : '' ?>" href="/admin/students">
-                            <i class="bi bi-people me-1"></i><?= __('student_accounts') ?>
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link <?= $currentPage === 'projects' && strpos($_SERVER['PHP_SELF'], '/admin/') !== false ? 'active' : '' ?>" href="/admin/projects">
                             <i class="bi bi-folder me-1"></i><?= __('all_projects') ?>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?= $currentPage === 'settings' && strpos($_SERVER['PHP_SELF'], '/admin/') !== false ? 'active' : '' ?>" href="/admin/settings">
-                            <i class="bi bi-gear me-1"></i><?= __('settings') ?>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -141,15 +136,15 @@ if ($demoActive) {
                             <i class="bi bi-folder2-open me-1"></i><?= __('files') ?>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= $currentPage === 'settings' && strpos($_SERVER['PHP_SELF'], '/admin/') !== false ? 'active' : '' ?>" href="/admin/settings">
+                            <i class="bi bi-gear me-1"></i><?= __('settings') ?>
+                        </a>
+                    </li>
                 <?php elseif ($isLoggedIn && $role === 'doctor'): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= $currentPage === 'dashboard' ? 'active' : '' ?>" href="/professor/dashboard">
                             <i class="bi bi-house-door me-1"></i><?= __('dashboard') ?>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?= $currentPage === 'settings' ? 'active' : '' ?>" href="/professor/settings">
-                            <i class="bi bi-gear me-1"></i><?= __('settings') ?>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -160,6 +155,11 @@ if ($demoActive) {
                     <li class="nav-item">
                         <a class="nav-link <?= $currentPage === 'files' && strpos($_SERVER['PHP_SELF'], '/professor/') !== false ? 'active' : '' ?>" href="/professor/files">
                             <i class="bi bi-folder2-open me-1"></i><?= __('files') ?>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= $currentPage === 'settings' ? 'active' : '' ?>" href="/professor/settings">
+                            <i class="bi bi-gear me-1"></i><?= __('settings') ?>
                         </a>
                     </li>
                 <?php endif; ?>
