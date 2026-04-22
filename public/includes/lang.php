@@ -355,7 +355,7 @@ $translations = [
 
     'login_methods' => ['ar' => 'طرق تسجيل الدخول', 'en' => 'Login Methods', 'de' => 'Anmeldemethoden'],
     'login_methods_description' => ['ar' => 'اختر الطرق المتاحة لتسجيل دخول الطلاب', 'en' => 'Choose which methods students can use to log in', 'de' => 'Wählen Sie, welche Methoden Studenten zur Anmeldung verwenden können'],
-    'login_method_both' => ['ar' => 'البريد الإلكتروني وكود الطالب', 'en' => 'Email and Student Code', 'de' => 'E-Mail und Matrikelnummer'],
+    'login_method_both' => ['ar' => 'البريد الإلكتروني او كود الطالب', 'en' => 'Email or Student Code', 'de' => 'E-Mail oder Matrikelnummer'],
     'login_method_email_only' => ['ar' => 'البريد الإلكتروني فقط', 'en' => 'Email Only', 'de' => 'Nur E-Mail'],
     'login_method_student_code_only' => ['ar' => 'كود الطالب فقط', 'en' => 'Student Code Only', 'de' => 'Nur Matrikelnummer'],
     'email_placeholder' => ['ar' => 'أدخل بريدك الإلكتروني', 'en' => 'Enter your email', 'de' => 'E-Mail eingeben'],
